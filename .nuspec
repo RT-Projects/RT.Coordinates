@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>RT.Coordinates</id>
+		<version>1.0.0</version>
+		<authors>Timwi</authors>
+		<owners>Timwi</owners>
+		<projectUrl>http://github.com/RT-Projects/RT.Coordinates</projectUrl>
+		<license type="expression">MIT</license>
+		<icon>Icon.png</icon>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>A tiny library with a struct that represents a coordinate on a rectilinear grid. Useful for 2D games and puzzles.</description>
+		<copyright>Copyright ©2022 Timwi</copyright>
+		<tags>game games puzzle puzzles grid grids coordinate coordinates maze</tags>
+	</metadata>
+</package>
