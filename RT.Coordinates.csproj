@@ -15,17 +15,20 @@
     <LangVersion>8.0</LangVersion>
     <OutputPath>builds\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>builds\$(Configuration)\obj-$(AssemblyName)\</IntermediateOutputPath>
-    <BaseIntermediateOutputPath>builds\$(Configuration)\obj-$(AssemblyName)\</BaseIntermediateOutputPath></PropertyGroup>
+    <BaseIntermediateOutputPath>builds\$(Configuration)\obj-$(AssemblyName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>builds\Debug\RT.Coordinates.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>builds\Release\RT.Coordinates.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
