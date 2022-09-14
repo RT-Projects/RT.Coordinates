@@ -40,7 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coord.cs" />
+    <Compile Include="HexDirection.cs" />
     <Compile Include="GridDirection.cs" />
+    <Compile Include="Hex.cs" />
+    <Compile Include="PointD.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

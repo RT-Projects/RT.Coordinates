@@ -82,9 +82,9 @@ namespace RT.Coordinates
         ///     The new <see cref="Coord"/> value.</returns>
         public Coord AddWrap(Coord c) => AddWrap(c.X, c.Y);
 
-        /// <summary>Compares two <see cref="Coord"/> values for equality.</summary>
-        public bool Equals(Coord other) => other.Index == Index && other.Width == Width && other.Height == Height;
         /// <summary>Implements <see cref="IEquatable{T}"/>.</summary>
+        public bool Equals(Coord other) => other.Index == Index && other.Width == Width && other.Height == Height;
+        /// <summary>Override.</summary>
         public override bool Equals(object obj) => obj is Coord other && Equals(other);
         /// <summary>Override.</summary>
         public override int GetHashCode() => unchecked(Index * 1048583 + Width * 1031 + Height);
