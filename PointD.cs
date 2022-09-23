@@ -5,7 +5,12 @@ namespace RT.Coordinates
     /// <summary>Represents a point in 2D space.</summary>
     public struct PointD : IEquatable<PointD>
     {
-        /// <summary>Constructor.</summary>
+        /// <summary>
+        ///     Constructor.</summary>
+        /// <param name="x">
+        ///     X-coordinate.</param>
+        /// <param name="y">
+        ///     Y-coordinate.</param>
         public PointD(double x, double y)
         {
             X = x;
@@ -33,9 +38,9 @@ namespace RT.Coordinates
 
         /// <summary>Implements <see cref="IEquatable{T}"/>.</summary>
         public bool Equals(PointD other) => X == other.X && Y == other.Y;
-        /// <summary>Override.</summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj) => obj is PointD p && Equals(p);
-        /// <summary>Override.</summary>
+        /// <inheritdoc/>
         public override int GetHashCode() => X.GetHashCode() * 1073741827 + Y.GetHashCode();
     }
 }

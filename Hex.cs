@@ -204,7 +204,7 @@ namespace RT.Coordinates
         ///     The width of a single hex tile in the grid.</param>
         public PointD GetCenter(double hexWidth) => new PointD(Q * .75 * hexWidth, (Q * .5 + R) * hexWidth * WidthToHeight);
 
-        /// <summary>Override.</summary>
+        /// <inheritdoc/>
         public override string ToString() => $"({Q}, {R})";
 
         /// <summary>Constructor.</summary>
@@ -212,13 +212,13 @@ namespace RT.Coordinates
 
         /// <summary>Implements <see cref="IEquatable{T}"/>.</summary>
         public bool Equals(Hex other) => Q == other.Q && R == other.R;
-        /// <summary>Override.</summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Hex hex && Equals(hex);
         /// <summary>Compares two <see cref="Hex"/> values for equality.</summary>
         public static bool operator ==(Hex one, Hex two) => one.Q == two.Q && one.R == two.R;
         /// <summary>Compares two <see cref="Hex"/> values for inequality.</summary>
         public static bool operator !=(Hex one, Hex two) => one.Q != two.Q || one.R != two.R;
-        /// <summary>Override.</summary>
+        /// <inheritdoc/>
         public override int GetHashCode() => Q * 1073741827 + R;
 
         /// <summary>Adds two hexes (treating them as vectors).</summary>
