@@ -5,7 +5,7 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>Represents a coordinate on a 2D grid.</summary>
-    public struct Coord : IEquatable<Coord>, IComparable<Coord>, IHasVertices<Coord>
+    public struct Coord : IEquatable<Coord>, IComparable<Coord>, IHasSvgGeometry<Coord>
     {
         /// <summary>Returns the index (in reading order, top-left corner is 0) of the cell.</summary>
         public int Index { get; private set; }
@@ -170,7 +170,7 @@ namespace RT.Coordinates
             _ => throw new ArgumentOutOfRangeException(nameof(dir), "Invalid GridDirection enum value."),
         };
 
-        /// <summary>Implements <see cref="IEquatable{T}"/>.</summary>
+        /// <summary>Compares this cell to another for equality.</summary>
         public bool Equals(Coord other) => other.X == X && other.Y == Y;
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Coord other && Equals(other);
@@ -223,7 +223,7 @@ namespace RT.Coordinates
                     yield return MoveBy((GridDirection) i, 1, toroidalX, toroidalY);
         }
 
-        /// <summary>Implements <see cref="IComparable{T}"/>.</summary>
+        /// <summary>Compares this cell to another.</summary>
         public int CompareTo(Coord other) => Index.CompareTo(other.Index);
 
         /// <summary>Returns the sequence of vertices that describe the shape of this cell.</summary>
@@ -238,5 +238,8 @@ namespace RT.Coordinates
                 yield return new CoordVertex(X, Y + 1, Width, Height);
             }
         }
+
+        /// <summary>Returns the center point of this cell.</summary>
+        public PointD Center => new PointD(X + .5, Y + .5);
     }
 }

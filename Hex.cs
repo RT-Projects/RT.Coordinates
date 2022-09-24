@@ -9,7 +9,7 @@ namespace RT.Coordinates
     ///     Represents a hexagonal tile in a two-dimensional grid in which each tile is a hexagon with a flat top and bottom
     ///     and two of its vertices pointing left and right. Each tile is represented as a pair of coordinates (Q, R), where
     ///     an increasing Q coordinate moves down and right, while an increasing R coordinate moves down.</remarks>
-    public struct Hex : IEquatable<Hex>
+    public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry<Hex>
     {
         /// <summary>
         ///     Returns a collection of tiles that form a hexagon of the specified size.</summary>
@@ -124,7 +124,7 @@ namespace RT.Coordinates
         ///     Returns a collection containing all of the current tile’s neighbors.</summary>
         /// <remarks>
         ///     The collection starts with the upper-left neighbor and proceeds clockwise.</remarks>
-        public Hex[] Neighbors => new Hex[]
+        public IEnumerable<Hex> Neighbors => new Hex[]
         {
             new Hex(Q - 1, R),
             new Hex(Q, R - 1),
@@ -135,17 +135,21 @@ namespace RT.Coordinates
         };
 
         /// <summary>
-        ///     Returns the neighboring hex tile in the specified direction.</summary>
+        ///     Returns the hex tile reached by moving in the specified direction.</summary>
+        /// <param name="dir">
+        ///     Direction to move in.</param>
+        /// <param name="amount">
+        ///     Number of tiles to move. Default is <c>1</c>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The value of <paramref name="dir"/> is not a valid HexDirection enum value.</exception>
-        public Hex GetNeighbor(HexDirection dir) => dir switch
+        public Hex Move(HexDirection dir, int amount = 1) => dir switch
         {
-            HexDirection.UpLeft => new Hex(Q - 1, R),
-            HexDirection.Up => new Hex(Q, R - 1),
-            HexDirection.UpRight => new Hex(Q + 1, R - 1),
-            HexDirection.DownRight => new Hex(Q + 1, R),
-            HexDirection.Down => new Hex(Q, R + 1),
-            HexDirection.DownLeft => new Hex(Q - 1, R + 1),
+            HexDirection.UpLeft => new Hex(Q - amount, R),
+            HexDirection.Up => new Hex(Q, R - amount),
+            HexDirection.UpRight => new Hex(Q + amount, R - amount),
+            HexDirection.DownRight => new Hex(Q + amount, R),
+            HexDirection.Down => new Hex(Q, R + amount),
+            HexDirection.DownLeft => new Hex(Q - amount, R + amount),
             _ => throw new ArgumentOutOfRangeException("dir", "Invalid HexDirection value."),
         };
 
@@ -158,8 +162,7 @@ namespace RT.Coordinates
         ///     <para>
         ///         To calculate the distance between two hex tiles <c>h1</c> and <c>h2</c>, write <c>(h1 - h2).Distance</c>.</para>
         ///     <para>
-        ///         To calculate actual Euclidean distance, use <see cref="GetCenter(double)"/> and <see
-        ///         cref="PointD.Distance"/>.</para></remarks>
+        ///         To calculate actual Euclidean distance, use <see cref="Center"/> and <see cref="PointD.Distance"/>.</para></remarks>
         public int Distance => Math.Max(Math.Abs(Q), Math.Max(Math.Abs(R), Math.Abs(-Q - R)));
 
         /// <summary>
@@ -198,11 +201,29 @@ namespace RT.Coordinates
             new PointD((Q * .75 - .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight)
         };
 
-        /// <summary>
-        ///     Returns the center of the hex tile in 2D space.</summary>
-        /// <param name="hexWidth">
-        ///     The width of a single hex tile in the grid.</param>
-        public PointD GetCenter(double hexWidth) => new PointD(Q * .75 * hexWidth, (Q * .5 + R) * hexWidth * WidthToHeight);
+        /// <summary>Returns the X-coordinate of the top-left vertex.</summary>
+        public double LeftX => Q * .75 - .25;
+        /// <summary>Returns the X-coordinate of the top-right vertex.</summary>
+        public double RightX => Q * .75 + .25;
+        /// <summary>Returns the Y-coordinate of the top vertices.</summary>
+        public double TopY => (Q * .5 + R - .50) * WidthToHeight;
+
+        /// <summary>Returns a sequence of vertices in the order in which they must be rendered.</summary>
+        public IEnumerable<Vertex<Hex>> Vertices
+        {
+            get
+            {
+                yield return new HexVertex(this, false);
+                yield return new HexVertex(this, true);
+                yield return new HexVertex(Move(HexDirection.DownRight), false);
+                yield return new HexVertex(Move(HexDirection.Down), true);
+                yield return new HexVertex(Move(HexDirection.Down), false);
+                yield return new HexVertex(Move(HexDirection.DownLeft), true);
+            }
+        }
+
+        /// <summary>Returns the center of the hex tile in 2D space.</summary>
+        public PointD Center => new PointD(Q * .75, (Q * .5 + R) * WidthToHeight);
 
         /// <inheritdoc/>
         public override string ToString() => $"({Q}, {R})";
@@ -210,7 +231,7 @@ namespace RT.Coordinates
         /// <summary>Constructor.</summary>
         public Hex(int q, int r) : this() { Q = q; R = r; }
 
-        /// <summary>Implements <see cref="IEquatable{T}"/>.</summary>
+        /// <summary>Compares this hex tile to another for equality.</summary>
         public bool Equals(Hex other) => Q == other.Q && R == other.R;
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Hex hex && Equals(hex);

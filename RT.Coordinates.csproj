@@ -31,13 +31,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Coord.cs" />
+    <Compile Include="HexVertex.cs" />
     <Compile Include="CoordVertex.cs" />
     <Compile Include="EdgeType.cs" />
+    <Compile Include="HexGrid.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="HexDirection.cs" />
     <Compile Include="GridDirection.cs" />
     <Compile Include="Hex.cs" />
-    <Compile Include="IHasVertices.cs" />
+    <Compile Include="IHasSvgGeometry.cs" />
     <Compile Include="INeighbor.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="CoordinatesHelpers.cs" />
@@ -45,6 +47,7 @@
     <Compile Include="PointD.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Structure.cs" />
+    <Compile Include="SvgInstructions.cs" />
     <Compile Include="Vertex.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

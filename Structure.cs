@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace RT.Coordinates
 {
@@ -119,18 +120,18 @@ namespace RT.Coordinates
                 }
             }
 
-            return generateMazeResult(_cells, traversible);
+            return makeModifiedStructure(_cells, traversible);
         }
 
         /// <summary>Provides a way to override the constructor call for a new structure when a maze is generated.</summary>
-        protected virtual Structure<TCell> generateMazeResult(HashSet<TCell> cells, HashSet<Link<TCell>> traversible) => new Structure<TCell>(cells, traversible);
+        protected virtual Structure<TCell> makeModifiedStructure(IEnumerable<TCell> cells, IEnumerable<Link<TCell>> traversible) => new Structure<TCell>(cells, traversible);
 
         /// <summary>Returns an SVG file that visualizes this structure.</summary>
-        public string Svg()
+        public string Svg(SvgInstructions<TCell> inf = null)
         {
             var allEdges = new Dictionary<Link<Vertex<TCell>>, List<TCell>>();
             foreach (var cell in _cells)
-                foreach (var edge in ((cell as IHasVertices<TCell>) ?? svgThrow()).Vertices.SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex<TCell>>(v1, v2)))
+                foreach (var edge in ((cell as IHasSvgGeometry<TCell>) ?? svgThrow()).Vertices.SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex<TCell>>(v1, v2)))
                     allEdges.AddSafe(edge, cell);
 
             var outlineEdges = new List<Link<Vertex<TCell>>>();
@@ -140,6 +141,16 @@ namespace RT.Coordinates
             foreach (var kvp in allEdges)
                 (svgEdgeType(kvp.Key, kvp.Value) switch { EdgeType.Outline => outlineEdges, EdgeType.Passage => passageEdges, _ => wallEdges }).Add(kvp.Key);
 
+            var specialLinks = new StringBuilder();
+            foreach (var specialLink in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
+            {
+                var start = ((IHasSvgGeometry<TCell>) specialLink.Cells.First()).Center;
+                var end = ((IHasSvgGeometry<TCell>) specialLink.Cells.Last()).Center;
+                var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
+                var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
+                specialLinks.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
+            }
+
             var outline = svgPath(outlineEdges);
             var walls = svgPath(wallEdges);
             var passages = svgPath(passageEdges);
@@ -148,7 +159,13 @@ namespace RT.Coordinates
             var minY = allEdges.SelectMany(kvp => kvp.Key.Cells).Min(v => v.Y);
             var maxX = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.X);
             var maxY = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.Y);
-            return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}' fill='none'><path d='{passages}' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' /><path d='{walls}' stroke-width='.05' stroke='black' /><path d='{outline}' stroke-width='.1' stroke='black' /></svg>";
+            return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}'>" +
+                $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />" +
+                $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />" +
+                $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />" +
+                (specialLinks.Length == 0 ? "" : $"<path d='{specialLinks}' fill='none' stroke-width='.3' stroke='black' /><path d='{specialLinks}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />") +
+                (inf?.PerCell == null || !typeof(IHasSvgGeometry<TCell>).IsAssignableFrom(typeof(TCell)) ? "" : _cells.Select(cell => new { Svg = inf.PerCell(cell), ((IHasSvgGeometry<TCell>) cell).Center }).Select(inf => inf.Svg == null ? "" : $"<g transform='translate({inf.Center.X} {inf.Center.Y})'>{inf.Svg}</g>").JoinString()) +
+                $"</svg>";
         }
 
         /// <summary>
@@ -159,7 +176,7 @@ namespace RT.Coordinates
         ///     The set of cells adjacent to this edge, in no guaranteed order.</param>
         protected virtual EdgeType svgEdgeType(Link<Vertex<TCell>> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
 
-        private static IHasVertices<TCell> svgThrow() => throw new InvalidOperationException($"To generate SVG, the type {typeof(TCell).FullName} must implement {typeof(IHasVertices<TCell>).FullName}.");
+        private static IHasSvgGeometry<TCell> svgThrow() => throw new InvalidOperationException($"To generate SVG, the type {typeof(TCell).FullName} must implement {typeof(IHasSvgGeometry<TCell>).FullName}.");
 
         private string svgPath(IEnumerable<Link<Vertex<TCell>>> edges)
         {
@@ -223,5 +240,28 @@ namespace RT.Coordinates
 
             return segments.Select((seg, ix) => seg == null ? "" : $"M{seg.Select(v => $"{v.X} {v.Y}").JoinString(" ")}{(closed[ix] ? "z" : "")}").JoinString();
         }
+
+        /// <summary>Adds the specified link to this structure.</summary>
+        public void AddLink(Link<TCell> link) => _links.Add(link);
+        /// <summary>Adds a link between the specified cells to this structure.</summary>
+        public void AddLink(TCell cell1, TCell cell2) => _links.Add(new Link<TCell>(cell1, cell2));
+        /// <summary>Adds the specified links to this structure.</summary>
+        public void AddLinks(params Link<TCell>[] links) { foreach (var link in links) _links.Add(link); }
+        /// <summary>Adds the specified links to this structure.</summary>
+        public void AddLinks(IEnumerable<Link<TCell>> links) { foreach (var link in links) _links.Add(link); }
+
+        /// <summary>Removes the specified link from this structure.</summary>
+        public void RemoveLink(Link<TCell> link) => _links.Remove(link);
+        /// <summary>Removes the specified links from this structure.</summary>
+        public void RemoveLinks(params Link<TCell>[] links) { foreach (var link in links) _links.Remove(link); }
+        /// <summary>Removes the specified links from this structure.</summary>
+        public void RemoveLinks(IEnumerable<Link<TCell>> links) { foreach (var link in links) _links.Remove(link); }
+
+        /// <summary>Removes the specified cell from this structure.</summary>
+        public void RemoveCell(TCell cell) { _cells.Remove(cell); _links.RemoveWhere(l => l.Cells.Contains(cell)); }
+        /// <summary>Removes the specified cells from this structure.</summary>
+        public void RemoveCells(params TCell[] cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
+        /// <summary>Removes the specified cells from this structure.</summary>
+        public void RemoveCells(IEnumerable<TCell> cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
     }
 }

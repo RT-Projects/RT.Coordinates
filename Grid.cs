@@ -46,7 +46,7 @@ namespace RT.Coordinates
         private readonly bool _toroidalY;
 
         /// <inheritdoc/>
-        protected override Structure<Coord> generateMazeResult(HashSet<Coord> cells, HashSet<Link<Coord>> traversible) => new Grid(cells, traversible, _toroidalX, _toroidalY);
+        protected override Structure<Coord> makeModifiedStructure(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> traversible) => new Grid(cells, traversible, _toroidalX, _toroidalY);
 
         /// <inheritdoc/>
         protected override EdgeType svgEdgeType(Link<Vertex<Coord>> edge, List<Coord> cells)

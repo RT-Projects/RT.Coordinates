@@ -42,5 +42,26 @@ namespace RT.Coordinates
         public override bool Equals(object obj) => obj is PointD p && Equals(p);
         /// <inheritdoc/>
         public override int GetHashCode() => X.GetHashCode() * 1073741827 + Y.GetHashCode();
+
+        /// <summary>
+        ///     Rotates the current point by the specified <paramref name="angle"/> about the origin.</summary>
+        /// <param name="angle">
+        ///     The angle in radians.</param>
+        /// <returns>
+        ///     The rotated point.</returns>
+        public PointD Rotate(double angle)
+        {
+            var sina = Math.Sin(angle);
+            var cosa = Math.Cos(angle);
+            return new PointD(X * cosa + Y * sina, Y * cosa - X * sina);
+        }
+
+        /// <summary>
+        ///     Rotates the current point by the specified <paramref name="angle"/> about the origin.</summary>
+        /// <param name="angle">
+        ///     The angle in degrees.</param>
+        /// <returns>
+        ///     The rotated point.</returns>
+        public PointD RotateDeg(double angle) => Rotate(angle * Math.PI / 180);
     }
 }
