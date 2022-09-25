@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 
 namespace RT.Coordinates
 {
-    /// <summary>Describes a vertex (gridline intersection) in a rectilinear grid.</summary>
+    /// <summary>Describes a vertex (gridline intersection) in a hexagonal grid (<see cref="HexGrid"/>).</summary>
     public class HexVertex : Vertex<Hex>
     {
         /// <summary>Returns the hex just below this vertex.</summary>

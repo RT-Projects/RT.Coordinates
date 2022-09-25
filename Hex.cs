@@ -4,11 +4,11 @@ using System.Collections.Generic;
 namespace RT.Coordinates
 {
     /// <summary>
-    ///     Represents a tile on a 2D flat-topped hexagonal grid.</summary>
+    ///     Represents a tile in a 2D flat-topped hexagonal grid.</summary>
     /// <remarks>
     ///     Represents a hexagonal tile in a two-dimensional grid in which each tile is a hexagon with a flat top and bottom
-    ///     and two of its vertices pointing left and right. Each tile is represented as a pair of coordinates (Q, R), where
-    ///     an increasing Q coordinate moves down and right, while an increasing R coordinate moves down.</remarks>
+    ///     and two of its vertices pointing left and right. Each hex is represented as a pair of coordinates (Q, R), where an
+    ///     increasing Q coordinate moves down and right, while an increasing R coordinate moves down.</remarks>
     public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry<Hex>
     {
         /// <summary>

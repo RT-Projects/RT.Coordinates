@@ -48,6 +48,9 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Structure.cs" />
     <Compile Include="SvgInstructions.cs" />
+    <Compile Include="Tri.cs" />
+    <Compile Include="TriGrid.cs" />
+    <Compile Include="TriVertex.cs" />
     <Compile Include="Vertex.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

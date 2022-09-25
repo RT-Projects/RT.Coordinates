@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RT.Coordinates
 {
-    /// <summary>Describes a vertex (gridline intersection) in a rectilinear grid.</summary>
+    /// <summary>Describes a vertex (gridline intersection) in a rectilinear grid (<see cref="Grid"/>).</summary>
     public class CoordVertex : Vertex<Coord>
     {
         /// <summary>Returns the x-coordinate of the vertex within the grid.</summary>
