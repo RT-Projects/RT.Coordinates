@@ -63,5 +63,8 @@ namespace RT.Coordinates
         /// <returns>
         ///     The rotated point.</returns>
         public PointD RotateDeg(double angle) => Rotate(angle * Math.PI / 180);
+
+        /// <inheritdoc/>
+        public override string ToString() => $"({X}, {Y})";
     }
 }

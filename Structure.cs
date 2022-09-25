@@ -134,6 +134,11 @@ namespace RT.Coordinates
                 foreach (var edge in ((cell as IHasSvgGeometry<TCell>) ?? svgThrow()).Vertices.SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex<TCell>>(v1, v2)))
                     allEdges.AddSafe(edge, cell);
 
+            var highlights = new StringBuilder();
+            if (inf?.HighlightCells != null)
+                foreach (var cell in inf.HighlightCells.Distinct())
+                    highlights.Append($"<path d='M{((cell as IHasSvgGeometry<TCell>) ?? svgThrow()).Vertices.Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{inf.HighlightColor}' stroke='none' />");
+
             var outlineEdges = new List<Link<Vertex<TCell>>>();
             var wallEdges = new List<Link<Vertex<TCell>>>();
             var passageEdges = new List<Link<Vertex<TCell>>>();
@@ -160,6 +165,7 @@ namespace RT.Coordinates
             var maxX = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.X);
             var maxY = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.Y);
             return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}'>" +
+                highlights +
                 $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />" +
                 $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />" +
                 $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />" +
