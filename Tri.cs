@@ -9,7 +9,7 @@ namespace RT.Coordinates
     ///     Represents a triangular tile in a two-dimensional grid in which the tiles alternative between being up-pointing
     ///     and down-pointing triangles. Each tri is represented as a pair of coordinates (X, Y), where X counts the tris in a
     ///     row and Y identifies the row. The (0, 0) tri is an up-pointing one.</remarks>
-    public struct Tri : IEquatable<Tri>, INeighbor<Tri>, IHasSvgGeometry<Tri>
+    public struct Tri : IEquatable<Tri>, INeighbor<Tri>, IHasSvgGeometry
     {
         /// <summary>
         ///     Constructor.</summary>
@@ -97,7 +97,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Vertex<Tri>> Vertices
+        public IEnumerable<Vertex> Vertices
         {
             get
             {

@@ -1,7 +1,7 @@
 namespace RT.Coordinates
 {
     /// <summary>
-    ///     Describes the type of edge (line segment between two <see cref="Vertex{TCell}"/>es) to draw in SVG when dealing
+    ///     Describes the type of edge (line segment between two <see cref="Vertex"/> objects) to draw in SVG when dealing
     ///     with an edge in a 2D structure.</summary>
     public enum EdgeType
     {

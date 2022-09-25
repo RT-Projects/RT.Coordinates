@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RT.Coordinates
 {
     /// <summary>Describes a vertex (gridline intersection) in a triangular grid (<see cref="TriGrid"/>).</summary>
-    public class TriVertex : Vertex<Tri>
+    public class TriVertex : Vertex
     {
         /// <summary>
         ///     Constructs a <see cref="TriVertex"/> representing the top vertex of an up-pointing triangle.</summary>
@@ -21,25 +21,11 @@ namespace RT.Coordinates
         public Tri Tri { get; private set; }
 
         /// <inheritdoc/>
-        public override bool Equals(Vertex<Tri> other) => other is TriVertex tv && tv.Tri.Equals(Tri);
+        public override bool Equals(Vertex other) => other is TriVertex tv && tv.Tri.Equals(Tri);
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is TriVertex tv && tv.Tri.Equals(Tri);
         /// <inheritdoc/>
         public override int GetHashCode() => Tri.GetHashCode();
-
-        /// <inheritdoc/>
-        public override IEnumerable<Tri> Cells
-        {
-            get
-            {
-                yield return new Tri(Tri.X - 1, Tri.Y - 1);
-                yield return new Tri(Tri.X, Tri.Y - 1);
-                yield return new Tri(Tri.X + 1, Tri.Y - 1);
-                yield return new Tri(Tri.X + 1, Tri.Y);
-                yield return Tri;
-                yield return new Tri(Tri.X - 1, Tri.Y);
-            }
-        }
 
         /// <inheritdoc/>
         public override double X => Tri.X / 2d;

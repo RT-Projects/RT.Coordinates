@@ -9,7 +9,7 @@ namespace RT.Coordinates
     ///     Represents a hexagonal tile in a two-dimensional grid in which each tile is a hexagon with a flat top and bottom
     ///     and two of its vertices pointing left and right. Each hex is represented as a pair of coordinates (Q, R), where an
     ///     increasing Q coordinate moves down and right, while an increasing R coordinate moves down.</remarks>
-    public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry<Hex>
+    public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry
     {
         /// <summary>
         ///     Returns a collection of tiles that form a hexagon of the specified size.</summary>
@@ -209,7 +209,7 @@ namespace RT.Coordinates
         public double TopY => (Q * .5 + R - .50) * WidthToHeight;
 
         /// <summary>Returns a sequence of vertices in the order in which they must be rendered.</summary>
-        public IEnumerable<Vertex<Hex>> Vertices
+        public IEnumerable<Vertex> Vertices
         {
             get
             {

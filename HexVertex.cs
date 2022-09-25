@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace RT.Coordinates
 {
     /// <summary>Describes a vertex (gridline intersection) in a hexagonal grid (<see cref="HexGrid"/>).</summary>
-    public class HexVertex : Vertex<Hex>
+    public class HexVertex : Vertex
     {
         /// <summary>Returns the hex just below this vertex.</summary>
         public Hex Hex { get; private set; }
@@ -24,23 +24,12 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<Hex> Cells
-        {
-            get
-            {
-                yield return Hex;
-                yield return Hex.Move(HexDirection.Up);
-                yield return Hex.Move(Right ? HexDirection.UpRight : HexDirection.UpLeft);
-            }
-        }
-
-        /// <inheritdoc/>
         public override double X => Right ? Hex.RightX : Hex.LeftX;
         /// <inheritdoc/>
         public override double Y => Hex.TopY;
 
         /// <inheritdoc/>
-        public override bool Equals(Vertex<Hex> other) => other is HexVertex hv && hv.Hex == Hex && hv.Right == Right;
+        public override bool Equals(Vertex other) => other is HexVertex hv && hv.Hex == Hex && hv.Right == Right;
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is HexVertex hv && Equals(hv);
         /// <inheritdoc/>

@@ -108,7 +108,8 @@ namespace RT.Coordinates
                 var ix = rndNext(0, todo.Count);
                 var cell = todo[ix];
 
-                var availableLinks = lnks[cell].Where(otherCell => cells.Contains(otherCell)).ToArray();
+                var availableLinks = (lnks.TryGetValue(cell, out var otherCells) ? otherCells : throw new InvalidOperationException($"The cell {cell} has no links."))
+                    .Where(otherCell => cells.Contains(otherCell)).ToArray();
                 if (availableLinks.Length == 0)
                     todo.RemoveAt(ix);
                 else
@@ -129,19 +130,19 @@ namespace RT.Coordinates
         /// <summary>Returns an SVG file that visualizes this structure.</summary>
         public string Svg(SvgInstructions<TCell> inf = null)
         {
-            var allEdges = new Dictionary<Link<Vertex<TCell>>, List<TCell>>();
+            var allEdges = new Dictionary<Link<Vertex>, List<TCell>>();
             foreach (var cell in _cells)
-                foreach (var edge in ((cell as IHasSvgGeometry<TCell>) ?? svgThrow()).Vertices.SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex<TCell>>(v1, v2)))
+                foreach (var edge in ((cell as IHasSvgGeometry) ?? svgThrow()).Vertices.SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex>(v1, v2)))
                     allEdges.AddSafe(edge, cell);
 
             var highlights = new StringBuilder();
             if (inf?.HighlightCells != null)
-                foreach (var cell in inf.HighlightCells.Distinct())
-                    highlights.Append($"<path d='M{((cell as IHasSvgGeometry<TCell>) ?? svgThrow()).Vertices.Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{inf.HighlightColor}' stroke='none' />");
+                foreach (var cell in inf.HighlightCells.Intersect(_cells))
+                    highlights.Append($"<path d='M{((cell as IHasSvgGeometry) ?? svgThrow()).Vertices.Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{inf.HighlightColor}' stroke='none' />");
 
-            var outlineEdges = new List<Link<Vertex<TCell>>>();
-            var wallEdges = new List<Link<Vertex<TCell>>>();
-            var passageEdges = new List<Link<Vertex<TCell>>>();
+            var outlineEdges = new List<Link<Vertex>>();
+            var wallEdges = new List<Link<Vertex>>();
+            var passageEdges = new List<Link<Vertex>>();
 
             foreach (var kvp in allEdges)
                 (svgEdgeType(kvp.Key, kvp.Value) switch { EdgeType.Outline => outlineEdges, EdgeType.Passage => passageEdges, _ => wallEdges }).Add(kvp.Key);
@@ -149,8 +150,8 @@ namespace RT.Coordinates
             var specialLinks = new StringBuilder();
             foreach (var specialLink in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
             {
-                var start = ((IHasSvgGeometry<TCell>) specialLink.Cells.First()).Center;
-                var end = ((IHasSvgGeometry<TCell>) specialLink.Cells.Last()).Center;
+                var start = ((IHasSvgGeometry) specialLink.Cells.First()).Center;
+                var end = ((IHasSvgGeometry) specialLink.Cells.Last()).Center;
                 var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
                 var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
                 specialLinks.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
@@ -170,7 +171,7 @@ namespace RT.Coordinates
                 $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />" +
                 $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />" +
                 (specialLinks.Length == 0 ? "" : $"<path d='{specialLinks}' fill='none' stroke-width='.3' stroke='black' /><path d='{specialLinks}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />") +
-                (inf?.PerCell == null || !typeof(IHasSvgGeometry<TCell>).IsAssignableFrom(typeof(TCell)) ? "" : _cells.Select(cell => new { Svg = inf.PerCell(cell), ((IHasSvgGeometry<TCell>) cell).Center }).Select(inf => inf.Svg == null ? "" : $"<g transform='translate({inf.Center.X} {inf.Center.Y})'>{inf.Svg}</g>").JoinString()) +
+                (inf?.PerCell == null || !typeof(IHasSvgGeometry).IsAssignableFrom(typeof(TCell)) ? "" : _cells.Select(cell => new { Svg = inf.PerCell(cell), ((IHasSvgGeometry) cell).Center }).Select(inf => inf.Svg == null ? "" : $"<g transform='translate({inf.Center.X} {inf.Center.Y})'>{inf.Svg}</g>").JoinString()) +
                 $"</svg>";
         }
 
@@ -180,15 +181,15 @@ namespace RT.Coordinates
         ///     The edge.</param>
         /// <param name="cells">
         ///     The set of cells adjacent to this edge, in no guaranteed order.</param>
-        protected virtual EdgeType svgEdgeType(Link<Vertex<TCell>> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
+        protected virtual EdgeType svgEdgeType(Link<Vertex> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
 
-        private static IHasSvgGeometry<TCell> svgThrow() => throw new InvalidOperationException($"To generate SVG, the type {typeof(TCell).FullName} must implement {typeof(IHasSvgGeometry<TCell>).FullName}.");
+        private static IHasSvgGeometry svgThrow() => throw new InvalidOperationException($"To generate SVG, the type {typeof(TCell).FullName} must implement {typeof(IHasSvgGeometry).FullName}.");
 
-        private string svgPath(IEnumerable<Link<Vertex<TCell>>> edges)
+        private string svgPath(IEnumerable<Link<Vertex>> edges)
         {
-            var segments = new List<List<Vertex<TCell>>>();
+            var segments = new List<List<Vertex>>();
             var closed = new List<bool>();
-            var endPoints = new Dictionary<Vertex<TCell>, int>();
+            var endPoints = new Dictionary<Vertex, int>();
 
             foreach (var edge in edges)
             {
@@ -239,7 +240,7 @@ namespace RT.Coordinates
                     // This is an entirely new segment
                     endPoints[v1] = segments.Count;
                     endPoints[v2] = segments.Count;
-                    segments.Add(new List<Vertex<TCell>> { v1, v2 });
+                    segments.Add(new List<Vertex> { v1, v2 });
                     closed.Add(false);
                 }
             }
