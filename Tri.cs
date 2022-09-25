@@ -23,6 +23,54 @@ namespace RT.Coordinates
             Y = y;
         }
 
+        /// <summary>
+        ///     Returns a set of tris that make up a large up-pointing triangle structure.</summary>
+        /// <param name="numRows">
+        ///     Number of rows of triangles.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     <paramref name="numRows"/> was zero or negative.</exception>
+        public static IEnumerable<Tri> LargeUpPointingTriangle(int numRows)
+        {
+            if (numRows <= 0)
+                throw new ArgumentOutOfRangeException(nameof(numRows), $"‘{nameof(numRows)}’ must be positive.");
+            for (var row = 0; row < numRows; row++)
+                for (var x = 0; x < 2 * row + 1; x++)
+                    yield return new Tri((1 - numRows % 2) + numRows - row + x - 1, row);
+        }
+
+        /// <summary>
+        ///     Returns a set of tris that make up a large down-pointing triangle structure.</summary>
+        /// <param name="numRows">
+        ///     Number of rows of triangles.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     <paramref name="numRows"/> was zero or negative.</exception>
+        public static IEnumerable<Tri> LargeDownPointingTriangle(int numRows)
+        {
+            if (numRows <= 0)
+                throw new ArgumentOutOfRangeException(nameof(numRows), $"‘{nameof(numRows)}’ must be positive.");
+            for (var row = 0; row < numRows; row++)
+                for (var x = 0; x < 2 * (numRows - row) - 1; x++)
+                    yield return new Tri(row + 1 + x, row);
+        }
+
+        /// <summary>
+        ///     Returns a set of tris that make up a large hexagon structure.</summary>
+        /// <param name="sideLength">
+        ///     Number of triangles along each side of the hexagon.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     <paramref name="sideLength"/> was zero or negative.</exception>
+        public static IEnumerable<Tri> LargeHexagon(int sideLength)
+        {
+            if (sideLength <= 0)
+                throw new ArgumentOutOfRangeException(nameof(sideLength), $"‘{nameof(sideLength)}’ must be positive.");
+            for (var row = 0; row < sideLength; row++)
+                for (var x = 0; x < 2 * sideLength + 1 + 2 * row; x++)
+                {
+                    yield return new Tri(x - row + (sideLength & ~1), row);
+                    yield return new Tri(x - row + (sideLength & ~1), 2 * sideLength - 1 - row);
+                }
+        }
+
         /// <summary>Returns the position of the tri within its row.</summary>
         public int X { get; private set; }
         /// <summary>Returns the row containing this tri.</summary>
