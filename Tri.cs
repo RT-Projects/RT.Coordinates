@@ -25,49 +25,84 @@ namespace RT.Coordinates
 
         /// <summary>
         ///     Returns a set of tris that make up a large up-pointing triangle structure.</summary>
-        /// <param name="numRows">
-        ///     Number of rows of triangles.</param>
+        /// <param name="sideLength">
+        ///     Number of tri cells per side.</param>
+        /// <param name="dx">
+        ///     Offset to shift the x-coordinates by. Default is <c>0</c>.</param>
+        /// <param name="dy">
+        ///     Offset to shift the y-coordinates by. Default is <c>0</c>.</param>
+        /// <remarks>
+        ///     With <paramref name="dx"/> and <paramref name="dy"/> equal to <c>0</c>, the bottom-left tri has an
+        ///     x-coordinate of <c>0</c> for odd values of <paramref name="sideLength"/> and <c>1</c> for even values, while
+        ///     the top tri has a y-coordinate of <c>0</c>.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///     <paramref name="numRows"/> was zero or negative.</exception>
-        public static IEnumerable<Tri> LargeUpPointingTriangle(int numRows)
+        ///     <paramref name="sideLength"/> was zero or negative.</exception>
+        /// <exception cref="ArgumentException">
+        ///     The values of <paramref name="dx"/> and <paramref name="dy"/> are not both even or both odd.</exception>
+        public static IEnumerable<Tri> LargeUpPointingTriangle(int sideLength, int dx = 0, int dy = 0)
         {
-            if (numRows <= 0)
-                throw new ArgumentOutOfRangeException(nameof(numRows), $"‘{nameof(numRows)}’ must be positive.");
-            for (var row = 0; row < numRows; row++)
+            if (sideLength <= 0)
+                throw new ArgumentOutOfRangeException(nameof(sideLength), $"‘{nameof(sideLength)}’ must be positive.");
+            if (((dx ^ dy) & 1) != 0)
+                throw new ArgumentException($"The values of ‘{nameof(dx)}’ and ‘{nameof(dy)}’ must be both even or both odd.", nameof(dy));
+            for (var row = 0; row < sideLength; row++)
                 for (var x = 0; x < 2 * row + 1; x++)
-                    yield return new Tri((1 - numRows % 2) + numRows - row + x - 1, row);
+                    yield return new Tri((1 - sideLength % 2) + sideLength - row + x - 1 + dx, row + dy);
         }
 
         /// <summary>
         ///     Returns a set of tris that make up a large down-pointing triangle structure.</summary>
-        /// <param name="numRows">
-        ///     Number of rows of triangles.</param>
+        /// <param name="sideLength">
+        ///     Number of tri cells per side.</param>
+        /// <param name="dx">
+        ///     Offset to shift the x-coordinates by. Default is <c>0</c>.</param>
+        /// <param name="dy">
+        ///     Offset to shift the y-coordinates by. Default is <c>0</c>.</param>
+        /// <remarks>
+        ///     With <paramref name="dx"/> and <paramref name="dy"/> equal to <c>0</c>, the top-left tri has coordinates
+        ///     <c>(1, 0)</c>.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///     <paramref name="numRows"/> was zero or negative.</exception>
-        public static IEnumerable<Tri> LargeDownPointingTriangle(int numRows)
+        ///     <paramref name="sideLength"/> was zero or negative.</exception>
+        /// <exception cref="ArgumentException">
+        ///     The values of <paramref name="dx"/> and <paramref name="dy"/> are not both even or both odd.</exception>
+        public static IEnumerable<Tri> LargeDownPointingTriangle(int sideLength, int dx = 0, int dy = 0)
         {
-            if (numRows <= 0)
-                throw new ArgumentOutOfRangeException(nameof(numRows), $"‘{nameof(numRows)}’ must be positive.");
-            for (var row = 0; row < numRows; row++)
-                for (var x = 0; x < 2 * (numRows - row) - 1; x++)
-                    yield return new Tri(row + 1 + x, row);
+            if (sideLength <= 0)
+                throw new ArgumentOutOfRangeException(nameof(sideLength), $"‘{nameof(sideLength)}’ must be positive.");
+            if (((dx ^ dy) & 1) != 0)
+                throw new ArgumentException($"The values of ‘{nameof(dx)}’ and ‘{nameof(dy)}’ must be both even or both odd.", nameof(dy));
+            for (var row = 0; row < sideLength; row++)
+                for (var x = 0; x < 2 * (sideLength - row) - 1; x++)
+                    yield return new Tri(row + 1 + x + dx, row + dy);
         }
 
         /// <summary>
         ///     Returns a set of tris that make up a large hexagon structure.</summary>
         /// <param name="sideLength">
         ///     Number of triangles along each side of the hexagon.</param>
+        /// <param name="dx">
+        ///     Offset to shift the x-coordinates by. Default is <c>0</c>.</param>
+        /// <param name="dy">
+        ///     Offset to shift the y-coordinates by. Default is <c>0</c>.</param>
+        /// <remarks>
+        ///     With <paramref name="dx"/> and <paramref name="dy"/> equal to <c>0</c>, the tris at the leftmost corner have
+        ///     an x-coordinate of <c>0</c> for odd values of <paramref name="sideLength"/> and <c>1</c> for even values,
+        ///     while the top row of tris has y-coordinates of <c>0</c>.</remarks>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     <paramref name="sideLength"/> was zero or negative.</exception>
-        public static IEnumerable<Tri> LargeHexagon(int sideLength)
+        /// <exception cref="ArgumentException">
+        ///     The values of <paramref name="dx"/> and <paramref name="dy"/> are not both even or both odd.</exception>
+        public static IEnumerable<Tri> LargeHexagon(int sideLength, int dx = 0, int dy = 0)
         {
             if (sideLength <= 0)
                 throw new ArgumentOutOfRangeException(nameof(sideLength), $"‘{nameof(sideLength)}’ must be positive.");
+            if (((dx ^ dy) & 1) != 0)
+                throw new ArgumentException($"The values of ‘{nameof(dx)}’ and ‘{nameof(dy)}’ must be both even or both odd.", nameof(dy));
             for (var row = 0; row < sideLength; row++)
                 for (var x = 0; x < 2 * sideLength + 1 + 2 * row; x++)
                 {
-                    yield return new Tri(x - row + (sideLength & ~1), row);
-                    yield return new Tri(x - row + (sideLength & ~1), 2 * sideLength - 1 - row);
+                    yield return new Tri(x - row + (sideLength & ~1) + dx, row + dy);
+                    yield return new Tri(x - row + (sideLength & ~1) + dx, 2 * sideLength - 1 - row + dy);
                 }
         }
 
@@ -76,7 +111,7 @@ namespace RT.Coordinates
         /// <summary>Returns the row containing this tri.</summary>
         public int Y { get; private set; }
         /// <summary>Determines whether this tri is up-pointing (<c>true</c>) or down-pointing (<c>false</c>).</summary>
-        public bool IsUpPointing => (X ^ Y) % 2 == 0;
+        public bool IsUpPointing => ((X ^ Y) & 1) == 0;
 
         /// <inheritdoc/>
         public bool Equals(Tri other) => other.X == X && other.Y == Y;

@@ -84,11 +84,15 @@ namespace RT.Coordinates
 
         /// <summary>
         ///     Returns a collection of all cells in a grid of the specified size.</summary>
-        /// <param name="w">
+        /// <param name="width">
         ///     Width of the grid.</param>
-        /// <param name="h">
+        /// <param name="height">
         ///     Height of the grid.</param>
-        public static IEnumerable<Coord> Rectangle(int w, int h) => Enumerable.Range(0, w * h).Select(ix => new Coord(ix % w, ix / w));
+        /// <param name="dx">
+        ///     Specifies the x-coordinate of the top-left corner. Default is <c>0</c>.</param>
+        /// <param name="dy">
+        ///     Specifies the y-coordinate of the top-left corner. Default is <c>0</c>.</param>
+        public static IEnumerable<Coord> Rectangle(int width, int height, int dx = 0, int dy = 0) => Enumerable.Range(0, width * height).Select(ix => new Coord(ix % width + dx, ix / width + dy));
 
         /// <summary>
         ///     Determines whether two cells are orthogonally adjacent (not including diagonals).</summary>

@@ -11,20 +11,30 @@ namespace RT.Coordinates
     ///     increasing Q coordinate moves down and right, while an increasing R coordinate moves down.</remarks>
     public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry
     {
+        /// <summary>Returns the Q coordinate (see <see cref="Hex"/> remarks).</summary>
+        public int Q { get; private set; }
+        /// <summary>Returns the R coordinate (see <see cref="Hex"/> remarks).</summary>
+        public int R { get; private set; }
+
+        /// <summary>Constructor.</summary>
+        public Hex(int q, int r) : this() { Q = q; R = r; }
+
         /// <summary>
-        ///     Returns a collection of tiles that form a hexagon of the specified size.</summary>
+        ///     Returns a collection of tiles that form a hexagon of the specified size and position.</summary>
         /// <param name="sideLength">
         ///     The number of hexagonal tiles that make up each side of the large hexagon. If this is <c>1</c>, a single tile
         ///     is returned. If this is <c>2</c>, there are 7 tiles. The number of tiles is given by the centered hexagonal
         ///     numbers (<c>https://en.wikipedia.org/wiki/Centered_hexagonal_number</c>).</param>
-        public static IEnumerable<Hex> LargeHexagon(int sideLength)
+        /// <param name="center">
+        ///     Specifies the center hex. Default is (0, 0).</param>
+        public static IEnumerable<Hex> LargeHexagon(int sideLength, Hex center = default)
         {
             for (int r = -sideLength + 1; r < sideLength; r++)
                 for (int q = -sideLength + 1; q < sideLength; q++)
                 {
                     var hex = new Hex(q, r);
                     if (hex.Distance < sideLength)
-                        yield return hex;
+                        yield return hex + center;
                 }
         }
 
@@ -37,21 +47,21 @@ namespace RT.Coordinates
         public const double WidthToHeight = 0.8660254037844386;   // Math.Sqrt(3) / 2;
 
         /// <summary>
-        ///     Returns the total width of a <see cref="LargeHexagon(int)"/> structure, assuming each hex tile’s width is
+        ///     Returns the total width of a <see cref="LargeHexagon(int, Hex)"/> structure, assuming each hex tile’s width is
         ///     <c>1</c>.</summary>
         /// <param name="sideLength">
         ///     The number of hexagonal tiles that make up each side of the large hexagon.</param>
         public static double LargeWidth(int sideLength) => (3 * sideLength - 1) * .5;
 
         /// <summary>
-        ///     Returns the total height of a <see cref="LargeHexagon(int)"/> structure, assuming each hex tile’s width is
-        ///     <c>1</c>.</summary>
+        ///     Returns the total height of a <see cref="LargeHexagon(int, Hex)"/> structure, assuming each hex tile’s width
+        ///     is <c>1</c>.</summary>
         /// <param name="sideLength">
         ///     The number of hexagonal tiles that make up each side of the large hexagon.</param>
         public static double LargeHeight(int sideLength) => (2 * sideLength - 1) * WidthToHeight;
 
         /// <summary>
-        ///     Returns a series of points that describe the outline of a <see cref="LargeHexagon(int)"/> structure.</summary>
+        ///     Returns a series of points that describe the outline of a <see cref="LargeHexagon(int, Hex)"/> structure.</summary>
         /// <param name="sideLength">
         ///     The number of hexagonal tiles that make up each side of the large hexagon.</param>
         /// <param name="hexWidth">
@@ -115,11 +125,6 @@ namespace RT.Coordinates
             }
         }
 
-        /// <summary>Returns the Q coordinate (see <see cref="Hex"/> remarks).</summary>
-        public int Q { get; private set; }
-        /// <summary>Returns the R coordinate (see <see cref="Hex"/> remarks).</summary>
-        public int R { get; private set; }
-
         /// <summary>
         ///     Returns a collection containing all of the current tile’s neighbors.</summary>
         /// <remarks>
@@ -166,8 +171,8 @@ namespace RT.Coordinates
         public int Distance => Math.Max(Math.Abs(Q), Math.Max(Math.Abs(R), Math.Abs(-Q - R)));
 
         /// <summary>
-        ///     Assuming a <see cref="LargeHexagon(int)"/> structure of side length <paramref name="sideLength"/>, returns a
-        ///     collection specifying which edges of the structure the current hex tile is adjacent to.</summary>
+        ///     Assuming a <see cref="LargeHexagon(int, Hex)"/> structure of side length <paramref name="sideLength"/>,
+        ///     returns a collection specifying which edges of the structure the current hex tile is adjacent to.</summary>
         /// <remarks>
         ///     If the current hex tile is in a corner of the structure, two values are returned; otherwise, only one.</remarks>
         public IEnumerable<HexDirection> GetEdges(int sideLength)
@@ -228,9 +233,6 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public override string ToString() => $"({Q}, {R})";
 
-        /// <summary>Constructor.</summary>
-        public Hex(int q, int r) : this() { Q = q; R = r; }
-
         /// <summary>Compares this hex tile to another for equality.</summary>
         public bool Equals(Hex other) => Q == other.Q && R == other.R;
         /// <inheritdoc/>
@@ -283,10 +285,10 @@ namespace RT.Coordinates
         public Hex Mirrored => new Hex(Q, -R - Q);
 
         /// <summary>
-        ///     Returns a string representing this hex tile’s position within a <see cref="LargeHexagon(int)"/> structure in a
-        ///     more human-intuitive (but mathematically unhelpful) format. The first coordinate identifies a column of hexes,
-        ///     counting from 1 on the far left of the grid. The second specifies the position of the hex within that column,
-        ///     counting from 1 at the top.</summary>
+        ///     Returns a string representing this hex tile’s position within a <see cref="LargeHexagon(int, Hex)"/> structure
+        ///     in a more human-intuitive (but mathematically unhelpful) format. The first coordinate identifies a column of
+        ///     hexes, counting from 1 on the far left of the grid. The second specifies the position of the hex within that
+        ///     column, counting from 1 at the top.</summary>
         /// <param name="sideLength">
         ///     The side length of the hexagonal grid.</param>
         public string ConvertCoordinates(int sideLength) => Q >= 0
