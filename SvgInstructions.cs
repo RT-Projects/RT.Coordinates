@@ -16,5 +16,15 @@ namespace RT.Coordinates
 
         /// <summary>Specifies the color used when highlighting cells specified by <see cref="HighlightCells"/>.</summary>
         public string HighlightColor = "hsl(284, 83%, 85%)";
+
+        /// <summary>
+        ///     Returns a collection of vertices for the specified cell. Only required for cells that don’t implement <see
+        ///     cref="IHasSvgGeometry"/>.</summary>
+        public Func<TCell, IEnumerable<Vertex>> GetVertices;
+
+        /// <summary>
+        ///     Returns the center point for the specified cell. Only required for cells that don’t implement <see
+        ///     cref="IHasSvgGeometry"/>.</summary>
+        public Func<TCell, PointD?> GetCenter;
     }
 }

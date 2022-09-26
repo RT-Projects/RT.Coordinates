@@ -9,7 +9,7 @@ namespace RT.Coordinates
     ///     Describes a structure of connected cells, such as a grid.</summary>
     /// <typeparam name="TCell">
     ///     The type of cells in the structure; for example, <see cref="Coord"/> or <see cref="Hex"/>.</typeparam>
-    public class Structure<TCell> where TCell : IEquatable<TCell>
+    public class Structure<TCell>
     {
         /// <summary>Contains the set of cells the structure consists of.</summary>
         protected readonly HashSet<TCell> _cells;
@@ -19,8 +19,8 @@ namespace RT.Coordinates
         /// <summary>
         ///     Constructs a structure with the specified cells and links between them.</summary>
         /// <param name="cells">
-        ///     The set of cells the structure consists of; for example, <see cref="Coord.Rectangle(int, int)"/> or <see
-        ///     cref="Hex.LargeHexagon(int)"/>.</param>
+        ///     The set of cells the structure consists of; for example, <see cref="Coord.Rectangle(int, int, int, int)"/> or
+        ///     <see cref="Hex.LargeHexagon(int, Hex)"/>.</param>
         /// <param name="links">
         ///     An explicit set of links (connections) between cells, defining which pairs of cells are neighbors. See
         ///     remarks.</param>
@@ -132,13 +132,13 @@ namespace RT.Coordinates
         {
             var allEdges = new Dictionary<Link<Vertex>, List<TCell>>();
             foreach (var cell in _cells)
-                foreach (var edge in ((cell as IHasSvgGeometry) ?? svgThrow()).Vertices.SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex>(v1, v2)))
+                foreach (var edge in getVertices(cell, inf).SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex>(v1, v2)))
                     allEdges.AddSafe(edge, cell);
 
             var highlights = new StringBuilder();
             if (inf?.HighlightCells != null)
                 foreach (var cell in inf.HighlightCells.Intersect(_cells))
-                    highlights.Append($"<path d='M{((cell as IHasSvgGeometry) ?? svgThrow()).Vertices.Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{inf.HighlightColor}' stroke='none' />");
+                    highlights.Append($"<path d='M{getVertices(cell, inf).Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{inf.HighlightColor}' stroke='none' />");
 
             var outlineEdges = new List<Link<Vertex>>();
             var wallEdges = new List<Link<Vertex>>();
@@ -150,8 +150,8 @@ namespace RT.Coordinates
             var specialLinks = new StringBuilder();
             foreach (var specialLink in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
             {
-                var start = ((IHasSvgGeometry) specialLink.Cells.First()).Center;
-                var end = ((IHasSvgGeometry) specialLink.Cells.Last()).Center;
+                var start = getCenter(specialLink.Cells.First(), inf);
+                var end = getCenter(specialLink.Cells.Last(), inf);
                 var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
                 var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
                 specialLinks.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
@@ -171,9 +171,24 @@ namespace RT.Coordinates
                 $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />" +
                 $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />" +
                 (specialLinks.Length == 0 ? "" : $"<path d='{specialLinks}' fill='none' stroke-width='.3' stroke='black' /><path d='{specialLinks}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />") +
-                (inf?.PerCell == null || !typeof(IHasSvgGeometry).IsAssignableFrom(typeof(TCell)) ? "" : _cells.Select(cell => new { Svg = inf.PerCell(cell), ((IHasSvgGeometry) cell).Center }).Select(inf => inf.Svg == null ? "" : $"<g transform='translate({inf.Center.X} {inf.Center.Y})'>{inf.Svg}</g>").JoinString()) +
+                (inf?.PerCell == null ? "" : _cells.Select(cell => processCellSvg(cell, inf)).JoinString()) +
                 $"</svg>";
         }
+
+        private static string processCellSvg(TCell cell, SvgInstructions<TCell> inf)
+        {
+            var svg = inf?.PerCell(cell);
+            if (svg == null)
+                return "";
+            var center = getCenter(cell, inf);
+            return $"<g transform='translate({center.X} {center.Y})'>{svg}</g>";
+        }
+
+        private static IHasSvgGeometry geom(TCell cell) => (cell as IHasSvgGeometry) ??
+            throw new InvalidOperationException($"To generate SVG, the type ‘{cell.GetType().FullName}’ must implement ‘{typeof(IHasSvgGeometry).FullName}’ or the provided ‘{typeof(SvgInstructions<TCell>)}’ instance must provide ‘{nameof(SvgInstructions<TCell>.GetVertices)}’ and ‘{nameof(SvgInstructions<TCell>.GetCenter)}’ delegates that do not return null.");
+
+        private static IEnumerable<Vertex> getVertices(TCell cell, SvgInstructions<TCell> inf) => inf?.GetVertices?.Invoke(cell) ?? geom(cell).Vertices;
+        private static PointD getCenter(TCell cell, SvgInstructions<TCell> inf) => inf?.GetCenter?.Invoke(cell) ?? geom(cell).Center;
 
         /// <summary>
         ///     Determines what type of edge to draw in SVG for a particular edge between cells.</summary>
@@ -182,8 +197,6 @@ namespace RT.Coordinates
         /// <param name="cells">
         ///     The set of cells adjacent to this edge, in no guaranteed order.</param>
         protected virtual EdgeType svgEdgeType(Link<Vertex> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
-
-        private static IHasSvgGeometry svgThrow() => throw new InvalidOperationException($"To generate SVG, the type {typeof(TCell).FullName} must implement {typeof(IHasSvgGeometry).FullName}.");
 
         private string svgPath(IEnumerable<Link<Vertex>> edges)
         {

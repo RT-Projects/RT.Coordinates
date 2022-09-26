@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Coord.cs" />
+    <Compile Include="GenericVertex.cs" />
     <Compile Include="HexVertex.cs" />
     <Compile Include="CoordVertex.cs" />
     <Compile Include="EdgeType.cs" />

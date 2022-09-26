@@ -33,6 +33,6 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is CoordVertex cv && cv.Cell.Equals(Cell);
         /// <inheritdoc/>
-        public override int GetHashCode() => Cell.GetHashCode();
+        public override int GetHashCode() => unchecked(Cell.GetHashCode() + 347);
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace RT.Coordinates
 {
     /// <summary>Describes a vertex (gridline intersection) in a hexagonal grid (<see cref="HexGrid"/>).</summary>

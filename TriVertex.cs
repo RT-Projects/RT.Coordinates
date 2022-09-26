@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace RT.Coordinates
 {
@@ -25,7 +24,7 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is TriVertex tv && tv.Tri.Equals(Tri);
         /// <inheritdoc/>
-        public override int GetHashCode() => Tri.GetHashCode();
+        public override int GetHashCode() => unchecked(Tri.GetHashCode() + 47);
 
         /// <inheritdoc/>
         public override double X => Tri.X / 2d;

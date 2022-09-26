@@ -7,7 +7,7 @@ namespace RT.Coordinates
     ///     Represents a link between two cells in a grid or structure.</summary>
     /// <typeparam name="TCell">
     ///     The type of the cells linked.</typeparam>
-    public struct Link<TCell> : IEquatable<Link<TCell>> where TCell : IEquatable<TCell>
+    public struct Link<TCell> : IEquatable<Link<TCell>>
     {
         private readonly TCell _cell1;
         private readonly TCell _cell2;
