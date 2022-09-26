@@ -43,8 +43,8 @@ namespace RT.Coordinates
         ///     left-pointing vertex to the right-pointing vertex), this constant is equal to the height (from the top edge to
         ///     the bottom edge).</summary>
         /// <remarks>
-        ///     The constant is equal to (√3)/2.</remarks>
-        public const double WidthToHeight = 0.8660254037844386;   // Math.Sqrt(3) / 2;
+        ///     The constant is equal to (√3)/2, or sin(60°).</remarks>
+        public const double WidthToHeight = 0.8660254037844386;
 
         /// <summary>
         ///     Returns the total width of a <see cref="LargeHexagon(int, Hex)"/> structure, assuming each hex tile’s width is
@@ -205,13 +205,6 @@ namespace RT.Coordinates
             new PointD((Q * .75 + .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight),
             new PointD((Q * .75 - .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight)
         };
-
-        /// <summary>Returns the X-coordinate of the top-left vertex.</summary>
-        public double LeftX => Q * .75 - .25;
-        /// <summary>Returns the X-coordinate of the top-right vertex.</summary>
-        public double RightX => Q * .75 + .25;
-        /// <summary>Returns the Y-coordinate of the top vertices.</summary>
-        public double TopY => (Q * .5 + R - .50) * WidthToHeight;
 
         /// <summary>Returns a sequence of vertices in the order in which they must be rendered.</summary>
         public IEnumerable<Vertex> Vertices

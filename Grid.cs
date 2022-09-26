@@ -50,7 +50,8 @@ namespace RT.Coordinates
             IEnumerable<Coord> get(Coord c)
             {
                 foreach (var neighbor in c.GetNeighbors(includeDiagonal))
-                    yield return neighbor;
+                    if (neighbor.X >= 0 && neighbor.X < width && neighbor.Y >= 0 && neighbor.Y <= height)
+                        yield return neighbor;
                 if (toroidalX && c.X == 0)
                     yield return new Coord(width - 1, c.Y);
                 if (toroidalX && c.X == width - 1)

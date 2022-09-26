@@ -67,7 +67,7 @@ namespace RT.Coordinates
             GridDirection.DownLeft => MoveBy(-amount, amount),
             GridDirection.Left => MoveBy(-amount, 0),
             GridDirection.UpLeft => MoveBy(-amount, -amount),
-            _ => throw new ArgumentOutOfRangeException(nameof(dir), "Invalid GridDirection enum value."),
+            _ => throw new ArgumentOutOfRangeException(nameof(dir), $"Invalid {nameof(GridDirection)} enum value."),
         };
 
         /// <summary>Compares this cell to another for equality.</summary>

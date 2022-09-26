@@ -22,9 +22,9 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override double X => Right ? Hex.RightX : Hex.LeftX;
+        public override double X => Hex.Q * .75 + (Right ? .25 : -.25);
         /// <inheritdoc/>
-        public override double Y => Hex.TopY;
+        public override double Y => (Hex.Q * .5 + Hex.R - .5) * Hex.WidthToHeight;
 
         /// <inheritdoc/>
         public override bool Equals(Vertex other) => other is HexVertex hv && hv.Hex == Hex && hv.Right == Right;
