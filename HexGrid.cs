@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RT.Coordinates
 {
     /// <summary>Describes a 2D grid of flat-topped hexagonal cells.</summary>
-    public class HexGrid : Structure<Hex>
+    public class HexGrid : StructureWithDirection<Hex, HexDirection>
     {
         /// <summary>
         ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,

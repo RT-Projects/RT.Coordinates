@@ -137,8 +137,9 @@ namespace RT.Coordinates
 
             var highlights = new StringBuilder();
             if (inf?.HighlightCells != null)
-                foreach (var cell in inf.HighlightCells.Intersect(_cells))
-                    highlights.Append($"<path d='M{getVertices(cell, inf).Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{inf.HighlightColor}' stroke='none' />");
+                foreach (var (cell, color) in inf.HighlightCells)
+                    if (_cells.Contains(cell))
+                        highlights.Append($"<path d='M{getVertices(cell, inf).Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{color ?? inf.HighlightColor ?? "hsl(284, 83%, 85%)"}' stroke='none' />");
 
             var outlineEdges = new List<Link<Vertex>>();
             var wallEdges = new List<Link<Vertex>>();

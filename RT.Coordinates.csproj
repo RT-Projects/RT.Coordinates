@@ -30,8 +30,11 @@
     <DocumentationFile>builds\Release\RT.Coordinates.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CellWithColor.cs" />
     <Compile Include="Coord.cs" />
     <Compile Include="GenericVertex.cs" />
+    <Compile Include="HexDirections.cs" />
+    <Compile Include="GridDirections.cs" />
     <Compile Include="HexVertex.cs" />
     <Compile Include="CoordVertex.cs" />
     <Compile Include="EdgeType.cs" />
@@ -40,6 +43,7 @@
     <Compile Include="HexDirection.cs" />
     <Compile Include="GridDirection.cs" />
     <Compile Include="Hex.cs" />
+    <Compile Include="IHasDirection.cs" />
     <Compile Include="IHasSvgGeometry.cs" />
     <Compile Include="INeighbor.cs" />
     <Compile Include="Link.cs" />
@@ -48,6 +52,7 @@
     <Compile Include="PointD.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Structure.cs" />
+    <Compile Include="StructureWithDirection.cs" />
     <Compile Include="SvgInstructions.cs" />
     <Compile Include="Tri.cs" />
     <Compile Include="TriGrid.cs" />

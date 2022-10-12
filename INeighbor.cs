@@ -8,7 +8,7 @@ namespace RT.Coordinates
     ///     The type of cell.</typeparam>
     public interface INeighbor<TCell>
     {
-        /// <summary>Returns the current cell�s neighbors.</summary>
+        /// <summary>Returns the current cell’s neighbors.</summary>
         public IEnumerable<TCell> Neighbors { get; }
     }
 }

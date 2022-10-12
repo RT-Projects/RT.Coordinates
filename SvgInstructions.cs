@@ -12,7 +12,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Instructs <see cref="Structure{TCell}.Svg(SvgInstructions{TCell})"/> to paint the specified cells with a
         ///     background color.</summary>
-        public IEnumerable<TCell> HighlightCells = null;
+        public IEnumerable<CellWithColor<TCell>> HighlightCells = null;
 
         /// <summary>Specifies the color used when highlighting cells specified by <see cref="HighlightCells"/>.</summary>
         public string HighlightColor = "hsl(284, 83%, 85%)";

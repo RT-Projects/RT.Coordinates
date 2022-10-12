@@ -5,7 +5,7 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>Represents a square cell in a 2D rectilinear grid.</summary>
-    public struct Coord : IEquatable<Coord>, INeighbor<Coord>, IHasSvgGeometry
+    public struct Coord : IEquatable<Coord>, INeighbor<Coord>, IHasSvgGeometry, IHasDirection<Coord, GridDirection>
     {
         /// <summary>Returns the X coordinate of the cell.</summary>
         public int X { get; private set; }
@@ -28,7 +28,7 @@ namespace RT.Coordinates
         ///     Amount of cells to move by.</param>
         /// <returns>
         ///     The new <see cref="Coord"/> value.</returns>
-        public Coord MoveXBy(int dx) => MoveBy(dx, 0);
+        public Coord MoveX(int dx) => Move(dx, 0);
 
         /// <summary>
         ///     Moves the current cell <paramref name="dy"/> number of spaces down.</summary>
@@ -36,7 +36,7 @@ namespace RT.Coordinates
         ///     Amount of cells to move by.</param>
         /// <returns>
         ///     The new <see cref="Coord"/> value.</returns>
-        public Coord MoveYBy(int dy) => MoveBy(0, dy);
+        public Coord MoveY(int dy) => Move(0, dy);
 
         /// <summary>
         ///     Moves the current cell <paramref name="dx"/> number of spaces to the right and <paramref name="dy"/> number of
@@ -47,7 +47,7 @@ namespace RT.Coordinates
         ///     Amount of cells to move by in the Y direction.</param>
         /// <returns>
         ///     The new <see cref="Coord"/> value.</returns>
-        public Coord MoveBy(int dx, int dy) => new Coord(X + dx, Y + dy);
+        public Coord Move(int dx, int dy) => new Coord(X + dx, Y + dy);
 
         /// <summary>
         ///     Moves the current cell a number of spaces in the specified direction.</summary>
@@ -57,16 +57,16 @@ namespace RT.Coordinates
         ///     Number of cells to move by. Default is <c>1</c>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The value of <paramref name="dir"/> was not one of the defined enum values of <see cref="GridDirection"/>.</exception>
-        public Coord MoveBy(GridDirection dir, int amount = 1) => dir switch
+        public Coord Move(GridDirection dir, int amount = 1) => dir switch
         {
-            GridDirection.Up => MoveBy(0, -amount),
-            GridDirection.UpRight => MoveBy(amount, -amount),
-            GridDirection.Right => MoveBy(amount, 0),
-            GridDirection.DownRight => MoveBy(amount, amount),
-            GridDirection.Down => MoveBy(0, amount),
-            GridDirection.DownLeft => MoveBy(-amount, amount),
-            GridDirection.Left => MoveBy(-amount, 0),
-            GridDirection.UpLeft => MoveBy(-amount, -amount),
+            GridDirection.Up => Move(0, -amount),
+            GridDirection.UpRight => Move(amount, -amount),
+            GridDirection.Right => Move(amount, 0),
+            GridDirection.DownRight => Move(amount, amount),
+            GridDirection.Down => Move(0, amount),
+            GridDirection.DownLeft => Move(-amount, amount),
+            GridDirection.Left => Move(-amount, 0),
+            GridDirection.UpLeft => Move(-amount, -amount),
             _ => throw new ArgumentOutOfRangeException(nameof(dir), $"Invalid {nameof(GridDirection)} enum value."),
         };
 
@@ -103,7 +103,7 @@ namespace RT.Coordinates
         public bool IsAdjacentTo(Coord other, bool includeDiagonal = false)
         {
             for (var i = 0; i < 8; i++)
-                if ((includeDiagonal || i % 2 == 0) && MoveBy((GridDirection) i) == other)
+                if ((includeDiagonal || i % 2 == 0) && Move((GridDirection) i) == other)
                     return true;
             return false;
         }
@@ -116,7 +116,7 @@ namespace RT.Coordinates
         {
             for (var i = 0; i < 8; i++)
                 if ((includeDiagonal || i % 2 == 0))
-                    yield return MoveBy((GridDirection) i);
+                    yield return Move((GridDirection) i);
         }
 
         /// <summary>Returns the sequence of vertices that describe the shape of this cell.</summary>

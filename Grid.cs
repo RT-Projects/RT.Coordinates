@@ -5,7 +5,7 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>Describes a 2D grid of square cells.</summary>
-    public class Grid : Structure<Coord>
+    public class Grid : StructureWithDirection<Coord, GridDirection>
     {
         /// <summary>
         ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
@@ -78,13 +78,13 @@ namespace RT.Coordinates
             {
                 var c = cells[0];
                 if (_toroidalX && c.X == 0 && edge.Cells.All(v => v is CoordVertex cv && cv.Cell.X == 0))
-                    return _links.Contains(new Link<Coord>(c, c.MoveXBy(_width - 1))) ? EdgeType.Passage : EdgeType.Wall;
+                    return _links.Contains(new Link<Coord>(c, c.MoveX(_width - 1))) ? EdgeType.Passage : EdgeType.Wall;
                 else if (_toroidalX && c.X == _width - 1 && edge.Cells.All(v => v is CoordVertex cv && cv.Cell.X == _width))
-                    return _links.Contains(new Link<Coord>(c, c.MoveXBy(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall;
+                    return _links.Contains(new Link<Coord>(c, c.MoveX(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall;
                 else if (_toroidalY && c.Y == 0 && edge.Cells.All(v => v is CoordVertex cv && cv.Cell.Y == 0))
-                    return _links.Contains(new Link<Coord>(c, c.MoveYBy(_height - 1))) ? EdgeType.Passage : EdgeType.Wall;
+                    return _links.Contains(new Link<Coord>(c, c.MoveY(_height - 1))) ? EdgeType.Passage : EdgeType.Wall;
                 else if (_toroidalY && c.Y == _height - 1 && edge.Cells.All(v => v is CoordVertex cv && cv.Cell.Y == _height))
-                    return _links.Contains(new Link<Coord>(c, c.MoveYBy(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall;
+                    return _links.Contains(new Link<Coord>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall;
             }
             return base.svgEdgeType(edge, cells);
         }
