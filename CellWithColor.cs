@@ -12,36 +12,41 @@ namespace RT.Coordinates
     {
         /// <summary>Identifies a cell in a grid.</summary>
         public TCell Cell { get; private set; }
-        /// <summary>Determines an SVG color, or <c>null</c> to use a default color.</summary>
-        public string SvgColor { get; private set; }
+        /// <summary>Determines the SVG fill color, or <c>null</c> to use a default color.</summary>
+        public string SvgFillColor { get; private set; }
+        /// <summary>Determines the SVG fill opacity, or <c>null</c> to omit the attribute.</summary>
+        public string SvgFillOpacity { get; private set; }
 
         /// <summary>Constructor.</summary>
-        public CellWithColor(TCell cell, string svgColor)
+        public CellWithColor(TCell cell, string color = null, string opacity = null)
         {
             Cell = cell;
-            SvgColor = svgColor;
+            SvgFillColor = color;
+            SvgFillOpacity = opacity;
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is CellWithColor<TCell> other && EqualityComparer<TCell>.Default.Equals(Cell, other.Cell) && SvgColor == other.SvgColor;
+        public override bool Equals(object obj) => obj is CellWithColor<TCell> other && EqualityComparer<TCell>.Default.Equals(Cell, other.Cell) && SvgFillColor == other.SvgFillColor && SvgFillOpacity == other.SvgFillOpacity;
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
             var hashCode = 1413938657;
-            hashCode = hashCode * -1521134295 + EqualityComparer<TCell>.Default.GetHashCode(Cell);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SvgColor);
+            hashCode = unchecked(hashCode * -1521134295 + EqualityComparer<TCell>.Default.GetHashCode(Cell));
+            hashCode = unchecked(hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SvgFillColor));
+            hashCode = unchecked(hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SvgFillOpacity));
             return hashCode;
         }
 
         /// <summary>Deconstructor.</summary>
-        public void Deconstruct(out TCell cell, out string svgColor)
+        public void Deconstruct(out TCell cell, out string color, out string opacity)
         {
             cell = Cell;
-            svgColor = SvgColor;
+            color = SvgFillColor;
+            opacity = SvgFillOpacity;
         }
 
         /// <summary>Implicit conversion that associates the specified cell with the default highlight color.</summary>
-        public static implicit operator CellWithColor<TCell>(TCell cell) => new CellWithColor<TCell>(cell, null);
+        public static implicit operator CellWithColor<TCell>(TCell cell) => new CellWithColor<TCell>(cell, null, null);
     }
 }

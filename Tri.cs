@@ -132,24 +132,9 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Vertex> Vertices
-        {
-            get
-            {
-                if (IsUpPointing)
-                {
-                    yield return new TriVertex(this);
-                    yield return new TriVertex(new Tri(X + 1, Y + 1));
-                    yield return new TriVertex(new Tri(X - 1, Y + 1));
-                }
-                else
-                {
-                    yield return new TriVertex(new Tri(X - 1, Y));
-                    yield return new TriVertex(new Tri(X + 1, Y));
-                    yield return new TriVertex(new Tri(X, Y + 1));
-                }
-            }
-        }
+        public IEnumerable<Link<Vertex>> Edges => IsUpPointing
+            ? new[] { new TriVertex(this), new TriVertex(new Tri(X + 1, Y + 1)), new TriVertex(new Tri(X - 1, Y + 1)) }.MakeEdges()
+            : new[] { new TriVertex(new Tri(X - 1, Y)), new TriVertex(new Tri(X + 1, Y)), new TriVertex(new Tri(X, Y + 1)) }.MakeEdges();
 
         /// <inheritdoc/>
         public PointD Center => new PointD(X / 2d, (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * 0.86602540378443864676372317075294);

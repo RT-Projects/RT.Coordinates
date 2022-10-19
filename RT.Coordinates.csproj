@@ -31,7 +31,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CellWithColor.cs" />
+    <Compile Include="CellWithDistance.cs" />
+    <Compile Include="CombinedCell.cs" />
     <Compile Include="Coord.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GenericVertex.cs" />
     <Compile Include="HexDirections.cs" />
     <Compile Include="GridDirections.cs" />
@@ -54,10 +57,14 @@
     <Compile Include="Structure.cs" />
     <Compile Include="StructureWithDirection.cs" />
     <Compile Include="SvgInstructions.cs" />
+    <Compile Include="SvgSegment.cs" />
     <Compile Include="Tri.cs" />
     <Compile Include="TriGrid.cs" />
     <Compile Include="TriVertex.cs" />
     <Compile Include="Vertex.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace RT.Coordinates
@@ -111,6 +112,63 @@ namespace RT.Coordinates
             }
             sb.Append(lastSeparator).Append(prefix).Append(prev).Append(suffix);
             return sb.ToString();
+        }
+
+        /// <summary>
+        ///     Turns the specified value into a nullable value.</summary>
+        /// <typeparam name="TInput">
+        ///     Any non-nullable value type.</typeparam>
+        /// <param name="input">
+        ///     Any value.</param>
+        /// <returns>
+        ///     The same value cast as nullable.</returns>
+        public static TInput? Nullable<TInput>(this TInput input) where TInput : struct
+        {
+            return (TInput?) input;
+        }
+
+        /// <summary>
+        ///     Returns only the non-<c>null</c> elements from the specified collection of nullable values as non-nullable
+        ///     values.</summary>
+        /// <typeparam name="T">
+        ///     The inner value type.</typeparam>
+        /// <param name="src">
+        ///     A collection of nullable values.</param>
+        /// <returns>
+        ///     A collection containing only those values that aren�t <c>null</c>.</returns>
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> src) where T : struct
+        {
+            if (src == null)
+                throw new ArgumentNullException(nameof(src));
+
+            IEnumerable<T> whereNotNullIterator()
+            {
+                foreach (var tq in src)
+                    if (tq != null)
+                        yield return tq.Value;
+            }
+            return whereNotNullIterator();
+        }
+
+        public static IEnumerable<Link<Vertex>> MakeEdges(this IEnumerable<Vertex> vertices) => vertices.SelectConsecutivePairs(true, (v1, v2) => new Link<Vertex>(v1, v2));
+
+        /// <summary>
+        ///     Returns the index of the first element in this <paramref name="source"/> satisfying the specified <paramref
+        ///     name="predicate"/>. If no such elements are found, returns <c>-1</c>.</summary>
+        public static int IndexOf<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+            int index = 0;
+            foreach (var v in source)
+            {
+                if (predicate(v))
+                    return index;
+                index++;
+            }
+            return -1;
         }
     }
 }

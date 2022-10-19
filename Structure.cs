@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 
 namespace RT.Coordinates
@@ -57,9 +58,12 @@ namespace RT.Coordinates
         }
 
         /// <summary>Returns this structure’s full set of cells.</summary>
-        public IEnumerable<TCell> Cells => _cells;
+        public IEnumerable<TCell> Cells { get { foreach (var cell in _cells) yield return cell; } }
         /// <summary>Returns the full set of links between the cells in this structure.</summary>
-        public IEnumerable<Link<TCell>> Links => _links;
+        public IEnumerable<Link<TCell>> Links { get { foreach (var link in _links) yield return link; } }
+
+        /// <summary>Determines whether this structure contains the specified <paramref name="cell"/>.</summary>
+        public bool Contains(TCell cell) => _cells.Contains(cell);
 
         /// <summary>Determines whether the specified link is traversible.</summary>
         public bool IsLink(Link<TCell> link) => _links.Contains(link);
@@ -132,14 +136,14 @@ namespace RT.Coordinates
         {
             var allEdges = new Dictionary<Link<Vertex>, List<TCell>>();
             foreach (var cell in _cells)
-                foreach (var edge in getVertices(cell, inf).SelectConsecutivePairs(closed: true, (v1, v2) => new Link<Vertex>(v1, v2)))
+                foreach (var edge in getEdges(cell, inf))
                     allEdges.AddSafe(edge, cell);
 
             var highlights = new StringBuilder();
             if (inf?.HighlightCells != null)
-                foreach (var (cell, color) in inf.HighlightCells)
+                foreach (var (cell, color, opacity) in inf.HighlightCells)
                     if (_cells.Contains(cell))
-                        highlights.Append($"<path d='M{getVertices(cell, inf).Select(v => $"{v.X} {v.Y}").JoinString(" ")}z' fill='{color ?? inf.HighlightColor ?? "hsl(284, 83%, 85%)"}' stroke='none' />");
+                        highlights.Append($"<path d='{svgPath(getEdges(cell, inf))}' fill='{color ?? inf.HighlightColor ?? "hsl(284, 83%, 85%)"}'{(opacity == null ? "" : $" fill-opacity='{opacity}'")} stroke='none' />");
 
             var outlineEdges = new List<Link<Vertex>>();
             var wallEdges = new List<Link<Vertex>>();
@@ -151,8 +155,9 @@ namespace RT.Coordinates
             var specialLinks = new StringBuilder();
             foreach (var specialLink in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
             {
-                var start = getCenter(specialLink.Cells.First(), inf);
-                var end = getCenter(specialLink.Cells.Last(), inf);
+                var c = specialLink.Cells.First();
+                var start = getCenter(c, inf);
+                var end = getCenter(specialLink.Other(c), inf);
                 var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
                 var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
                 specialLinks.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
@@ -167,12 +172,16 @@ namespace RT.Coordinates
             var maxX = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.X);
             var maxY = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.Y);
             return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}'>" +
+                inf?.ExtraSvg1 +
                 highlights +
-                $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />" +
-                $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />" +
-                $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />" +
+                inf?.ExtraSvg2 +
+                (inf?.PassagesPath?.Invoke(passages) ?? $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />") +
+                (inf?.WallsPath?.Invoke(walls) ?? $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />") +
+                (inf?.OutlinePath?.Invoke(outline) ?? $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />") +
                 (specialLinks.Length == 0 ? "" : $"<path d='{specialLinks}' fill='none' stroke-width='.3' stroke='black' /><path d='{specialLinks}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />") +
+                inf?.ExtraSvg3 +
                 (inf?.PerCell == null ? "" : _cells.Select(cell => processCellSvg(cell, inf)).JoinString()) +
+                inf?.ExtraSvg4 +
                 $"</svg>";
         }
 
@@ -186,9 +195,9 @@ namespace RT.Coordinates
         }
 
         private static IHasSvgGeometry geom(TCell cell) => (cell as IHasSvgGeometry) ??
-            throw new InvalidOperationException($"To generate SVG, the type ‘{cell.GetType().FullName}’ must implement ‘{typeof(IHasSvgGeometry).FullName}’ or the provided ‘{typeof(SvgInstructions<TCell>)}’ instance must provide ‘{nameof(SvgInstructions<TCell>.GetVertices)}’ and ‘{nameof(SvgInstructions<TCell>.GetCenter)}’ delegates that do not return null.");
+            throw new InvalidOperationException($"To generate SVG, the type ‘{cell.GetType().FullName}’ must implement ‘{typeof(IHasSvgGeometry).FullName}’ or the provided ‘{typeof(SvgInstructions<TCell>)}’ instance must provide ‘{nameof(SvgInstructions<TCell>.GetEdges)}’ and ‘{nameof(SvgInstructions<TCell>.GetCenter)}’ delegates.");
 
-        private static IEnumerable<Vertex> getVertices(TCell cell, SvgInstructions<TCell> inf) => inf?.GetVertices?.Invoke(cell) ?? geom(cell).Vertices;
+        private static IEnumerable<Link<Vertex>> getEdges(TCell cell, SvgInstructions<TCell> inf) => inf?.GetEdges?.Invoke(cell) ?? geom(cell).Edges;
         private static PointD getCenter(TCell cell, SvgInstructions<TCell> inf) => inf?.GetCenter?.Invoke(cell) ?? geom(cell).Center;
 
         /// <summary>
@@ -199,7 +208,7 @@ namespace RT.Coordinates
         ///     The set of cells adjacent to this edge, in no guaranteed order.</param>
         protected virtual EdgeType svgEdgeType(Link<Vertex> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
 
-        private string svgPath(IEnumerable<Link<Vertex>> edges)
+        private static IEnumerable<SvgSegment> combineSegments(IEnumerable<Link<Vertex>> edges)
         {
             var segments = new List<List<Vertex>>();
             var closed = new List<bool>();
@@ -208,7 +217,7 @@ namespace RT.Coordinates
             foreach (var edge in edges)
             {
                 var v1 = edge.Cells.First();
-                var v2 = edge.Cells.Last();
+                var v2 = edge.Other(v1);
                 if (endPoints.TryGetValue(v1, out var ix1))
                 {
                     if (endPoints.TryGetValue(v2, out var ix2))
@@ -259,8 +268,13 @@ namespace RT.Coordinates
                 }
             }
 
-            return segments.Select((seg, ix) => seg == null ? "" : $"M{seg.Select(v => $"{v.X} {v.Y}").JoinString(" ")}{(closed[ix] ? "z" : "")}").JoinString();
+            for (var i = 0; i < segments.Count; i++)
+                if (segments[i] != null)
+                    yield return new SvgSegment(segments[i], closed[i]);
         }
+
+        private string svgPath(IEnumerable<Link<Vertex>> edges) =>
+            combineSegments(edges).Select(seg => $"M{seg.Vertices.Select(v => $"{v.X} {v.Y}").JoinString(" ")}{(seg.Closed ? "z" : "")}").JoinString();
 
         /// <summary>Adds the specified link to this structure.</summary>
         public void AddLink(Link<TCell> link) => _links.Add(link);
@@ -284,5 +298,101 @@ namespace RT.Coordinates
         public void RemoveCells(params TCell[] cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
         /// <summary>Removes the specified cells from this structure.</summary>
         public void RemoveCells(IEnumerable<TCell> cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
+
+        /// <summary>
+        ///     Finds the shortest path from the specified <paramref name="origin"/> cell to every other cell in the
+        ///     structure.</summary>
+        /// <param name="origin">
+        ///     The start cell at which all paths begin.</param>
+        /// <returns>
+        ///     A dictionary mapping from each cell to a structure revealing the distance from <paramref name="origin"/> as
+        ///     well as the previous cell on the path.</returns>
+        public Dictionary<TCell, CellWithDistance<TCell>> FindPaths(TCell origin) => findPaths(origin, default, false);
+
+        /// <summary>
+        ///     Finds the shortest path from the specified <paramref name="from"/> cell to the specified <paramref name="to"/>
+        ///     cell.</summary>
+        /// <param name="from">
+        ///     The starting cell.</param>
+        /// <param name="to">
+        ///     The destination cell.</param>
+        /// <returns>
+        ///     A collection containing every cell along the path, including <paramref name="from"/> and <paramref
+        ///     name="to"/>.</returns>
+        public IEnumerable<TCell> FindPath(TCell from, TCell to) => findPaths(from, to, true).GetPathTo(to);
+
+        private Dictionary<TCell, CellWithDistance<TCell>> findPaths(TCell origin, TCell stopAt, bool hasStopAt)
+        {
+            var links = new Dictionary<TCell, List<TCell>>();
+            foreach (var link in _links)
+                foreach (var c in link.Cells)
+                    (links.TryGetValue(c, out var list) ? list : (links[c] = new List<TCell>())).Add(link.Other(c));
+
+            var result = new Dictionary<TCell, CellWithDistance<TCell>>();
+            var q = new Queue<CellWithDistance<TCell>>();
+            q.Enqueue(new CellWithDistance<TCell>(origin, default, 0));
+            while (q.Count > 0)
+            {
+                var item = q.Dequeue();
+                if (result.ContainsKey(item.Cell))
+                    continue;
+                result[item.Cell] = item;
+                if (hasStopAt && item.Cell.Equals(stopAt))
+                    break;
+                if (!links.TryGetValue(item.Cell, out var list))
+                    continue;
+                foreach (var other in list)
+                    q.Enqueue(new CellWithDistance<TCell>(other, item.Cell, item.Distance + 1));
+            }
+            return result;
+        }
+
+        /// <summary>
+        ///     Returns a new structure in which the specified set of cells is combined (merged) into a single cell.</summary>
+        /// <param name="cells">
+        ///     Set of cells to combine into one.</param>
+        /// <remarks>
+        ///     <para>
+        ///         Note that the type of the structure changes from <c>Structure&lt;TCell&gt;</c> to
+        ///         <c>Structure&lt;CombinedCell&lt;TCell&gt;&gt;</c>. If you wish to combine multiple groups of cells, call
+        ///         this overload with zero parameters first just to change the type, then subsequently use <see
+        ///         cref="Extensions.CombineCells{TCell}(Structure{CombinedCell{TCell}}, TCell[])"/> to combine each group.
+        ///         The following example code illustrates this principle by creating a grid in which some horizontal or
+        ///         vertical pairs of cells are combined:</para>
+        ///     <code>
+        ///         var grid = new Grid(12, 12).CombineCells();
+        ///         foreach (var cell in grid.Cells.Select(cc =&gt; cc.First()))
+        ///             if ((cell.X % 4 == 0 &amp;&amp; cell.Y % 4 &lt; 2) || (cell.X % 4 == 2 &amp;&amp; cell.Y % 4 &gt; 1))
+        ///                 grid = grid.CombineCells(new Coord[] { cell, cell.Move(GridDirection.Right) });
+        ///             else if ((cell.X % 4 &gt; 1 &amp;&amp; cell.Y % 4 == 0) || (cell.X % 4 &lt; 2 &amp;&amp; cell.Y % 4 == 2))
+        ///                 grid = grid.CombineCells(new Coord[] { cell, cell.Move(GridDirection.Down) });</code></remarks>
+        public Structure<CombinedCell<TCell>> CombineCells(params TCell[] cells) => CombineCells((IEnumerable<TCell>) cells);
+
+        /// <summary>
+        ///     Returns a new structure in which the specified set of cells is combined (merged) into a single cell.</summary>
+        /// <param name="cells">
+        ///     Set of cells to combine into one.</param>
+        /// <remarks>
+        ///     See remarks at the other overload, <see cref="CombineCells(TCell[])"/>.</remarks>
+        public Structure<CombinedCell<TCell>> CombineCells(IEnumerable<TCell> cells)
+        {
+            var combo = new CombinedCell<TCell>(cells, allowEmpty: true);
+            if (combo.Count == 0)
+                return new Structure<CombinedCell<TCell>>(
+                    _cells.Select(c => new CombinedCell<TCell>(c)),
+                    _links.Select(link => { var c = link.Cells.First(); return new Link<CombinedCell<TCell>>(new CombinedCell<TCell>(c), new CombinedCell<TCell>(link.Other(c))); }));
+            return new Structure<CombinedCell<TCell>>(
+                _cells.Where(c => !combo.Contains(c)).Select(c => new CombinedCell<TCell>(c)).Concat(new CombinedCell<TCell>[] { combo }),
+                _links.Select(link =>
+                {
+                    var c1 = link.Cells.First();
+                    var c2 = link.Other(c1);
+                    if (combo.Contains(c1))
+                        return combo.Contains(c2) ? null : new Link<CombinedCell<TCell>>(combo, new CombinedCell<TCell>(c2)).Nullable();
+                    if (combo.Contains(c2))
+                        return new Link<CombinedCell<TCell>>(new CombinedCell<TCell>(c1), combo).Nullable();
+                    return new Link<CombinedCell<TCell>>(new CombinedCell<TCell>(c1), new CombinedCell<TCell>(c2)).Nullable();
+                }).WhereNotNull());
+        }
     }
 }

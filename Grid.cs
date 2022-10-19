@@ -71,6 +71,22 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         protected override Structure<Coord> makeModifiedStructure(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> traversible) => new Grid(cells, traversible, _toroidalX, _toroidalY);
 
+        /// <summary>
+        ///     Generates a maze on this structure.</summary>
+        /// <param name="rnd">
+        ///     A random number generator.</param>
+        /// <exception cref="InvalidOperationException">
+        ///     The current structure is disjointed (consists of more than one piece).</exception>
+        public new Grid GenerateMaze(Random rnd = null) => (Grid) base.GenerateMaze(rnd);
+
+        /// <summary>
+        ///     Generates a maze on this structure.</summary>
+        /// <param name="rndNext">
+        ///     A delegate that can provide random numbers.</param>
+        /// <exception cref="InvalidOperationException">
+        ///     The current structure is disjointed (consists of more than one piece).</exception>
+        public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
+
         /// <inheritdoc/>
         protected override EdgeType svgEdgeType(Link<Vertex> edge, List<Coord> cells)
         {

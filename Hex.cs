@@ -206,19 +206,16 @@ namespace RT.Coordinates
             new PointD((Q * .75 - .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight)
         };
 
-        /// <summary>Returns a sequence of vertices in the order in which they must be rendered.</summary>
-        public IEnumerable<Vertex> Vertices
+        /// <inheritdoc/>
+        public IEnumerable<Link<Vertex>> Edges => new[]
         {
-            get
-            {
-                yield return new HexVertex(this, false);
-                yield return new HexVertex(this, true);
-                yield return new HexVertex(Move(HexDirection.DownRight), false);
-                yield return new HexVertex(Move(HexDirection.Down), true);
-                yield return new HexVertex(Move(HexDirection.Down), false);
-                yield return new HexVertex(Move(HexDirection.DownLeft), true);
-            }
-        }
+            new HexVertex(this, false),
+            new HexVertex(this, true),
+            new HexVertex(Move(HexDirection.DownRight), false),
+            new HexVertex(Move(HexDirection.Down), true),
+            new HexVertex(Move(HexDirection.Down), false),
+            new HexVertex(Move(HexDirection.DownLeft), true)
+        }.MakeEdges();
 
         /// <summary>Returns the center of the hex tile in 2D space.</summary>
         public PointD Center => new PointD(Q * .75, (Q * .5 + R) * WidthToHeight);

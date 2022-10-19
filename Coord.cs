@@ -119,23 +119,23 @@ namespace RT.Coordinates
                     yield return Move((GridDirection) i);
         }
 
-        /// <summary>Returns the sequence of vertices that describe the shape of this cell.</summary>
-        public IEnumerable<Vertex> Vertices
+        /// <inheritdoc/>
+        public IEnumerable<Link<Vertex>> Edges => new[]
         {
-            get
-            {
-                // Clockwise from top-left
-                yield return new CoordVertex(X, Y);
-                yield return new CoordVertex(X + 1, Y);
-                yield return new CoordVertex(X + 1, Y + 1);
-                yield return new CoordVertex(X, Y + 1);
-            }
-        }
+            new CoordVertex(X, Y),
+            new CoordVertex(X + 1, Y),
+            new CoordVertex(X + 1, Y + 1),
+            new CoordVertex(X, Y + 1)
+        }.MakeEdges();
 
         /// <summary>Returns the center point of this cell.</summary>
         public PointD Center => new PointD(X + .5, Y + .5);
 
         /// <summary>Returns a collection of all of this cell’s orthogonal neighbors (no diagonals).</summary>
         public IEnumerable<Coord> Neighbors => GetNeighbors();
+
+        /// <summary>Returns the set of chess knight’s moves from the current cell.</summary>
+        public IEnumerable<Coord> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
+        private static readonly Coord[] _knightsMoveOffsets = { new Coord(1, -2), new Coord(2, -1), new Coord(2, 1), new Coord(1, 2), new Coord(-1, 2), new Coord(-2, 1), new Coord(-2, -1), new Coord(-1, -2) };
     }
 }
