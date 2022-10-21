@@ -65,13 +65,18 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => new[]
+        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+
+        /// <summary>
+        ///     Returns the vertices along the perimeter of this <see cref="Kite"/>, going clockwise from the “spiky” vertex
+        ///     (center of <see cref="Hex"/>).</summary>
+        public Vertex[] Vertices => new[]
         {
             new KiteVertex(Hex, KiteVertex.Position.Center),
             new KiteVertex(Hex, fullPos: 2 * (int) Pos),
             new KiteVertex(Hex, fullPos: 2 * (int) Pos + 1),
             new KiteVertex(Hex, fullPos: 2 * (int) Pos + 2)
-        }.MakeEdges();
+        };
 
         /// <inheritdoc/>
         public PointD Center => Hex.Center * 2 + new PointD(0, -.6).Rotate(((int) Pos + .5) * Math.PI / 3);

@@ -207,7 +207,10 @@ namespace RT.Coordinates
         };
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => new[]
+        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+
+        /// <summary>Returns the vertices along the perimeter of this <see cref="Hex"/>, going clockwise from the top-left.</summary>
+        public Vertex[] Vertices => new[]
         {
             new HexVertex(this, false),
             new HexVertex(this, true),
@@ -215,7 +218,7 @@ namespace RT.Coordinates
             new HexVertex(Move(HexDirection.Down), true),
             new HexVertex(Move(HexDirection.Down), false),
             new HexVertex(Move(HexDirection.DownLeft), true)
-        }.MakeEdges();
+        };
 
         /// <summary>Returns the center of the hex tile in 2D space.</summary>
         public PointD Center => new PointD(Q * .75, (Q * .5 + R) * WidthToHeight);

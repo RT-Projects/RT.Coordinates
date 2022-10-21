@@ -132,9 +132,14 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => IsUpPointing
-            ? new[] { new TriVertex(this), new TriVertex(new Tri(X + 1, Y + 1)), new TriVertex(new Tri(X - 1, Y + 1)) }.MakeEdges()
-            : new[] { new TriVertex(new Tri(X - 1, Y)), new TriVertex(new Tri(X + 1, Y)), new TriVertex(new Tri(X, Y + 1)) }.MakeEdges();
+        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+
+        /// <summary>
+        ///     Returns the vertices along the perimeter of this <see cref="Tri"/>, going clockwise from the top (up-pointing)
+        ///     or top-left (down-pointing).</summary>
+        public Vertex[] Vertices => IsUpPointing
+            ? new[] { new TriVertex(this), new TriVertex(new Tri(X + 1, Y + 1)), new TriVertex(new Tri(X - 1, Y + 1)) }
+            : new[] { new TriVertex(new Tri(X - 1, Y)), new TriVertex(new Tri(X + 1, Y)), new TriVertex(new Tri(X, Y + 1)) };
 
         /// <inheritdoc/>
         public PointD Center => new PointD(X / 2d, (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * 0.86602540378443864676372317075294);

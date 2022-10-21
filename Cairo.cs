@@ -101,7 +101,12 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => (Pos switch
+        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+
+        /// <summary>
+        ///     Returns the vertices along the perimeter of this <see cref="Cairo"/>, going clockwise from the “tip” of the
+        ///     pentagon (the vertex opposite the horizontal or vertical edge).</summary>
+        public Vertex[] Vertices => Pos switch
         {
             Position.Top => new[] {
                 new CairoVertex(Hex, CairoVertex.Position.CenterTop),
@@ -132,7 +137,7 @@ namespace RT.Coordinates
                 new CairoVertex(Hex, CairoVertex.Position.CenterBottom),
                 new CairoVertex(Hex, CairoVertex.Position.MidBottomLeft)
             },
-        }).MakeEdges();
+        };
 
         private const double sqrt7 = 2.6457513110645905905016157536392604257102591830825;
         private static readonly double[] xs = { sqrt7 / 2, 3 * sqrt7 / 4, sqrt7 / 2, sqrt7 / 4 };

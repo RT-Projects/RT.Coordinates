@@ -120,13 +120,16 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => new[]
+        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+
+        /// <summary>Returns the vertices along the perimeter of this <see cref="Coord"/>, going clockwise from the top-left.</summary>
+        private Vertex[] Vertices => new[]
         {
             new CoordVertex(X, Y),
             new CoordVertex(X + 1, Y),
             new CoordVertex(X + 1, Y + 1),
             new CoordVertex(X, Y + 1)
-        }.MakeEdges();
+        };
 
         /// <summary>Returns the center point of this cell.</summary>
         public PointD Center => new PointD(X + .5, Y + .5);
