@@ -195,7 +195,7 @@ namespace RT.Coordinates
             var minY = allEdges.SelectMany(kvp => kvp.Key.Cells).Min(v => v.Y);
             var maxX = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.X);
             var maxY = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.Y);
-            return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}'>" +
+            return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}' font-size='.2' text-anchor='middle'>" +
                 inf?.ExtraSvg1 +
                 highlights +
                 inf?.ExtraSvg2 +
