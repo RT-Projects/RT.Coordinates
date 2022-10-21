@@ -123,7 +123,7 @@ namespace RT.Coordinates
         public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Coord"/>, going clockwise from the top-left.</summary>
-        private Vertex[] Vertices => new[]
+        private Vertex[] Vertices => new Vertex[]
         {
             new CoordVertex(X, Y),
             new CoordVertex(X + 1, Y),

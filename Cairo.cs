@@ -108,21 +108,21 @@ namespace RT.Coordinates
         ///     pentagon (the vertex opposite the horizontal or vertical edge).</summary>
         public Vertex[] Vertices => Pos switch
         {
-            Position.Top => new[] {
+            Position.Top => new Vertex[] {
                 new CairoVertex(Hex, CairoVertex.Position.CenterTop),
                 new CairoVertex(Hex, CairoVertex.Position.MidTopLeft),
                 new CairoVertex(Hex, CairoVertex.Position.TopLeft),
                 new CairoVertex(Hex.Move(HexDirection.UpRight), CairoVertex.Position.Left),
                 new CairoVertex(Hex.Move(HexDirection.UpRight), CairoVertex.Position.MidBottomLeft)
             },
-            Position.Right => new[] {
+            Position.Right => new Vertex[] {
                 new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.TopLeft),
                 new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.MidTopLeft),
                 new CairoVertex(Hex, CairoVertex.Position.CenterBottom),
                 new CairoVertex(Hex, CairoVertex.Position.CenterTop),
                 new CairoVertex(Hex.Move(HexDirection.UpRight), CairoVertex.Position.MidBottomLeft)
             },
-            Position.Bottom => new[] {
+            Position.Bottom => new Vertex[] {
                 new CairoVertex(Hex, CairoVertex.Position.CenterBottom),
                 new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.MidTopLeft),
                 new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.Left),
@@ -130,7 +130,7 @@ namespace RT.Coordinates
                 new CairoVertex(Hex, CairoVertex.Position.MidBottomLeft)
             },
             // Position.Left
-            _ => new[] {
+            _ => new Vertex[] {
                 new CairoVertex(Hex, CairoVertex.Position.Left),
                 new CairoVertex(Hex, CairoVertex.Position.MidTopLeft),
                 new CairoVertex(Hex, CairoVertex.Position.CenterTop),

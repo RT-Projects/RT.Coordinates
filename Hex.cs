@@ -210,7 +210,7 @@ namespace RT.Coordinates
         public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Hex"/>, going clockwise from the top-left.</summary>
-        public Vertex[] Vertices => new[]
+        public Vertex[] Vertices => new Vertex[]
         {
             new HexVertex(this, false),
             new HexVertex(this, true),

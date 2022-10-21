@@ -70,7 +70,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Kite"/>, going clockwise from the “spiky” vertex
         ///     (center of <see cref="Hex"/>).</summary>
-        public Vertex[] Vertices => new[]
+        public Vertex[] Vertices => new Vertex[]
         {
             new KiteVertex(Hex, KiteVertex.Position.Center),
             new KiteVertex(Hex, fullPos: 2 * (int) Pos),

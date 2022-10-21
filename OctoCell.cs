@@ -55,8 +55,8 @@ namespace RT.Coordinates
         ///     Returns the vertices along the perimeter of this <see cref="OctoCell"/>, going clockwise from the top-left
         ///     (octagon) or top (square).</summary>
         public Vertex[] Vertices => IsSquare
-            ? new[] { new OctoVertex(X + 1, Y, 0), new OctoVertex(X + 1, Y + 1, 2), new OctoVertex(X + 1, Y + 1, 1), new OctoVertex(X, Y + 1, 3) }
-            : new[] { new OctoVertex(X, Y, 2), new OctoVertex(X, Y, 3), new OctoVertex(X + 1, Y, 1), new OctoVertex(X + 1, Y, 0), new OctoVertex(X, Y + 1, 3), new OctoVertex(X, Y + 1, 2), new OctoVertex(X, Y, 0), new OctoVertex(X, Y, 1) };
+            ? new Vertex[] { new OctoVertex(X + 1, Y, 0), new OctoVertex(X + 1, Y + 1, 2), new OctoVertex(X + 1, Y + 1, 1), new OctoVertex(X, Y + 1, 3) }
+            : new Vertex[] { new OctoVertex(X, Y, 2), new OctoVertex(X, Y, 3), new OctoVertex(X + 1, Y, 1), new OctoVertex(X + 1, Y, 0), new OctoVertex(X, Y + 1, 3), new OctoVertex(X, Y + 1, 2), new OctoVertex(X, Y, 0), new OctoVertex(X, Y, 1) };
 
         /// <inheritdoc/>
         public PointD Center => IsSquare ? new PointD(X + 1, Y + 1) : new PointD(X + .5, Y + .5);
