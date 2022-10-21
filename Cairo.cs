@@ -47,6 +47,12 @@ namespace RT.Coordinates
             Left
         }
 
+        /// <summary>
+        ///     Constructs a hexagonal grid of the specified <paramref name="sideLength"/> and divides each hexagon into four
+        ///     <see cref="Cairo"/> cells.</summary>
+        public static IEnumerable<Cairo> LargeHexagon(int sideLength) => Hex.LargeHexagon(sideLength).SelectMany(hex => _cairoPositions.Select(pos => new Cairo(hex, pos)));
+        private static readonly Position[] _cairoPositions = (Position[]) Enum.GetValues(typeof(Position));
+
         /// <inheritdoc/>
         public bool Equals(Cairo other) => other.Hex.Equals(Hex) && other.Pos == Pos;
         /// <inheritdoc/>
@@ -140,7 +146,7 @@ namespace RT.Coordinates
         };
 
         private const double sqrt7 = 2.6457513110645905905016157536392604257102591830825;
-        private static readonly double[] xs = { sqrt7 / 2, 3 * sqrt7 / 4, sqrt7 / 2, sqrt7 / 4 };
+        private static readonly double[] xs = { 0, sqrt7 / 4, 0, -sqrt7 / 4 };
         private static readonly double[] ys = { -sqrt7 / 4 - .5, 0, sqrt7 / 4 + .5, 0 };
 
         /// <inheritdoc/>

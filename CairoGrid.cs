@@ -21,11 +21,9 @@ namespace RT.Coordinates
         ///     Constructs a <see cref="CairoGrid"/> consisting of a hexagonal grid of the specified <paramref
         ///     name="sideLength"/>.</summary>
         public CairoGrid(int sideLength)
-            : base(Hex.LargeHexagon(sideLength).SelectMany(hex => _cairoPositions.Select(pos => new Cairo(hex, pos))))
+            : base(Cairo.LargeHexagon(sideLength))
         {
         }
-
-        private static readonly Cairo.Position[] _cairoPositions = (Cairo.Position[]) Enum.GetValues(typeof(Cairo.Position));
 
         /// <inheritdoc/>
         protected override Structure<Cairo> makeModifiedStructure(IEnumerable<Cairo> cells, IEnumerable<Link<Cairo>> traversible) => new CairoGrid(cells, traversible);

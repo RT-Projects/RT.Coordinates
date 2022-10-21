@@ -35,9 +35,8 @@ namespace RT.Coordinates
         }
 
         private const double sqrt7 = 2.6457513110645905905016157536392604257102591830825;
-        private const double s = (sqrt7 - 1) / 2;
         private const double h = (sqrt7 + 1) / 2;
-        private static readonly double[] xs = { s / 2, 0, s / 2, s, s + .5, s + .5 };
+        private static readonly double[] xs = { -(sqrt7 + 1) / 4, -sqrt7 / 2, -(sqrt7 + 1) / 4, -.5, 0, 0 };
         private static readonly double[] ys = { h / 2, 0, -h / 2, -h, -.5, .5 };
 
         /// <inheritdoc/>
