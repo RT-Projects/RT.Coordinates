@@ -27,7 +27,7 @@ namespace RT.Coordinates
         public override int GetHashCode() => unchecked(Tri.GetHashCode() + 47);
 
         /// <inheritdoc/>
-        public override double X => Tri.X / 2d;
+        public override double X => Tri.X * .5; // cos 60°
         /// <inheritdoc/>
         public override double Y => Tri.Y * 0.86602540378443864676372317075294; // sin 60°
     }

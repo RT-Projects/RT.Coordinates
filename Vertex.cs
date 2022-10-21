@@ -10,6 +10,9 @@ namespace RT.Coordinates
         /// <summary>Returns the y-coordinate of this vertex in SVG space.</summary>
         public abstract double Y { get; }
 
+        /// <summary>Returns the coordinates of this vertex in SVG space.</summary>
+        public PointD Point => new PointD(X, Y);
+
         /// <inheritdoc/>
         public abstract bool Equals(Vertex other);
 

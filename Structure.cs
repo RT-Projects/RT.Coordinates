@@ -337,6 +337,13 @@ namespace RT.Coordinates
         /// <summary>Removes the specified cells from this structure.</summary>
         public void RemoveCells(IEnumerable<TCell> cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
 
+        /// <summary>Adds the specified cells to this structure.</summary>
+        public void AddCell(TCell cell) { _cells.Add(cell); }
+        /// <summary>Adds the specified cells to this structure.</summary>
+        public void AddCells(params TCell[] cells) { foreach (var cell in cells) _cells.Add(cell); }
+        /// <summary>Adds the specified cells to this structure.</summary>
+        public void AddCells(IEnumerable<TCell> cells) { foreach (var cell in cells) _cells.Add(cell); }
+
         /// <summary>
         ///     Finds the shortest path from the specified <paramref name="origin"/> cell to every other cell in the
         ///     structure.</summary>

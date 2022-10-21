@@ -60,6 +60,19 @@ namespace RT.Coordinates
         }
 
         /// <summary>
+        ///     Rotates the current point by the specified <paramref name="angle"/> about the specified point.</summary>
+        /// <param name="angle">
+        ///     The angle in radians.</param>
+        /// <param name="about">
+        ///     Point to rotate the current point about.</param>
+        /// <returns>
+        ///     The rotated point.</returns>
+        /// <remarks>
+        ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
+        ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
+        public PointD Rotate(double angle, PointD about) => (this - about).Rotate(angle) + about;
+
+        /// <summary>
         ///     Rotates the current point by the specified <paramref name="angle"/> about the origin.</summary>
         /// <param name="angle">
         ///     The angle in degrees.</param>
@@ -69,6 +82,19 @@ namespace RT.Coordinates
         ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
         ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
         public PointD RotateDeg(double angle) => Rotate(angle * Math.PI / 180);
+
+        /// <summary>
+        ///     Rotates the current point by the specified <paramref name="angle"/> about the specified point.</summary>
+        /// <param name="angle">
+        ///     The angle in degrees.</param>
+        /// <param name="about">
+        ///     Point to rotate the current point about.</param>
+        /// <returns>
+        ///     The rotated point.</returns>
+        /// <remarks>
+        ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
+        ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
+        public PointD RotateDeg(double angle, PointD about) => Rotate(angle * Math.PI / 180, about);
 
         /// <inheritdoc/>
         public override string ToString() => $"({X}, {Y})";
