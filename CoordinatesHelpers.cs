@@ -150,8 +150,6 @@ namespace RT.Coordinates
             return whereNotNullIterator();
         }
 
-        public static IEnumerable<Link<Vertex>> MakeEdges(this IEnumerable<Vertex> vertices) => vertices.SelectConsecutivePairs(true, (v1, v2) => new Link<Vertex>(v1, v2));
-
         /// <summary>
         ///     Returns the index of the first element in this <paramref name="source"/> satisfying the specified <paramref
         ///     name="predicate"/>. If no such elements are found, returns <c>-1</c>.</summary>

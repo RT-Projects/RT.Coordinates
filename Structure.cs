@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -132,7 +133,7 @@ namespace RT.Coordinates
         protected virtual Structure<TCell> makeModifiedStructure(IEnumerable<TCell> cells, IEnumerable<Link<TCell>> traversible) => new Structure<TCell>(cells, traversible);
 
         /// <summary>Returns an SVG file that visualizes this structure.</summary>
-        public string Svg(SvgInstructions<TCell> inf = null)
+        public string Svg(SvgInstructions inf = null)
         {
             var allEdges = new Dictionary<Link<Vertex>, List<TCell>>();
             foreach (var cell in _cells)
@@ -140,10 +141,33 @@ namespace RT.Coordinates
                     allEdges.AddSafe(edge, cell);
 
             var highlights = new StringBuilder();
-            if (inf?.HighlightCells != null)
-                foreach (var (cell, color, opacity) in inf.HighlightCells)
-                    if (_cells.Contains(cell))
-                        highlights.Append($"<path d='{svgPath(getEdges(cell, inf))}' fill='{color ?? inf.HighlightColor ?? "hsl(284, 83%, 85%)"}'{(opacity == null ? "" : $" fill-opacity='{opacity}'")} stroke='none' />");
+            StringBuilder addFill(TCell cell, string fill) => fill == null ? null : highlights.Append($"<path d='{svgPath(getEdges(cell, inf))}' fill='{fill}' stroke='none' />");
+            StringBuilder addFillAndOpacity(TCell cell, string fill, string opacity) => opacity == null ? addFill(cell, fill) : highlights.Append($"<path d='{svgPath(getEdges(cell, inf))}' fill='{fill}' fill-opacity='{opacity}' stroke='none' />");
+            StringBuilder addFillColor(TCell cell, SvgColor color) => addFillAndOpacity(cell, color.SvgFillColor, color.SvgFillOpacity);
+            StringBuilder addFillObject(TCell cell, object fill) => fill == null ? null : fill is SvgColor color ? addFillColor(cell, color) : addFill(cell, fill.ToString());
+
+            if (inf?.HighlightCells is IEnumerable enumerable)
+                foreach (var obj in enumerable)
+                {
+                    if (obj is TCell c && _cells.Contains(c))
+                        addFillColor(c, inf.HighlightColor);
+                    else if (obj is DictionaryEntry de && de.Key is TCell c2 && _cells.Contains(c2))
+                    {
+                        if (de.Value is SvgColor color)
+                            addFillColor(c2, color);
+                        else if (de.Value != null)
+                            addFill(c2, de.Value.ToString());
+                    }
+                }
+            else if (inf?.HighlightCells is Func<object, object> fnc1)
+                foreach (var cell in _cells)
+                    addFillObject(cell, fnc1(cell));
+            else if (inf?.HighlightCells is Func<object, string> fnc2)
+                foreach (var cell in _cells)
+                    addFill(cell, fnc2(cell));
+            else if (inf?.HighlightCells is Func<object, SvgColor> fnc3)
+                foreach (var cell in _cells)
+                    addFillColor(cell, fnc3(cell));
 
             var outlineEdges = new List<Link<Vertex>>();
             var wallEdges = new List<Link<Vertex>>();
@@ -185,7 +209,7 @@ namespace RT.Coordinates
                 $"</svg>";
         }
 
-        private static string processCellSvg(TCell cell, SvgInstructions<TCell> inf)
+        private static string processCellSvg(TCell cell, SvgInstructions inf)
         {
             var svg = inf?.PerCell(cell);
             if (svg == null)
@@ -195,10 +219,10 @@ namespace RT.Coordinates
         }
 
         private static IHasSvgGeometry geom(TCell cell) => (cell as IHasSvgGeometry) ??
-            throw new InvalidOperationException($"To generate SVG, the type ‘{cell.GetType().FullName}’ must implement ‘{typeof(IHasSvgGeometry).FullName}’ or the provided ‘{typeof(SvgInstructions<TCell>)}’ instance must provide ‘{nameof(SvgInstructions<TCell>.GetEdges)}’ and ‘{nameof(SvgInstructions<TCell>.GetCenter)}’ delegates.");
+            throw new InvalidOperationException($"To generate SVG, the type ‘{cell.GetType().FullName}’ must implement ‘{typeof(IHasSvgGeometry).FullName}’ or the provided ‘{typeof(SvgInstructions)}’ instance must provide ‘{nameof(SvgInstructions.GetEdges)}’ and ‘{nameof(SvgInstructions.GetCenter)}’ delegates.");
 
-        private static IEnumerable<Link<Vertex>> getEdges(TCell cell, SvgInstructions<TCell> inf) => inf?.GetEdges?.Invoke(cell) ?? geom(cell).Edges;
-        private static PointD getCenter(TCell cell, SvgInstructions<TCell> inf) => inf?.GetCenter?.Invoke(cell) ?? geom(cell).Center;
+        private static IEnumerable<Link<Vertex>> getEdges(TCell cell, SvgInstructions inf) => inf?.GetEdges?.Invoke(cell) ?? geom(cell).Edges;
+        private static PointD getCenter(TCell cell, SvgInstructions inf) => inf?.GetCenter?.Invoke(cell) ?? geom(cell).Center;
 
         /// <summary>
         ///     Determines what type of edge to draw in SVG for a particular edge between cells.</summary>
@@ -273,8 +297,22 @@ namespace RT.Coordinates
                     yield return new SvgSegment(segments[i], closed[i]);
         }
 
-        private string svgPath(IEnumerable<Link<Vertex>> edges) =>
-            combineSegments(edges).Select(seg => $"M{seg.Vertices.Select(v => $"{v.X} {v.Y}").JoinString(" ")}{(seg.Closed ? "z" : "")}").JoinString();
+        private string svgPath(IEnumerable<Link<Vertex>> edges)
+        {
+            var sb = new StringBuilder();
+            foreach (var segment in combineSegments(edges))
+            {
+                sb.AppendFormat("M{0} {1}", segment.Vertices[0].X, segment.Vertices[0].Y);
+                for (var i = 1; i < segment.Vertices.Count; i++)
+                    sb.Append(segment.Vertices[i].SvgPathFragment(segment.Vertices[i - 1]));
+                if (segment.Closed)
+                {
+                    sb.Append(segment.Vertices[0].SvgPathFragment(segment.Vertices[segment.Vertices.Count - 1]));
+                    sb.Append("z");
+                }
+            }
+            return sb.ToString();
+        }
 
         /// <summary>Adds the specified link to this structure.</summary>
         public void AddLink(Link<TCell> link) => _links.Add(link);

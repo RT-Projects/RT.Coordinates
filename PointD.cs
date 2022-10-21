@@ -49,11 +49,14 @@ namespace RT.Coordinates
         ///     The angle in radians.</param>
         /// <returns>
         ///     The rotated point.</returns>
+        /// <remarks>
+        ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
+        ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
         public PointD Rotate(double angle)
         {
             var sina = Math.Sin(angle);
             var cosa = Math.Cos(angle);
-            return new PointD(X * cosa + Y * sina, Y * cosa - X * sina);
+            return new PointD(X * cosa - Y * sina, X * sina + Y * cosa);
         }
 
         /// <summary>
@@ -62,6 +65,9 @@ namespace RT.Coordinates
         ///     The angle in degrees.</param>
         /// <returns>
         ///     The rotated point.</returns>
+        /// <remarks>
+        ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
+        ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
         public PointD RotateDeg(double angle) => Rotate(angle * Math.PI / 180);
 
         /// <inheritdoc/>

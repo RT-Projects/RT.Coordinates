@@ -30,7 +30,10 @@
     <DocumentationFile>builds\Release\RT.Coordinates.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CellWithColor.cs" />
+    <Compile Include="Cairo.cs" />
+    <Compile Include="CairoVertex.cs" />
+    <Compile Include="CairoGrid.cs" />
+    <Compile Include="SvgColor.cs" />
     <Compile Include="CellWithDistance.cs" />
     <Compile Include="CombinedCell.cs" />
     <Compile Include="Coord.cs" />
@@ -38,6 +41,9 @@
     <Compile Include="GenericVertex.cs" />
     <Compile Include="HexDirections.cs" />
     <Compile Include="GridDirections.cs" />
+    <Compile Include="Kite.cs" />
+    <Compile Include="KiteGrid.cs" />
+    <Compile Include="KiteVertex.cs" />
     <Compile Include="OctoCell.cs" />
     <Compile Include="OctoGrid.cs" />
     <Compile Include="HexVertex.cs" />

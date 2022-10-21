@@ -82,5 +82,10 @@ namespace RT.Coordinates
                     return link.Nullable();
                 }).WhereNotNull());
         }
+
+        /// <summary>
+        ///     Generates a set of edges from a collection of vertices in which the vertices are in the correct order (either
+        ///     clockwise or counter-clockwise).</summary>
+        public static IEnumerable<Link<Vertex>> MakeEdges(this IEnumerable<Vertex> vertices) => vertices.SelectConsecutivePairs(true, (v1, v2) => new Link<Vertex>(v1, v2));
     }
 }
