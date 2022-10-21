@@ -60,7 +60,6 @@
     <Compile Include="Link.cs" />
     <Compile Include="CoordinatesHelpers.cs" />
     <Compile Include="OctoVertex.cs" />
-    <Compile Include="OutOfBoundsException.cs" />
     <Compile Include="PointD.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Structure.cs" />
