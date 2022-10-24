@@ -183,16 +183,17 @@ namespace RT.Coordinates
                 })
                     .Add(kvp.Key);
 
-            var specialLinks = new StringBuilder();
-            foreach (var specialLink in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
-            {
-                var c = specialLink.Cells.First();
-                var start = getCenter(c, inf);
-                var end = getCenter(specialLink.Other(c), inf);
-                var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
-                var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
-                specialLinks.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
-            }
+            var tunnels = new StringBuilder();
+            foreach (var tunnel in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
+                if (drawTunnel(tunnel))
+                {
+                    var c = tunnel.Cells.First();
+                    var start = getCenter(c, inf);
+                    var end = getCenter(tunnel.Other(c), inf);
+                    var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
+                    var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
+                    tunnels.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
+                }
 
             var outline = svgPath(outlineEdges);
             var walls = svgPath(wallEdges);
@@ -209,7 +210,7 @@ namespace RT.Coordinates
                 (inf?.PassagesPath?.Invoke(passages) ?? $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />") +
                 (inf?.WallsPath?.Invoke(walls) ?? $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />") +
                 (inf?.OutlinePath?.Invoke(outline) ?? $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />") +
-                (specialLinks.Length == 0 ? "" : $"<path d='{specialLinks}' fill='none' stroke-width='.3' stroke='black' /><path d='{specialLinks}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />") +
+                (tunnels.Length == 0 ? "" : $"<path d='{tunnels}' fill='none' stroke-width='.3' stroke='black' /><path d='{tunnels}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />") +
                 inf?.ExtraSvg3 +
                 (inf?.PerCell == null ? "" : _cells.Select(cell => processCellSvg(cell, inf)).JoinString()) +
                 inf?.ExtraSvg4 +
@@ -232,12 +233,21 @@ namespace RT.Coordinates
         private static PointD getCenter(TCell cell, SvgInstructions inf) => inf?.GetCenter?.Invoke(cell) ?? geom(cell).Center;
 
         /// <summary>
-        ///     Determines what type of edge to draw in SVG for a particular edge between cells.</summary>
+        ///     When overridden in a derived class, determines what type of edge to draw in SVG for a particular edge between
+        ///     cells or at the edge of the grid.</summary>
         /// <param name="edge">
         ///     The edge.</param>
         /// <param name="cells">
         ///     The set of cells adjacent to this edge, in no guaranteed order.</param>
         protected virtual EdgeType svgEdgeType(Link<Vertex> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
+
+        /// <summary>
+        ///     When overridden in a derived class, determines whether a tunnel should be drawn for the specified <paramref
+        ///     name="link"/>. This method is only called for links between cells that have no edges in common; otherwise,
+        ///     <see cref="svgEdgeType(Link{Vertex}, List{TCell})"/> is called instead.</summary>
+        /// <param name="link">
+        ///     Specifies the link for which to decide whether to draw a tunnel.</param>
+        protected virtual bool drawTunnel(Link<TCell> link) => true;
 
         private static IEnumerable<SvgSegment> combineSegments(IEnumerable<Link<Vertex>> edges)
         {

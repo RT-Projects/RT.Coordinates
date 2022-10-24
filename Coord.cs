@@ -115,7 +115,7 @@ namespace RT.Coordinates
         public IEnumerable<Coord> GetNeighbors(bool includeDiagonal = false)
         {
             for (var i = 0; i < 8; i++)
-                if ((includeDiagonal || i % 2 == 0))
+                if (includeDiagonal || i % 2 == 0)
                     yield return Move((GridDirection) i);
         }
 

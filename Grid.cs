@@ -15,13 +15,6 @@ namespace RT.Coordinates
         {
         }
 
-        private Grid(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> links, bool toroidalX, bool toroidalY)
-            : base(cells, links, null)
-        {
-            _toroidalX = toroidalX;
-            _toroidalY = toroidalY;
-        }
-
         /// <summary>
         ///     Constructs a rectilinear grid that is <paramref name="width"/> cells wide and <paramref name="height"/> cells
         ///     tall.</summary>
@@ -29,14 +22,12 @@ namespace RT.Coordinates
         ///     Width of the grid.</param>
         /// <param name="height">
         ///     Height of the grid.</param>
-        /// <param name="includeDiagonalLinks">
-        ///     If <c>true</c>, links between diagonally adjacent cells are included in the structure.</param>
         /// <param name="toroidalX">
         ///     If <c>true</c>, treats the grid as horizontally toroidal (the left/right edges wrap around).</param>
         /// <param name="toroidalY">
         ///     If <c>true</c>, treats the grid as vertically toroidal (the top/bottom edges wrap around).</param>
-        public Grid(int width, int height, bool includeDiagonalLinks = false, bool toroidalX = false, bool toroidalY = false)
-            : base(Coord.Rectangle(width, height), getNeighbors: getNeighborsGetter(width, height, includeDiagonalLinks, toroidalX, toroidalY))
+        public Grid(int width, int height, bool toroidalX = false, bool toroidalY = false)
+            : base(Coord.Rectangle(width, height), getNeighbors: getNeighborsGetter(width, height, toroidalX, toroidalY))
         {
             _width = width;
             _height = height;
@@ -44,12 +35,21 @@ namespace RT.Coordinates
             _toroidalY = toroidalY;
         }
 
-        private static Func<Coord, IEnumerable<Coord>> getNeighborsGetter(int width, int height, bool includeDiagonal, bool toroidalX, bool toroidalY)
+        private Grid(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> links, int width, int height, bool toroidalX, bool toroidalY)
+            : base(cells, links, null)
         {
-            return c => get(c);
+            _width = width;
+            _height = height;
+            _toroidalX = toroidalX;
+            _toroidalY = toroidalY;
+        }
+
+        private static Func<Coord, IEnumerable<Coord>> getNeighborsGetter(int width, int height, bool toroidalX, bool toroidalY)
+        {
+            return get;
             IEnumerable<Coord> get(Coord c)
             {
-                foreach (var neighbor in c.GetNeighbors(includeDiagonal))
+                foreach (var neighbor in c.GetNeighbors())
                     if (neighbor.X >= 0 && neighbor.X < width && neighbor.Y >= 0 && neighbor.Y <= height)
                         yield return neighbor;
                 if (toroidalX && c.X == 0)
@@ -69,7 +69,7 @@ namespace RT.Coordinates
         private readonly bool _toroidalY;
 
         /// <inheritdoc/>
-        protected override Structure<Coord> makeModifiedStructure(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> traversible) => new Grid(cells, traversible, _toroidalX, _toroidalY);
+        protected override Structure<Coord> makeModifiedStructure(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> traversible) => new Grid(cells, traversible, _width, _height, _toroidalX, _toroidalY);
 
         /// <summary>
         ///     Generates a maze on this structure.</summary>
@@ -103,6 +103,14 @@ namespace RT.Coordinates
                     return _links.Contains(new Link<Coord>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall;
             }
             return base.svgEdgeType(edge, cells);
+        }
+
+        /// <inheritdoc/>
+        protected override bool drawTunnel(Link<Coord> link)
+        {
+            var c = link.Cells.First();
+            var d = link.Other(c);
+            return !(_toroidalX && Math.Abs(c.X - d.X) + 1 == _width || _toroidalY && Math.Abs(c.Y - d.Y) + 1 == _height);
         }
     }
 }
