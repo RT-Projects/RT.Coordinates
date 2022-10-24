@@ -33,6 +33,12 @@
     <Compile Include="Cairo.cs" />
     <Compile Include="CairoVertex.cs" />
     <Compile Include="CairoGrid.cs" />
+    <Compile Include="Floret.cs" />
+    <Compile Include="FloretVertex.cs" />
+    <Compile Include="FloretGrid.cs" />
+    <Compile Include="RhombGrid.cs" />
+    <Compile Include="Rhomb.cs" />
+    <Compile Include="RhombVertex.cs" />
     <Compile Include="SvgColor.cs" />
     <Compile Include="CellWithDistance.cs" />
     <Compile Include="CombinedCell.cs" />
