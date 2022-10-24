@@ -85,17 +85,17 @@ namespace RT.Coordinates
         public enum Position
         {
             /// <summary>The upper-right (1 o’clock) kite.</summary>
-            UpRight,
+            TopRight,
             /// <summary>The right (3 o’clock) kite.</summary>
             Right,
             /// <summary>The lower-right (5 o’clock) kite.</summary>
-            DownRight,
+            BottomRight,
             /// <summary>The lower-left (7 o’clock) kite.</summary>
-            DownLeft,
+            BottomLeft,
             /// <summary>The left (9 o’clock) kite.</summary>
             Left,
             /// <summary>The upper-left (11 o’clock) kite.</summary>
-            UpLeft
+            TopLeft
         }
 
         /// <inheritdoc/>

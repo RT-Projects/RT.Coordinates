@@ -95,13 +95,16 @@ namespace RT.Coordinates
                         yield return new Cairo(Hex.Move(HexDirection.Down), Position.Top);
                         break;
 
-                    default:    // Position.Left
+                    case Position.Left:
                         yield return new Cairo(Hex, Position.Top);
                         yield return new Cairo(Hex, Position.Right);
                         yield return new Cairo(Hex, Position.Bottom);
                         yield return new Cairo(Hex.Move(HexDirection.DownLeft), Position.Top);
                         yield return new Cairo(Hex.Move(HexDirection.UpLeft), Position.Bottom);
                         break;
+
+                    default:
+                        throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.");
                 }
             }
         }
@@ -135,14 +138,14 @@ namespace RT.Coordinates
                 new CairoVertex(Hex.Move(HexDirection.Down), CairoVertex.Position.TopLeft),
                 new CairoVertex(Hex, CairoVertex.Position.MidBottomLeft)
             },
-            // Position.Left
-            _ => new Vertex[] {
+            Position.Left => new Vertex[] {
                 new CairoVertex(Hex, CairoVertex.Position.Left),
                 new CairoVertex(Hex, CairoVertex.Position.MidTopLeft),
                 new CairoVertex(Hex, CairoVertex.Position.CenterTop),
                 new CairoVertex(Hex, CairoVertex.Position.CenterBottom),
                 new CairoVertex(Hex, CairoVertex.Position.MidBottomLeft)
             },
+            _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.")
         };
 
         private const double sqrt7 = 2.6457513110645905905016157536392604257102591830825;

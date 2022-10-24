@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace RT.Coordinates
 {
     /// <summary>Describes one of the vertices of a <see cref="Kite"/>.</summary>
@@ -61,7 +59,7 @@ namespace RT.Coordinates
             Right,
             /// <summary>Midpoint of the lower-right edge of the hex.</summary>
             MidDownRight,
-            /// <summary>Center of the hex.</summary>
+            /// <summary>Centerpoint of the hex.</summary>
             Center
         }
 

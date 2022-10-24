@@ -174,7 +174,14 @@ namespace RT.Coordinates
             var passageEdges = new List<Link<Vertex>>();
 
             foreach (var kvp in allEdges)
-                (svgEdgeType(kvp.Key, kvp.Value) switch { EdgeType.Outline => outlineEdges, EdgeType.Passage => passageEdges, _ => wallEdges }).Add(kvp.Key);
+                (svgEdgeType(kvp.Key, kvp.Value) switch
+                {
+                    EdgeType.Outline => outlineEdges,
+                    EdgeType.Passage => passageEdges,
+                    EdgeType.Wall => wallEdges,
+                    EdgeType e => throw new InvalidOperationException($"Invalid {nameof(EdgeType)} value encountered: {e}")
+                })
+                    .Add(kvp.Key);
 
             var specialLinks = new StringBuilder();
             foreach (var specialLink in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))

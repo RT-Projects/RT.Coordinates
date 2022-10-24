@@ -129,15 +129,18 @@ namespace RT.Coordinates
         ///     Returns a collection containing all of the current tile’s neighbors.</summary>
         /// <remarks>
         ///     The collection starts with the upper-left neighbor and proceeds clockwise.</remarks>
-        public IEnumerable<Hex> Neighbors => new Hex[]
+        public IEnumerable<Hex> Neighbors
         {
-            new Hex(Q - 1, R),
-            new Hex(Q, R - 1),
-            new Hex(Q + 1, R - 1),
-            new Hex(Q + 1, R),
-            new Hex(Q, R + 1),
-            new Hex(Q - 1, R + 1)
-        };
+            get
+            {
+                yield return new Hex(Q - 1, R);
+                yield return new Hex(Q, R - 1);
+                yield return new Hex(Q + 1, R - 1);
+                yield return new Hex(Q + 1, R);
+                yield return new Hex(Q, R + 1);
+                yield return new Hex(Q - 1, R + 1);
+            }
+        }
 
         /// <summary>
         ///     Returns the hex tile reached by moving in the specified direction.</summary>
