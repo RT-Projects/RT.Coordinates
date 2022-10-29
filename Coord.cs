@@ -5,7 +5,7 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>Represents a square cell in a 2D rectilinear grid.</summary>
-    public struct Coord : IEquatable<Coord>, INeighbor<Coord>, IHasSvgGeometry, IHasDirection<Coord, GridDirection>
+    public struct Coord : IEquatable<Coord>, INeighbor<Coord>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Coord, GridDirection>
     {
         /// <summary>Returns the X coordinate of the cell.</summary>
         public int X { get; private set; }
@@ -136,6 +136,8 @@ namespace RT.Coordinates
 
         /// <summary>Returns a collection of all of this cell’s orthogonal neighbors (no diagonals).</summary>
         public IEnumerable<Coord> Neighbors => GetNeighbors();
+
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <summary>Returns the set of chess knight’s moves from the current cell.</summary>
         public IEnumerable<Coord> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }

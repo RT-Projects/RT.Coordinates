@@ -8,7 +8,7 @@ namespace RT.Coordinates
     ///     Describes a kite-shaped cell in a <see cref="Grid"/>. The “spikier” vertex of the kite is the center of a hexagon;
     ///     the sides adjacent are spokes connecting with the midpoints of the hexagon’s outline; and the rest form the
     ///     outline.</summary>
-    public struct Kite : IEquatable<Kite>, IHasSvgGeometry, INeighbor<Kite>
+    public struct Kite : IEquatable<Kite>, INeighbor<Kite>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>The underlying hex tile. This kite forms one sixth of that hexagon.</summary>
         public Hex Hex { get; private set; }
@@ -64,6 +64,8 @@ namespace RT.Coordinates
                 yield return new Kite(Hex.Move((Hex.Direction) (((int) Pos + 2) % 6)), (Position) (((int) Pos + 4) % 6));
             }
         }
+
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();

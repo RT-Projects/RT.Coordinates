@@ -7,7 +7,7 @@ namespace RT.Coordinates
     /// <summary>
     ///     Represents a cell in a <see cref="Grid"/>. Each cairo is a pentagon. Four cairos form a hexagon that is either
     ///     horizontally or vertically stretched.</summary>
-    public struct Cairo : IEquatable<Cairo>, INeighbor<Cairo>, IHasSvgGeometry
+    public struct Cairo : IEquatable<Cairo>, INeighbor<Cairo>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>Identifies a hexagon. Each Cairo is one quarter of a hexagon.</summary>
         public Hex Hex { get; private set; }
@@ -109,6 +109,8 @@ namespace RT.Coordinates
                 }
             }
         }
+
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();

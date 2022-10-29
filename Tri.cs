@@ -10,7 +10,7 @@ namespace RT.Coordinates
     ///     Represents a triangular tile in a two-dimensional grid in which the tiles alternative between being up-pointing
     ///     and down-pointing triangles. Each tri is represented as a pair of coordinates (X, Y), where X counts the tris in a
     ///     row and Y identifies the row. The (0, 0) tri is an up-pointing one.</remarks>
-    public struct Tri : IEquatable<Tri>, INeighbor<Tri>, IHasSvgGeometry
+    public struct Tri : IEquatable<Tri>, INeighbor<Tri>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>
         ///     Constructor.</summary>
@@ -132,15 +132,17 @@ namespace RT.Coordinates
             }
         }
 
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Tri"/>, going clockwise from the top (up-pointing)
         ///     or top-left (down-pointing).</summary>
-        public Vertex[] Vertices => IsUpPointing
-            ? new Vertex[] { new TriVertex(this), new TriVertex(new Tri(X + 1, Y + 1)), new TriVertex(new Tri(X - 1, Y + 1)) }
-            : new Vertex[] { new TriVertex(new Tri(X - 1, Y)), new TriVertex(new Tri(X + 1, Y)), new TriVertex(new Tri(X, Y + 1)) };
+        public Coordinates.Vertex[] Vertices => IsUpPointing
+            ? new Coordinates.Vertex[] { new Vertex(this), new Vertex(new Tri(X + 1, Y + 1)), new Vertex(new Tri(X - 1, Y + 1)) }
+            : new Coordinates.Vertex[] { new Vertex(new Tri(X - 1, Y)), new Vertex(new Tri(X + 1, Y)), new Vertex(new Tri(X, Y + 1)) };
 
         /// <inheritdoc/>
         public PointD Center => new PointD(X / 2d, (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * 0.86602540378443864676372317075294);
@@ -170,13 +172,13 @@ namespace RT.Coordinates
         }
 
         /// <summary>Describes a vertex (gridline intersection) in a triangular grid (<see cref="Grid"/>).</summary>
-        public class TriVertex : Vertex
+        public class Vertex : Coordinates.Vertex
         {
             /// <summary>
-            ///     Constructs a <see cref="TriVertex"/> representing the top vertex of an up-pointing triangle.</summary>
+            ///     Constructs a <see cref="Vertex"/> representing the top vertex of an up-pointing triangle.</summary>
             /// <param name="tri">
             ///     The triangle representing this vertex.</param>
-            public TriVertex(Tri tri)
+            public Vertex(Tri tri)
             {
                 if (!tri.IsUpPointing)
                     throw new ArgumentException("The tri must be an up-pointing tri.", nameof(tri));
@@ -187,9 +189,9 @@ namespace RT.Coordinates
             public Tri Tri { get; private set; }
 
             /// <inheritdoc/>
-            public override bool Equals(Vertex other) => other is TriVertex tv && tv.Tri.Equals(Tri);
+            public override bool Equals(Coordinates.Vertex other) => other is Vertex tv && tv.Tri.Equals(Tri);
             /// <inheritdoc/>
-            public override bool Equals(object obj) => obj is TriVertex tv && tv.Tri.Equals(Tri);
+            public override bool Equals(object obj) => obj is Vertex tv && tv.Tri.Equals(Tri);
             /// <inheritdoc/>
             public override int GetHashCode() => unchecked(Tri.GetHashCode() + 47);
 

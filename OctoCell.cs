@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RT.Coordinates
 {
     /// <summary>Represents a cell in an <see cref="Grid"/>. Each cell may be an octagon or a square.</summary>
-    public struct OctoCell : IEquatable<OctoCell>, IHasSvgGeometry, INeighbor<OctoCell>
+    public struct OctoCell : IEquatable<OctoCell>, INeighbor<OctoCell>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>X-coordinate of the cell.</summary>
         public int X { get; private set; }
@@ -62,9 +63,31 @@ namespace RT.Coordinates
         public PointD Center => IsSquare ? new PointD(X + 1, Y + 1) : new PointD(X + .5, Y + .5);
 
         /// <inheritdoc/>
-        public IEnumerable<OctoCell> Neighbors => IsSquare
-            ? new[] { new OctoCell(X, Y, false), new OctoCell(X + 1, Y, false), new OctoCell(X + 1, Y + 1, false), new OctoCell(X, Y + 1, false) }
-            : new[] { new OctoCell(X, Y - 1, true), new OctoCell(X, Y - 1, true), new OctoCell(X + 1, Y, false), new OctoCell(X, Y, true), new OctoCell(X, Y + 1, false), new OctoCell(X - 1, Y, true), new OctoCell(X - 1, Y, false) };
+        public IEnumerable<OctoCell> Neighbors
+        {
+            get
+            {
+                if (IsSquare)
+                {
+                    yield return new OctoCell(X, Y, false);
+                    yield return new OctoCell(X + 1, Y, false);
+                    yield return new OctoCell(X + 1, Y + 1, false);
+                    yield return new OctoCell(X, Y + 1, false);
+                }
+                else
+                {
+                    yield return new OctoCell(X, Y - 1, true);
+                    yield return new OctoCell(X, Y - 1, true);
+                    yield return new OctoCell(X + 1, Y, false);
+                    yield return new OctoCell(X, Y, true);
+                    yield return new OctoCell(X, Y + 1, false);
+                    yield return new OctoCell(X - 1, Y, true);
+                    yield return new OctoCell(X - 1, Y, false);
+                }
+            }
+        }
+
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
         public override string ToString() => string.Format(IsSquare ? "[{0},{1}]" : "({0},{1})", X, Y);

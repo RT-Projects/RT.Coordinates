@@ -10,7 +10,7 @@ namespace RT.Coordinates
     ///     the same hexagon. The remaining vertices are off from the hexagon’s edge but in such a way that 6 florets make a
     ///     flower-like shape which tiles the plane in a hexagonal pattern. The flatter part of each pentagon has internal
     ///     angles of 120°.</summary>
-    public struct Floret : IEquatable<Floret>, IHasSvgGeometry, INeighbor<Floret>
+    public struct Floret : IEquatable<Floret>, INeighbor<Floret>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>The underlying hex tile. This floret forms one sixth of that hexagon.</summary>
         public Hex Hex { get; private set; }
@@ -67,6 +67,8 @@ namespace RT.Coordinates
                 yield return new Floret(Hex.Move((Hex.Direction) (((int) Pos + 2) % 6)), (Position) (((int) Pos + 3) % 6));
             }
         }
+
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();

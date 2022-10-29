@@ -6,7 +6,7 @@ namespace RT.Coordinates
 {
     /// <summary>
     ///     Describes a cell in a <see cref="Grid"/>. Three cells of this kind form a hexagon, which in turn tiles the plane.</summary>
-    public struct Rhomb : IEquatable<Rhomb>, INeighbor<Rhomb>, IHasSvgGeometry
+    public struct Rhomb : IEquatable<Rhomb>, INeighbor<Rhomb>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>The underlying hex tile. This rhomb forms one third of that hexagon.</summary>
         public Hex Hex { get; private set; }
@@ -90,6 +90,8 @@ namespace RT.Coordinates
                 }
             }
         }
+
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();

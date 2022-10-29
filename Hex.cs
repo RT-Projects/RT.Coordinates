@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RT.Coordinates
 {
@@ -9,7 +10,7 @@ namespace RT.Coordinates
     ///     Represents a hexagonal tile in a two-dimensional grid in which each tile is a hexagon with a flat top and bottom
     ///     and two of its vertices pointing left and right. Each hex is represented as a pair of coordinates (Q, R), where an
     ///     increasing Q coordinate moves down and right, while an increasing R coordinate moves down.</remarks>
-    public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry, IHasDirection<Hex, Hex.Direction>
+    public struct Hex : IEquatable<Hex>, INeighbor<Hex>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Hex, Hex.Direction>
     {
         /// <summary>Returns the Q coordinate (see <see cref="Hex"/> remarks).</summary>
         public int Q { get; private set; }
@@ -141,6 +142,8 @@ namespace RT.Coordinates
                 yield return new Hex(Q - 1, R + 1);
             }
         }
+
+        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <summary>
         ///     Returns the hex tile reached by moving in the specified direction.</summary>
