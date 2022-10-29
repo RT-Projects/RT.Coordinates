@@ -5,7 +5,7 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>Represents a square cell in a 2D rectilinear grid.</summary>
-    public struct Coord : IEquatable<Coord>, INeighbor<Coord>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Coord, GridDirection>
+    public struct Coord : IEquatable<Coord>, INeighbor<Coord>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Coord, Coord.Direction>
     {
         /// <summary>Returns the X coordinate of the cell.</summary>
         public int X { get; private set; }
@@ -56,18 +56,18 @@ namespace RT.Coordinates
         /// <param name="amount">
         ///     Number of cells to move by. Default is <c>1</c>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///     The value of <paramref name="dir"/> was not one of the defined enum values of <see cref="GridDirection"/>.</exception>
-        public Coord Move(GridDirection dir, int amount = 1) => dir switch
+        ///     The value of <paramref name="dir"/> was not one of the defined enum values of <see cref="Direction"/>.</exception>
+        public Coord Move(Direction dir, int amount = 1) => dir switch
         {
-            GridDirection.Up => Move(0, -amount),
-            GridDirection.UpRight => Move(amount, -amount),
-            GridDirection.Right => Move(amount, 0),
-            GridDirection.DownRight => Move(amount, amount),
-            GridDirection.Down => Move(0, amount),
-            GridDirection.DownLeft => Move(-amount, amount),
-            GridDirection.Left => Move(-amount, 0),
-            GridDirection.UpLeft => Move(-amount, -amount),
-            _ => throw new ArgumentOutOfRangeException(nameof(dir), $"Invalid {nameof(GridDirection)} enum value."),
+            Direction.Up => Move(0, -amount),
+            Direction.UpRight => Move(amount, -amount),
+            Direction.Right => Move(amount, 0),
+            Direction.DownRight => Move(amount, amount),
+            Direction.Down => Move(0, amount),
+            Direction.DownLeft => Move(-amount, amount),
+            Direction.Left => Move(-amount, 0),
+            Direction.UpLeft => Move(-amount, -amount),
+            _ => throw new ArgumentOutOfRangeException(nameof(dir), $"Invalid {nameof(Direction)} enum value."),
         };
 
         /// <summary>Compares this cell to another for equality.</summary>
@@ -103,7 +103,7 @@ namespace RT.Coordinates
         public bool IsAdjacentTo(Coord other, bool includeDiagonal = false)
         {
             for (var i = 0; i < 8; i++)
-                if ((includeDiagonal || i % 2 == 0) && Move((GridDirection) i) == other)
+                if ((includeDiagonal || i % 2 == 0) && Move((Direction) i) == other)
                     return true;
             return false;
         }
@@ -116,7 +116,7 @@ namespace RT.Coordinates
         {
             for (var i = 0; i < 8; i++)
                 if (includeDiagonal || i % 2 == 0)
-                    yield return Move((GridDirection) i);
+                    yield return Move((Direction) i);
         }
 
         /// <inheritdoc/>
@@ -288,5 +288,33 @@ namespace RT.Coordinates
             /// <inheritdoc/>
             public override int GetHashCode() => unchecked(Cell.GetHashCode() + 347);
         }
+
+        /// <summary>Identifies a direction within a 2D rectilinear grid.</summary>
+        public enum Direction
+        {
+            /// <summary>Up (dx = 0, dy = -1).</summary>
+            Up,
+            /// <summary>Up and right (dx = 1, dy = -1).</summary>
+            UpRight,
+            /// <summary>Right (dx = 1, dy = 0).</summary>
+            Right,
+            /// <summary>Down and right (dx = 1, dy = 1).</summary>
+            DownRight,
+            /// <summary>Down (dx = 0, dy = 1).</summary>
+            Down,
+            /// <summary>Down and left (dx = -1, dy = 1).</summary>
+            DownLeft,
+            /// <summary>Left (dx = -1, dy = 0).</summary>
+            Left,
+            /// <summary>Up and left (dx = -1, dy = -1).</summary>
+            UpLeft
+        }
+
+        /// <summary>Provides a collection of all orthogonal directions.</summary>
+        public static readonly IEnumerable<Direction> OrthogonalDirections = new[] { Direction.Up, Direction.Right, Direction.Down, Direction.Left };
+        /// <summary>Provides a collection of all diagonal directions.</summary>
+        public static readonly IEnumerable<Direction> DiagonalDirections = new[] { Direction.UpRight, Direction.DownRight, Direction.DownLeft, Direction.UpLeft };
+        /// <summary>Provides a collection of all directions.</summary>
+        public static readonly IEnumerable<Direction> AllDirections = (Direction[]) Enum.GetValues(typeof(Direction));
     }
 }

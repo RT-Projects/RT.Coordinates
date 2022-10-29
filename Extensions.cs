@@ -183,6 +183,15 @@ namespace RT.Coordinates
         }
 
         /// <summary>
+        ///     Returns a new <see cref="Coord.Direction"/> which is the specified multiple of 45° clockwise from the current
+        ///     direction.</summary>
+        /// <param name="dir">
+        ///     Original starting direction.</param>
+        /// <param name="amount">
+        ///     Number of 45° turns to perform. Use negative numbers to go counter-clockwise.</param>
+        public static Coord.Direction Clockwise(this Coord.Direction dir, int amount = 1) => (Coord.Direction) ((((int) dir + amount) % 8 + 8) % 8);
+
+        /// <summary>
         ///     Returns a new <see cref="Hex.Direction"/> which is the specified multiple of 60° clockwise from the current
         ///     direction.</summary>
         /// <param name="dir">

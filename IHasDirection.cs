@@ -5,8 +5,8 @@ namespace RT.Coordinates
     /// <typeparam name="TCell">
     ///     Type of cell (for example, <see cref="Coord"/> or <see cref="Hex"/>).</typeparam>
     /// <typeparam name="TDirection">
-    ///     Type (usually an enum type) that defines the set of possible directions (for example, <see cref="GridDirection"/>
-    ///     or <see cref="HexDirection"/>).</typeparam>
+    ///     Type (usually an enum type) that defines the set of possible directions (for example, <see
+    ///     cref="Coord.Direction"/> or <see cref="Hex.Direction"/>).</typeparam>
     public interface IHasDirection<TCell, TDirection> where TCell : IHasDirection<TCell, TDirection>
     {
         /// <summary>Returns the cell that is <paramref name="amount"/> steps in the specified <paramref name="direction"/>.</summary>

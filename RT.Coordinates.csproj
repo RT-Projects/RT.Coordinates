@@ -39,11 +39,9 @@
     <Compile Include="Coord.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GenericVertex.cs" />
-    <Compile Include="GridDirections.cs" />
     <Compile Include="Kite.cs" />
     <Compile Include="OctoCell.cs" />
     <Compile Include="EdgeType.cs" />
-    <Compile Include="GridDirection.cs" />
     <Compile Include="Hex.cs" />
     <Compile Include="IHasDirection.cs" />
     <Compile Include="IHasSvgGeometry.cs" />
