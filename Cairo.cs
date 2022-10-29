@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace RT.Coordinates
 {
-    /// <summary>Represents a cell in a <see cref="CairoGrid"/>.</summary>
+    /// <summary>
+    ///     Represents a cell in a <see cref="Grid"/>. Each cairo is a pentagon. Four cairos form a hexagon that is either
+    ///     horizontally or vertically stretched.</summary>
     public struct Cairo : IEquatable<Cairo>, INeighbor<Cairo>, IHasSvgGeometry
     {
         /// <summary>Identifies a hexagon. Each Cairo is one quarter of a hexagon.</summary>
@@ -72,35 +73,35 @@ namespace RT.Coordinates
                 switch (Pos)
                 {
                     case Position.Top:
-                        yield return new Cairo(Hex.Move(HexDirection.Up), Position.Bottom);
-                        yield return new Cairo(Hex.Move(HexDirection.UpRight), Position.Left);
+                        yield return new Cairo(Hex.Move(Hex.Direction.Up), Position.Bottom);
+                        yield return new Cairo(Hex.Move(Hex.Direction.UpRight), Position.Left);
                         yield return new Cairo(Hex, Position.Right);
                         yield return new Cairo(Hex, Position.Left);
-                        yield return new Cairo(Hex.Move(HexDirection.UpLeft), Position.Right);
+                        yield return new Cairo(Hex.Move(Hex.Direction.UpLeft), Position.Right);
                         break;
 
                     case Position.Right:
                         yield return new Cairo(Hex, Position.Bottom);
                         yield return new Cairo(Hex, Position.Left);
                         yield return new Cairo(Hex, Position.Top);
-                        yield return new Cairo(Hex.Move(HexDirection.UpRight), Position.Bottom);
-                        yield return new Cairo(Hex.Move(HexDirection.DownRight), Position.Top);
+                        yield return new Cairo(Hex.Move(Hex.Direction.UpRight), Position.Bottom);
+                        yield return new Cairo(Hex.Move(Hex.Direction.DownRight), Position.Top);
                         break;
 
                     case Position.Bottom:
-                        yield return new Cairo(Hex.Move(HexDirection.DownRight), Position.Left);
+                        yield return new Cairo(Hex.Move(Hex.Direction.DownRight), Position.Left);
                         yield return new Cairo(Hex, Position.Right);
                         yield return new Cairo(Hex, Position.Left);
-                        yield return new Cairo(Hex.Move(HexDirection.DownLeft), Position.Right);
-                        yield return new Cairo(Hex.Move(HexDirection.Down), Position.Top);
+                        yield return new Cairo(Hex.Move(Hex.Direction.DownLeft), Position.Right);
+                        yield return new Cairo(Hex.Move(Hex.Direction.Down), Position.Top);
                         break;
 
                     case Position.Left:
                         yield return new Cairo(Hex, Position.Top);
                         yield return new Cairo(Hex, Position.Right);
                         yield return new Cairo(Hex, Position.Bottom);
-                        yield return new Cairo(Hex.Move(HexDirection.DownLeft), Position.Top);
-                        yield return new Cairo(Hex.Move(HexDirection.UpLeft), Position.Bottom);
+                        yield return new Cairo(Hex.Move(Hex.Direction.DownLeft), Position.Top);
+                        yield return new Cairo(Hex.Move(Hex.Direction.UpLeft), Position.Bottom);
                         break;
 
                     default:
@@ -110,40 +111,40 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Cairo"/>, going clockwise from the “tip” of the
         ///     pentagon (the vertex opposite the horizontal or vertical edge).</summary>
-        public Vertex[] Vertices => Pos switch
+        public Coordinates.Vertex[] Vertices => Pos switch
         {
-            Position.Top => new Vertex[] {
-                new CairoVertex(Hex, CairoVertex.Position.CenterTop),
-                new CairoVertex(Hex, CairoVertex.Position.MidTopLeft),
-                new CairoVertex(Hex, CairoVertex.Position.TopLeft),
-                new CairoVertex(Hex.Move(HexDirection.UpRight), CairoVertex.Position.Left),
-                new CairoVertex(Hex.Move(HexDirection.UpRight), CairoVertex.Position.MidBottomLeft)
+            Position.Top => new Coordinates.Vertex[] {
+                new Vertex(Hex, Vertex.Position.CenterTop),
+                new Vertex(Hex, Vertex.Position.MidTopLeft),
+                new Vertex(Hex, Vertex.Position.TopLeft),
+                new Vertex(Hex.Move(Hex.Direction.UpRight), Vertex.Position.Left),
+                new Vertex(Hex.Move(Hex.Direction.UpRight), Vertex.Position.MidBottomLeft)
             },
-            Position.Right => new Vertex[] {
-                new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.TopLeft),
-                new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.MidTopLeft),
-                new CairoVertex(Hex, CairoVertex.Position.CenterBottom),
-                new CairoVertex(Hex, CairoVertex.Position.CenterTop),
-                new CairoVertex(Hex.Move(HexDirection.UpRight), CairoVertex.Position.MidBottomLeft)
+            Position.Right => new Coordinates.Vertex[] {
+                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft),
+                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.MidTopLeft),
+                new Vertex(Hex, Vertex.Position.CenterBottom),
+                new Vertex(Hex, Vertex.Position.CenterTop),
+                new Vertex(Hex.Move(Hex.Direction.UpRight), Vertex.Position.MidBottomLeft)
             },
-            Position.Bottom => new Vertex[] {
-                new CairoVertex(Hex, CairoVertex.Position.CenterBottom),
-                new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.MidTopLeft),
-                new CairoVertex(Hex.Move(HexDirection.DownRight), CairoVertex.Position.Left),
-                new CairoVertex(Hex.Move(HexDirection.Down), CairoVertex.Position.TopLeft),
-                new CairoVertex(Hex, CairoVertex.Position.MidBottomLeft)
+            Position.Bottom => new Coordinates.Vertex[] {
+                new Vertex(Hex, Vertex.Position.CenterBottom),
+                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.MidTopLeft),
+                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.Left),
+                new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft),
+                new Vertex(Hex, Vertex.Position.MidBottomLeft)
             },
-            Position.Left => new Vertex[] {
-                new CairoVertex(Hex, CairoVertex.Position.Left),
-                new CairoVertex(Hex, CairoVertex.Position.MidTopLeft),
-                new CairoVertex(Hex, CairoVertex.Position.CenterTop),
-                new CairoVertex(Hex, CairoVertex.Position.CenterBottom),
-                new CairoVertex(Hex, CairoVertex.Position.MidBottomLeft)
+            Position.Left => new Coordinates.Vertex[] {
+                new Vertex(Hex, Vertex.Position.Left),
+                new Vertex(Hex, Vertex.Position.MidTopLeft),
+                new Vertex(Hex, Vertex.Position.CenterTop),
+                new Vertex(Hex, Vertex.Position.CenterBottom),
+                new Vertex(Hex, Vertex.Position.MidBottomLeft)
             },
             _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.")
         };
@@ -157,5 +158,98 @@ namespace RT.Coordinates
 
         /// <inheritdoc/>
         public override string ToString() => $"{Hex};{(int) Pos}";
+
+        /// <summary>
+        ///     Describes a grid structure consisting of <see cref="Cairo"/> cells that join up in groups of 4 to form
+        ///     (horizontally or vertically stretched) hexagons, which in turn tile the plane.</summary>
+        public class Grid : Structure<Cairo>
+        {
+            /// <summary>
+            ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
+            ///     IEnumerable{TCell}})"/>.</summary>
+            public Grid(IEnumerable<Cairo> cells, IEnumerable<Link<Cairo>> links = null, Func<Cairo, IEnumerable<Cairo>> getNeighbors = null)
+                : base(cells, links, getNeighbors)
+            {
+            }
+
+            /// <summary>
+            ///     Constructs a <see cref="Grid"/> consisting of a hexagonal grid of the specified <paramref
+            ///     name="sideLength"/>.</summary>
+            public Grid(int sideLength)
+                : base(Cairo.LargeHexagon(sideLength))
+            {
+            }
+
+            /// <inheritdoc/>
+            protected override Structure<Cairo> makeModifiedStructure(IEnumerable<Cairo> cells, IEnumerable<Link<Cairo>> traversible) => new Grid(cells, traversible);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rnd">
+            ///     A random number generator.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new Grid GenerateMaze(Random rnd = null) => (Grid) base.GenerateMaze(rnd);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rndNext">
+            ///     A delegate that can provide random numbers.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
+        }
+
+        /// <summary>Describes one of the vertices of a <see cref="Cairo"/>.</summary>
+        public class Vertex : Coordinates.Vertex
+        {
+            /// <summary>The <see cref="Hex"/> tile that this <see cref="Vertex"/> is within.</summary>
+            public Hex Hex { get; private set; }
+            /// <summary>Which position within the <see cref="Hex"/> this vertex is.</summary>
+            public Position Pos { get; private set; }
+
+            /// <summary>Constructor.</summary>
+            public Vertex(Hex hex, Position pos)
+            {
+                Hex = hex;
+                Pos = pos;
+            }
+
+            /// <summary>
+            ///     Describes the position of a <see cref="Vertex"/> in relation to the vertices of its containing <see
+            ///     cref="Hex"/>.</summary>
+            public enum Position
+            {
+                /// <summary>Midpoint of the lower-left edge of the hex.</summary>
+                MidBottomLeft,
+                /// <summary>Left vertex of the hex.</summary>
+                Left,
+                /// <summary>Midpoint of the upper-left edge of the hex.</summary>
+                MidTopLeft,
+                /// <summary>Top-left vertex of the hex.</summary>
+                TopLeft,
+                /// <summary>Top of the two Cairo vertices that are inside of the hexagon.</summary>
+                CenterTop,
+                /// <summary>Bottom of the two Cairo vertices that are inside of the hexagon.</summary>
+                CenterBottom
+            }
+
+            private const double sqrt7 = 2.6457513110645905905016157536392604257102591830825;
+            private const double h = (sqrt7 + 1) / 2;
+            private static readonly double[] xs = { -(sqrt7 + 1) / 4, -sqrt7 / 2, -(sqrt7 + 1) / 4, -.5, 0, 0 };
+            private static readonly double[] ys = { h / 2, 0, -h / 2, -h, -.5, .5 };
+
+            /// <inheritdoc/>
+            public override double X => Hex.Q * h + xs[(int) Pos];
+            /// <inheritdoc/>
+            public override double Y => Hex.Q * h + Hex.R * (sqrt7 + 1) + ys[(int) Pos];
+
+            /// <inheritdoc/>
+            public override bool Equals(Coordinates.Vertex other) => other is Vertex cv && cv.Hex.Equals(Hex) && cv.Pos == Pos;
+            /// <inheritdoc/>
+            public override bool Equals(object obj) => obj is Vertex cv && cv.Hex.Equals(Hex) && cv.Pos == Pos;
+            /// <inheritdoc/>
+            public override int GetHashCode() => Hex.GetHashCode() * 11 + (int) Pos;
+        }
     }
 }

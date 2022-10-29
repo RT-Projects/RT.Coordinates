@@ -135,7 +135,7 @@ namespace RT.Coordinates
         /// <param name="src">
         ///     A collection of nullable values.</param>
         /// <returns>
-        ///     A collection containing only those values that aren�t <c>null</c>.</returns>
+        ///     A collection containing only those values that aren’t <c>null</c>.</returns>
         public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> src) where T : struct
         {
             if (src == null)

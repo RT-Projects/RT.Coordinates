@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RT.Coordinates
 {
@@ -146,5 +147,56 @@ namespace RT.Coordinates
 
         /// <inheritdoc/>
         public override string ToString() => $"({X}, {Y})";
+
+        /// <summary>Describes a 2D grid of triangular cells.</summary>
+        public class Grid : Structure<Tri>
+        {
+            /// <summary>
+            ///     Constructs a grid of the specified width and height in which the top-left triangle is an up-pointing one.</summary>
+            /// <param name="width">
+            ///     Number of triangles per row.</param>
+            /// <param name="height">
+            ///     Number of rows.</param>
+            public Grid(int width, int height) : this(Enumerable.Range(0, width * height).Select(i => new Tri(i % width, i / width)))
+            {
+            }
+
+            /// <summary>
+            ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
+            ///     IEnumerable{TCell}})"/>.</summary>
+            public Grid(IEnumerable<Tri> cells, IEnumerable<Link<Tri>> links = null, Func<Tri, IEnumerable<Tri>> getNeighbors = null) : base(cells, links, getNeighbors)
+            {
+            }
+        }
+
+        /// <summary>Describes a vertex (gridline intersection) in a triangular grid (<see cref="Grid"/>).</summary>
+        public class TriVertex : Vertex
+        {
+            /// <summary>
+            ///     Constructs a <see cref="TriVertex"/> representing the top vertex of an up-pointing triangle.</summary>
+            /// <param name="tri">
+            ///     The triangle representing this vertex.</param>
+            public TriVertex(Tri tri)
+            {
+                if (!tri.IsUpPointing)
+                    throw new ArgumentException("The tri must be an up-pointing tri.", nameof(tri));
+                Tri = tri;
+            }
+
+            /// <summary>Returns the tri whose top vertex is this vertex.</summary>
+            public Tri Tri { get; private set; }
+
+            /// <inheritdoc/>
+            public override bool Equals(Vertex other) => other is TriVertex tv && tv.Tri.Equals(Tri);
+            /// <inheritdoc/>
+            public override bool Equals(object obj) => obj is TriVertex tv && tv.Tri.Equals(Tri);
+            /// <inheritdoc/>
+            public override int GetHashCode() => unchecked(Tri.GetHashCode() + 47);
+
+            /// <inheritdoc/>
+            public override double X => Tri.X * .5; // cos 60°
+            /// <inheritdoc/>
+            public override double Y => Tri.Y * 0.86602540378443864676372317075294; // sin 60°
+        }
     }
 }

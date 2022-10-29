@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RT.Coordinates
 {
     /// <summary>
-    ///     Describes a cell in a <see cref="RhombGrid"/>. Three cells of this kind form a hexagon, which in turn tiles the
-    ///     plane.</summary>
+    ///     Describes a cell in a <see cref="Grid"/>. Three cells of this kind form a hexagon, which in turn tiles the plane.</summary>
     public struct Rhomb : IEquatable<Rhomb>, INeighbor<Rhomb>, IHasSvgGeometry
     {
         /// <summary>The underlying hex tile. This rhomb forms one third of that hexagon.</summary>
@@ -65,24 +65,24 @@ namespace RT.Coordinates
                 switch (Pos)
                 {
                     case Position.TopRight:
-                        yield return new Rhomb(Hex.Move(HexDirection.Up), Position.BottomRight);
-                        yield return new Rhomb(Hex.Move(HexDirection.UpRight), Position.Left);
+                        yield return new Rhomb(Hex.Move(Hex.Direction.Up), Position.BottomRight);
+                        yield return new Rhomb(Hex.Move(Hex.Direction.UpRight), Position.Left);
                         yield return new Rhomb(Hex, Position.BottomRight);
                         yield return new Rhomb(Hex, Position.Left);
                         break;
 
                     case Position.BottomRight:
                         yield return new Rhomb(Hex, Position.TopRight);
-                        yield return new Rhomb(Hex.Move(HexDirection.DownRight), Position.Left);
-                        yield return new Rhomb(Hex.Move(HexDirection.Down), Position.TopRight);
+                        yield return new Rhomb(Hex.Move(Hex.Direction.DownRight), Position.Left);
+                        yield return new Rhomb(Hex.Move(Hex.Direction.Down), Position.TopRight);
                         yield return new Rhomb(Hex, Position.Left);
                         break;
 
                     case Position.Left:
                         yield return new Rhomb(Hex, Position.TopRight);
                         yield return new Rhomb(Hex, Position.BottomRight);
-                        yield return new Rhomb(Hex.Move(HexDirection.DownLeft), Position.TopRight);
-                        yield return new Rhomb(Hex.Move(HexDirection.UpLeft), Position.BottomRight);
+                        yield return new Rhomb(Hex.Move(Hex.Direction.DownLeft), Position.TopRight);
+                        yield return new Rhomb(Hex.Move(Hex.Direction.UpLeft), Position.BottomRight);
                         break;
 
                     default:
@@ -92,35 +92,119 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Rhomb"/>, going clockwise from the vertex at the
         ///     center of <see cref="Hex"/>.</summary>
-        public Vertex[] Vertices => Pos switch
+        public Coordinates.Vertex[] Vertices => Pos switch
         {
-            Position.TopRight => new Vertex[] {
-                new RhombVertex(Hex, RhombVertex.Position.Center),
-                new RhombVertex(Hex, RhombVertex.Position.TopLeft),
-                new RhombVertex(Hex, RhombVertex.Position.TopRight),
-                new RhombVertex(Hex.Move(HexDirection.DownRight), RhombVertex.Position.TopLeft)
+            Position.TopRight => new Coordinates.Vertex[] {
+                new Vertex(Hex, Vertex.Position.Center),
+                new Vertex(Hex, Vertex.Position.TopLeft),
+                new Vertex(Hex, Vertex.Position.TopRight),
+                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft)
             },
-            Position.BottomRight => new Vertex[] {
-                new RhombVertex(Hex, RhombVertex.Position.Center),
-                new RhombVertex(Hex.Move(HexDirection.DownRight), RhombVertex.Position.TopLeft),
-                new RhombVertex(Hex.Move(HexDirection.Down), RhombVertex.Position.TopRight),
-                new RhombVertex(Hex.Move(HexDirection.Down), RhombVertex.Position.TopLeft)
+            Position.BottomRight => new Coordinates.Vertex[] {
+                new Vertex(Hex, Vertex.Position.Center),
+                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft),
+                new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopRight),
+                new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft)
             },
-            Position.Left => new Vertex[] {
-                new RhombVertex(Hex, RhombVertex.Position.Center),
-                new RhombVertex(Hex.Move(HexDirection.Down), RhombVertex.Position.TopLeft),
-                new RhombVertex(Hex.Move(HexDirection.DownLeft), RhombVertex.Position.TopRight),
-                new RhombVertex(Hex, RhombVertex.Position.TopLeft)
+            Position.Left => new Coordinates.Vertex[] {
+                new Vertex(Hex, Vertex.Position.Center),
+                new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft),
+                new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.TopRight),
+                new Vertex(Hex, Vertex.Position.TopLeft)
             },
             _ => throw new InvalidOperationException($"{nameof(Pos)} has an invalid value of {Pos}.")
         };
 
         /// <inheritdoc/>
         public PointD Center => Hex.Center * 1.5;
+
+        /// <summary>
+        ///     Describes a grid structure consisting of <see cref="Rhomb"/> cells that join up in groups of 3 to form
+        ///     hexagons, which in turn tile the plane.</summary>
+        public class Grid : Structure<Rhomb>
+        {
+            /// <summary>
+            ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
+            ///     IEnumerable{TCell}})"/>.</summary>
+            public Grid(IEnumerable<Rhomb> cells, IEnumerable<Link<Rhomb>> links = null, Func<Rhomb, IEnumerable<Rhomb>> getNeighbors = null)
+                : base(cells, links, getNeighbors)
+            {
+            }
+
+            /// <summary>
+            ///     Constructs a <see cref="Grid"/> consisting of a hexagonal grid of the specified <paramref
+            ///     name="sideLength"/>.</summary>
+            public Grid(int sideLength)
+                : base(Hex.LargeHexagon(sideLength).SelectMany(hex => _rhombPositions.Select(pos => new Rhomb(hex, pos))))
+            {
+            }
+
+            private static readonly Position[] _rhombPositions = (Position[]) Enum.GetValues(typeof(Position));
+
+            /// <inheritdoc/>
+            protected override Structure<Rhomb> makeModifiedStructure(IEnumerable<Rhomb> cells, IEnumerable<Link<Rhomb>> traversible) => new Grid(cells, traversible);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rnd">
+            ///     A random number generator.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new Grid GenerateMaze(Random rnd = null) => (Grid) base.GenerateMaze(rnd);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rndNext">
+            ///     A delegate that can provide random numbers.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
+        }
+
+        /// <summary>Describes one of the vertices of a <see cref="Rhomb"/>.</summary>
+        public class Vertex : Coordinates.Vertex
+        {
+            /// <summary>The <see cref="Hex"/> tile that this <see cref="Vertex"/> is within.</summary>
+            public Hex Hex { get; private set; }
+            /// <summary>Which position within the <see cref="Hex"/> this vertex is.</summary>
+            public Position Pos { get; private set; }
+
+            /// <summary>Constructor.</summary>
+            public Vertex(Hex hex, Position pos)
+            {
+                Hex = hex;
+                Pos = pos;
+            }
+
+            /// <summary>
+            ///     Describes the position of a <see cref="Vertex"/> in relation to the vertices of its containing <see
+            ///     cref="Hex"/>.</summary>
+            public enum Position
+            {
+                /// <summary>Top-left vertex of the hex.</summary>
+                TopLeft,
+                /// <summary>Top-right vertex of the hex.</summary>
+                TopRight,
+                /// <summary>Centerpoint of the hex.</summary>
+                Center
+            }
+
+            /// <inheritdoc/>
+            public override bool Equals(object obj) => obj is Vertex rv && Hex.Equals(rv.Hex) && Pos == rv.Pos;
+            /// <inheritdoc/>
+            public override bool Equals(Coordinates.Vertex vertex) => vertex is Vertex rv && Hex.Equals(rv.Hex) && Pos == rv.Pos;
+            /// <inheritdoc/>
+            public override int GetHashCode() => Hex.GetHashCode() * 13 + (int) Pos;
+
+            /// <inheritdoc/>
+            public override double X => Hex.Q * 1.125 + (Pos switch { Position.TopLeft => -.375, Position.TopRight => .375, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") });
+            /// <inheritdoc/>
+            public override double Y => Hex.WidthToHeight * (Hex.Q * .75 + Hex.R * 1.5 + (Pos switch { Position.TopLeft => -.75, Position.TopRight => -.75, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") }));
+        }
     }
 }

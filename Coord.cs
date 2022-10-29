@@ -120,15 +120,15 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Coord"/>, going clockwise from the top-left.</summary>
-        private Vertex[] Vertices => new Vertex[]
+        private Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
-            new CoordVertex(X, Y),
-            new CoordVertex(X + 1, Y),
-            new CoordVertex(X + 1, Y + 1),
-            new CoordVertex(X, Y + 1)
+            new Vertex(X, Y),
+            new Vertex(X + 1, Y),
+            new Vertex(X + 1, Y + 1),
+            new Vertex(X, Y + 1)
         };
 
         /// <summary>Returns the center point of this cell.</summary>
@@ -140,5 +140,151 @@ namespace RT.Coordinates
         /// <summary>Returns the set of chess knight’s moves from the current cell.</summary>
         public IEnumerable<Coord> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
         private static readonly Coord[] _knightsMoveOffsets = { new Coord(1, -2), new Coord(2, -1), new Coord(2, 1), new Coord(1, 2), new Coord(-1, 2), new Coord(-2, 1), new Coord(-2, -1), new Coord(-1, -2) };
+
+        /// <summary>Describes a 2D grid of square cells.</summary>
+        public class Grid : Structure<Coord>
+        {
+            /// <summary>
+            ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
+            ///     IEnumerable{TCell}})"/>.</summary>
+            public Grid(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> links = null, Func<Coord, IEnumerable<Coord>> getNeighbors = null)
+                : base(cells, links, getNeighbors)
+            {
+            }
+
+            /// <summary>
+            ///     Constructs a rectilinear grid that is <paramref name="width"/> cells wide and <paramref name="height"/> cells
+            ///     tall.</summary>
+            /// <param name="width">
+            ///     Width of the grid.</param>
+            /// <param name="height">
+            ///     Height of the grid.</param>
+            /// <param name="toroidalX">
+            ///     If <c>true</c>, treats the grid as horizontally toroidal (the left/right edges wrap around).</param>
+            /// <param name="toroidalY">
+            ///     If <c>true</c>, treats the grid as vertically toroidal (the top/bottom edges wrap around).</param>
+            public Grid(int width, int height, bool toroidalX = false, bool toroidalY = false)
+                : base(Rectangle(width, height), getNeighbors: getNeighborsGetter(width, height, toroidalX, toroidalY))
+            {
+                _width = width;
+                _height = height;
+                _toroidalX = toroidalX;
+                _toroidalY = toroidalY;
+            }
+
+            private Grid(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> links, int width, int height, bool toroidalX, bool toroidalY)
+                : base(cells, links, null)
+            {
+                _width = width;
+                _height = height;
+                _toroidalX = toroidalX;
+                _toroidalY = toroidalY;
+            }
+
+            private static Func<Coord, IEnumerable<Coord>> getNeighborsGetter(int width, int height, bool toroidalX, bool toroidalY)
+            {
+                return get;
+                IEnumerable<Coord> get(Coord c)
+                {
+                    foreach (var neighbor in c.GetNeighbors())
+                        if (neighbor.X >= 0 && neighbor.X < width && neighbor.Y >= 0 && neighbor.Y <= height)
+                            yield return neighbor;
+                    if (toroidalX && c.X == 0)
+                        yield return new Coord(width - 1, c.Y);
+                    if (toroidalX && c.X == width - 1)
+                        yield return new Coord(0, c.Y);
+                    if (toroidalY && c.Y == 0)
+                        yield return new Coord(c.X, height - 1);
+                    if (toroidalY && c.Y == height - 1)
+                        yield return new Coord(c.X, 0);
+                }
+            }
+
+            private readonly int _width;
+            private readonly int _height;
+            private readonly bool _toroidalX;
+            private readonly bool _toroidalY;
+
+            /// <inheritdoc/>
+            protected override Structure<Coord> makeModifiedStructure(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> traversible) => new Grid(cells, traversible, _width, _height, _toroidalX, _toroidalY);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rnd">
+            ///     A random number generator.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new Grid GenerateMaze(Random rnd = null) => (Grid) base.GenerateMaze(rnd);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rndNext">
+            ///     A delegate that can provide random numbers.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
+
+            /// <inheritdoc/>
+            protected override EdgeType svgEdgeType(Link<Coordinates.Vertex> edge, List<Coord> cells)
+            {
+                if (cells.Count == 1)
+                {
+                    var c = cells[0];
+                    if (_toroidalX && c.X == 0 && edge.Cells.All(v => v is Vertex cv && cv.Cell.X == 0))
+                        return _links.Contains(new Link<Coord>(c, c.MoveX(_width - 1))) ? EdgeType.Passage : EdgeType.Wall;
+                    else if (_toroidalX && c.X == _width - 1 && edge.Cells.All(v => v is Vertex cv && cv.Cell.X == _width))
+                        return _links.Contains(new Link<Coord>(c, c.MoveX(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall;
+                    else if (_toroidalY && c.Y == 0 && edge.Cells.All(v => v is Vertex cv && cv.Cell.Y == 0))
+                        return _links.Contains(new Link<Coord>(c, c.MoveY(_height - 1))) ? EdgeType.Passage : EdgeType.Wall;
+                    else if (_toroidalY && c.Y == _height - 1 && edge.Cells.All(v => v is Vertex cv && cv.Cell.Y == _height))
+                        return _links.Contains(new Link<Coord>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall;
+                }
+                return base.svgEdgeType(edge, cells);
+            }
+
+            /// <inheritdoc/>
+            protected override bool drawTunnel(Link<Coord> link)
+            {
+                var c = link.Cells.First();
+                var d = link.Other(c);
+                return !(_toroidalX && Math.Abs(c.X - d.X) + 1 == _width || _toroidalY && Math.Abs(c.Y - d.Y) + 1 == _height);
+            }
+        }
+
+        /// <summary>Describes a vertex (gridline intersection) in a rectilinear grid (<see cref="Grid"/>).</summary>
+        public class Vertex : Coordinates.Vertex
+        {
+            /// <summary>Returns the grid cell whose top-left corner is this coordinate.</summary>
+            public Coord Cell { get; private set; }
+
+            /// <summary>
+            ///     Constructor.</summary>
+            /// <param name="x">
+            ///     The x-coordinate of the cell that has this vertex as its top-left corner.</param>
+            /// <param name="y">
+            ///     The y-coordinate of the cell that has this vertex as its top-left corner.</param>
+            public Vertex(int x, int y)
+            {
+                Cell = new Coord(x, y);
+            }
+
+            /// <summary>Constructor.</summary>
+            public Vertex(Coord cell)
+            {
+                Cell = cell;
+            }
+
+            /// <inheritdoc/>
+            public override double X => Cell.X;
+            /// <inheritdoc/>
+            public override double Y => Cell.Y;
+
+            /// <inheritdoc/>
+            public override bool Equals(Coordinates.Vertex other) => other is Vertex cv && cv.Cell.Equals(Cell);
+            /// <inheritdoc/>
+            public override bool Equals(object obj) => obj is Vertex cv && cv.Cell.Equals(Cell);
+            /// <inheritdoc/>
+            public override int GetHashCode() => unchecked(Cell.GetHashCode() + 347);
+        }
     }
 }

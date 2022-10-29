@@ -9,7 +9,7 @@ namespace RT.Coordinates
     ///     Represents a hexagonal tile in a two-dimensional grid in which each tile is a hexagon with a flat top and bottom
     ///     and two of its vertices pointing left and right. Each hex is represented as a pair of coordinates (Q, R), where an
     ///     increasing Q coordinate moves down and right, while an increasing R coordinate moves down.</remarks>
-    public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry, IHasDirection<Hex, HexDirection>
+    public struct Hex : IEquatable<Hex>, INeighbor<Hex>, IHasSvgGeometry, IHasDirection<Hex, Hex.Direction>
     {
         /// <summary>Returns the Q coordinate (see <see cref="Hex"/> remarks).</summary>
         public int Q { get; private set; }
@@ -150,14 +150,14 @@ namespace RT.Coordinates
         ///     Number of tiles to move. Default is <c>1</c>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The value of <paramref name="dir"/> is not a valid HexDirection enum value.</exception>
-        public Hex Move(HexDirection dir, int amount = 1) => dir switch
+        public Hex Move(Direction dir, int amount = 1) => dir switch
         {
-            HexDirection.UpLeft => new Hex(Q - amount, R),
-            HexDirection.Up => new Hex(Q, R - amount),
-            HexDirection.UpRight => new Hex(Q + amount, R - amount),
-            HexDirection.DownRight => new Hex(Q + amount, R),
-            HexDirection.Down => new Hex(Q, R + amount),
-            HexDirection.DownLeft => new Hex(Q - amount, R + amount),
+            Direction.UpLeft => new Hex(Q - amount, R),
+            Direction.Up => new Hex(Q, R - amount),
+            Direction.UpRight => new Hex(Q + amount, R - amount),
+            Direction.DownRight => new Hex(Q + amount, R),
+            Direction.Down => new Hex(Q, R + amount),
+            Direction.DownLeft => new Hex(Q - amount, R + amount),
             _ => throw new ArgumentOutOfRangeException("dir", "Invalid HexDirection value."),
         };
 
@@ -178,21 +178,21 @@ namespace RT.Coordinates
         ///     returns a collection specifying which edges of the structure the current hex tile is adjacent to.</summary>
         /// <remarks>
         ///     If the current hex tile is in a corner of the structure, two values are returned; otherwise, only one.</remarks>
-        public IEnumerable<HexDirection> GetEdges(int sideLength)
+        public IEnumerable<Direction> GetEdges(int sideLength)
         {
             // Don’t use ‘else’ because multiple conditions could apply
             if (Q + R == -sideLength)
-                yield return HexDirection.UpLeft;
+                yield return Direction.UpLeft;
             if (R == -sideLength)
-                yield return HexDirection.Up;
+                yield return Direction.Up;
             if (Q == sideLength)
-                yield return HexDirection.UpRight;
+                yield return Direction.UpRight;
             if (Q + R == sideLength)
-                yield return HexDirection.DownRight;
+                yield return Direction.DownRight;
             if (R == sideLength)
-                yield return HexDirection.Down;
+                yield return Direction.Down;
             if (Q == -sideLength)
-                yield return HexDirection.DownLeft;
+                yield return Direction.DownLeft;
         }
 
         /// <summary>
@@ -210,17 +210,17 @@ namespace RT.Coordinates
         };
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Hex"/>, going clockwise from the top-left.</summary>
-        public Vertex[] Vertices => new Vertex[]
+        public Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
-            new HexVertex(this, false),
-            new HexVertex(this, true),
-            new HexVertex(Move(HexDirection.DownRight), false),
-            new HexVertex(Move(HexDirection.Down), true),
-            new HexVertex(Move(HexDirection.Down), false),
-            new HexVertex(Move(HexDirection.DownLeft), true)
+            new Vertex(this, false),
+            new Vertex(this, true),
+            new Vertex(Move(Direction.DownRight), false),
+            new Vertex(Move(Direction.Down), true),
+            new Vertex(Move(Direction.Down), false),
+            new Vertex(Move(Direction.DownLeft), true)
         };
 
         /// <summary>Returns the center of the hex tile in 2D space.</summary>
@@ -290,5 +290,99 @@ namespace RT.Coordinates
         public string ConvertCoordinates(int sideLength) => Q >= 0
                 ? $"({Q + sideLength}, {R + sideLength})"
                 : $"({Q + sideLength}, {Q + R + sideLength})";
+
+        /// <summary>Identifies a direction within a 2D hexagonal grid.</summary>
+        public enum Direction
+        {
+            /// <summary>Up and left (dq = -1, dr = 0).</summary>
+            UpLeft,
+            /// <summary>Up (dq = 0, dr = -1).</summary>
+            Up,
+            /// <summary>Up and right (dq = 1, dr = -1).</summary>
+            UpRight,
+            /// <summary>Down and right (dq = 1, dr = 0).</summary>
+            DownRight,
+            /// <summary>Down (dq = 0, dr = 1).</summary>
+            Down,
+            /// <summary>Down and left (dq = -1, dr = 1).</summary>
+            DownLeft
+        }
+
+        /// <summary>Provides a collection of all hexagonal directions.</summary>
+        public static readonly IEnumerable<Direction> AllDirections = (Direction[]) Enum.GetValues(typeof(Direction));
+
+        /// <summary>Describes a 2D grid of flat-topped hexagonal cells.</summary>
+        public class HexGrid : Structure<Hex>
+        {
+            /// <summary>
+            ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
+            ///     IEnumerable{TCell}})"/>.</summary>
+            public HexGrid(IEnumerable<Hex> cells, IEnumerable<Link<Hex>> links = null, Func<Hex, IEnumerable<Hex>> getNeighbors = null)
+                : base(cells, links, getNeighbors)
+            {
+            }
+
+            /// <summary>
+            ///     Constructs a hexagonal grid of the specified <paramref name="sideLength"/>.</summary>
+            /// <param name="sideLength">
+            ///     Size of the grid.</param>
+            public HexGrid(int sideLength)
+                : base(Hex.LargeHexagon(sideLength))
+            {
+            }
+
+            /// <inheritdoc/>
+            protected override Structure<Hex> makeModifiedStructure(IEnumerable<Hex> cells, IEnumerable<Link<Hex>> traversible) => new HexGrid(cells, traversible);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rnd">
+            ///     A random number generator.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new HexGrid GenerateMaze(Random rnd = null) => (HexGrid) base.GenerateMaze(rnd);
+
+            /// <summary>
+            ///     Generates a maze on this structure.</summary>
+            /// <param name="rndNext">
+            ///     A delegate that can provide random numbers.</param>
+            /// <exception cref="InvalidOperationException">
+            ///     The current structure is disjointed (consists of more than one piece).</exception>
+            public new HexGrid GenerateMaze(Func<int, int, int> rndNext) => (HexGrid) base.GenerateMaze(rndNext);
+        }
+
+        /// <summary>Describes a vertex (gridline intersection) in a hexagonal grid (<see cref="HexGrid"/>).</summary>
+        public class Vertex : Coordinates.Vertex
+        {
+            /// <summary>Returns the hex just below this vertex.</summary>
+            public Hex Hex { get; private set; }
+
+            /// <summary>If <c>true</c>, this vertex is the top-right vertex of <see cref="Hex"/>; otherwise, the top-left.</summary>
+            public bool Right { get; private set; }
+
+            /// <summary>
+            ///     Constructor.</summary>
+            /// <param name="hex">
+            ///     The hex just below this vertex.</param>
+            /// <param name="right">
+            ///     If <c>true</c>, identifies the top-right vertex of <paramref name="hex"/>; otherwise, the top-left.</param>
+            public Vertex(Hex hex, bool right)
+            {
+                Hex = hex;
+                Right = right;
+            }
+
+            /// <inheritdoc/>
+            public override double X => Hex.Q * .75 + (Right ? .25 : -.25);
+            /// <inheritdoc/>
+            public override double Y => (Hex.Q * .5 + Hex.R - .5) * WidthToHeight;
+
+            /// <inheritdoc/>
+            public override bool Equals(Coordinates.Vertex other) => other is Vertex hv && hv.Hex == Hex && hv.Right == Right;
+            /// <inheritdoc/>
+            public override bool Equals(object obj) => obj is Vertex hv && Equals(hv);
+            /// <inheritdoc/>
+            public override int GetHashCode() => unchecked(Hex.GetHashCode() * (Right ? 1048609 : 1048601));
+        }
     }
 }

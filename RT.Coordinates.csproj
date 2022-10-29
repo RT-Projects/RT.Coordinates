@@ -31,33 +31,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Cairo.cs" />
-    <Compile Include="CairoVertex.cs" />
-    <Compile Include="CairoGrid.cs" />
     <Compile Include="Floret.cs" />
-    <Compile Include="FloretVertex.cs" />
-    <Compile Include="FloretGrid.cs" />
-    <Compile Include="RhombGrid.cs" />
     <Compile Include="Rhomb.cs" />
-    <Compile Include="RhombVertex.cs" />
     <Compile Include="SvgColor.cs" />
     <Compile Include="CellWithDistance.cs" />
     <Compile Include="CombinedCell.cs" />
     <Compile Include="Coord.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GenericVertex.cs" />
-    <Compile Include="HexDirections.cs" />
     <Compile Include="GridDirections.cs" />
     <Compile Include="Kite.cs" />
-    <Compile Include="KiteGrid.cs" />
-    <Compile Include="KiteVertex.cs" />
     <Compile Include="OctoCell.cs" />
-    <Compile Include="OctoGrid.cs" />
-    <Compile Include="HexVertex.cs" />
-    <Compile Include="CoordVertex.cs" />
     <Compile Include="EdgeType.cs" />
-    <Compile Include="HexGrid.cs" />
-    <Compile Include="Grid.cs" />
-    <Compile Include="HexDirection.cs" />
     <Compile Include="GridDirection.cs" />
     <Compile Include="Hex.cs" />
     <Compile Include="IHasDirection.cs" />
@@ -65,16 +50,12 @@
     <Compile Include="INeighbor.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="CoordinatesHelpers.cs" />
-    <Compile Include="OctoVertex.cs" />
     <Compile Include="PointD.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Structure.cs" />
-    <Compile Include="StructureWithDirection.cs" />
     <Compile Include="SvgInstructions.cs" />
     <Compile Include="SvgSegment.cs" />
     <Compile Include="Tri.cs" />
-    <Compile Include="TriGrid.cs" />
-    <Compile Include="TriVertex.cs" />
     <Compile Include="Vertex.cs" />
   </ItemGroup>
   <ItemGroup>

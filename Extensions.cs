@@ -87,5 +87,108 @@ namespace RT.Coordinates
         ///     Generates a set of edges from a collection of vertices in which the vertices are in the correct order (either
         ///     clockwise or counter-clockwise).</summary>
         public static IEnumerable<Link<Vertex>> MakeEdges(this IEnumerable<Vertex> vertices) => vertices.SelectConsecutivePairs(true, (v1, v2) => new Link<Vertex>(v1, v2));
+
+        /// <summary>
+        ///     Determines whether it is possible within <paramref name="structure"/> to move the specified <paramref
+        ///     name="amount"/> of steps in the specified <paramref name="direction"/> and sets <paramref name="newCell"/> to
+        ///     the cell landed on.</summary>
+        /// <param name="structure">
+        ///     The structure to examine.</param>
+        /// <param name="cell">
+        ///     Starting cell.</param>
+        /// <param name="direction">
+        ///     Direction to attempt to move in.</param>
+        /// <param name="newCell">
+        ///     Receives the cell landed on.</param>
+        /// <param name="amount">
+        ///     Number of steps to move.</param>
+        public static bool TryMove<TCell, TDirection>(this Structure<TCell> structure, TCell cell, TDirection direction, out TCell newCell, int amount = 1)
+            where TCell : IHasDirection<TCell, TDirection>
+        {
+            newCell = cell;
+            for (var i = 0; i < amount; i++)
+            {
+                var c = newCell.Move(direction, amount);
+                if (!structure.Cells.Contains(c) || !structure.Links.Contains(new Link<TCell>(newCell, c)))
+                {
+                    newCell = default;
+                    return false;
+                }
+                newCell = c;
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///     Determines whether it is possible within <paramref name="structure"/> to move the specified <paramref
+        ///     name="amount"/> of steps in the specified <paramref name="direction"/>.</summary>
+        /// <param name="structure">
+        ///     The structure to examine.</param>
+        /// <param name="cell">
+        ///     Starting cell.</param>
+        /// <param name="direction">
+        ///     Direction to attempt to move in.</param>
+        /// <param name="amount">
+        ///     Number of steps to move.</param>
+        public static bool CanMove<TCell, TDirection>(this Structure<TCell> structure, TCell cell, TDirection direction, int amount = 1)
+            where TCell : IHasDirection<TCell, TDirection> => TryMove(structure, cell, direction, out _, amount);
+
+        /// <summary>
+        ///     Moves the specified <paramref name="amount"/> of steps in the specified <paramref name="direction"/> within
+        ///     <paramref name="structure"/> and returns the cell landed on.</summary>
+        /// <param name="structure">
+        ///     The structure within which to move.</param>
+        /// <param name="cell">
+        ///     Starting cell.</param>
+        /// <param name="direction">
+        ///     Direction to attempt to move in.</param>
+        /// <param name="amount">
+        ///     Number of steps to move.</param>
+        /// <exception cref="InvalidOperationException">
+        ///     It is not possible to move the specified number of steps.</exception>
+        public static TCell Move<TCell, TDirection>(this Structure<TCell> structure, TCell cell, TDirection direction, int amount = 1)
+            where TCell : IHasDirection<TCell, TDirection> => TryMove(structure, cell, direction, out var newCell, amount)
+                ? newCell
+                : throw new InvalidOperationException("The structure does not allow movement for that many steps in that direction.");
+
+        /// <summary>
+        ///     Returns the maximum number of steps it is possible to move in the specified <paramref name="direction"/>
+        ///     within <paramref name="structure"/>.</summary>
+        /// <param name="structure">
+        ///     The structure within which to move.</param>
+        /// <param name="cell">
+        ///     Starting cell.</param>
+        /// <param name="direction">
+        ///     Direction to attempt to move in.</param>
+        /// <param name="lastCell">
+        ///     Receives the final cell landed on.</param>
+        /// <exception cref="InvalidOperationException">
+        ///     The structure contains a cycle that causes the movement to loop back on itself.</exception>
+        public static int MaxMoves<TCell, TDirection>(this Structure<TCell> structure, TCell cell, TDirection direction, out TCell lastCell)
+            where TCell : IHasDirection<TCell, TDirection>
+        {
+            lastCell = cell;
+            var already = new HashSet<TCell> { cell };
+            var amount = 0;
+            while (true)
+            {
+                var c = lastCell.Move(direction);
+                if (!already.Add(c))
+                    throw new InvalidOperationException("The structure contains a cycle that causes the movement to loop back on itself.");
+                if (!structure.Cells.Contains(c) || !structure.Links.Contains(new Link<TCell>(lastCell, c)))
+                    return amount;
+                amount++;
+                lastCell = c;
+            }
+        }
+
+        /// <summary>
+        ///     Returns a new <see cref="Hex.Direction"/> which is the specified multiple of 60° clockwise from the current
+        ///     direction.</summary>
+        /// <param name="dir">
+        ///     Original starting direction.</param>
+        /// <param name="amount">
+        ///     Number of 60° turns to perform. Use negative numbers to go counter-clockwise.</param>
+        public static Hex.Direction Clockwise(this Hex.Direction dir, int amount = 1) => (Hex.Direction) ((((int) dir + amount) % 6 + 6) % 6);
     }
 }
