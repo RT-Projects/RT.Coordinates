@@ -44,6 +44,8 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public PointD Center => TileKind switch
         {
+            Kind.Dart => (3 * Corner + Vector.Base(Angle).DivideByPhi).Point / 3,
+            Kind.Kite => (18 * Corner + 11 * Vector.Base(Angle)).Point / 18,
             Kind.ThinRhomb => (2 * (Corner + Vector.Base(Angle)) + Vector.Base(Angle + 3).DivideByPhi).Point / 2,
             Kind.ThickRhomb => (2 * Corner + Vector.Base(Angle).MultiplyByPhi).Point / 2,
             _ => throw new InvalidOperationException($"Invalid TileKind value ‘{TileKind}’.")
@@ -54,8 +56,8 @@ namespace RT.Coordinates
         ///     (<see cref="Corner"/>).</summary>
         public Coordinates.Vertex[] Vertices => TileKind switch
         {
-            Kind.Dart => throw new NotImplementedException(),
-            Kind.Kite => throw new NotImplementedException(),
+            Kind.Dart => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle + 7).DivideByPhi, Corner + Vector.Base(Angle).DivideByPhi, Corner + Vector.Base(Angle + 3).DivideByPhi },
+            Kind.Kite => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle + 9), Corner + Vector.Base(Angle), Corner + Vector.Base(Angle + 1) },
             Kind.ThickRhomb => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle + 9), Corner + Vector.Base(Angle + 9) + Vector.Base(Angle + 1), Corner + Vector.Base(Angle + 1) },
             Kind.ThinRhomb => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle), Corner + Vector.Base(Angle) + Vector.Base(Angle + 1), Corner + Vector.Base(Angle + 1) },
             _ => throw new InvalidOperationException($"Invalid TileKind value ‘{TileKind}’."),
@@ -71,8 +73,28 @@ namespace RT.Coordinates
             {
                 switch (TileKind)
                 {
-                    case Kind.Kite: throw new NotImplementedException();
-                    case Kind.Dart: throw new NotImplementedException();
+                    case Kind.Kite:
+                        yield return new Penrose(Kind.Dart, Corner.MultiplyByPhi + Vector.Base(Angle + 9).DivideByPhi, Angle + 4);
+                        yield return new Penrose(Kind.Dart, Corner.MultiplyByPhi + Vector.Base(Angle + 1).DivideByPhi, Angle + 6);
+                        yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 9)).MultiplyByPhi, Angle + 3);
+                        yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 1)).MultiplyByPhi, Angle + 7);
+
+                        // Extra
+                        yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 1)).MultiplyByPhi, Angle + 5);
+                        yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 9)).MultiplyByPhi, Angle + 5);
+                        yield break;
+
+                    case Kind.Dart:
+                        yield return new Penrose(Kind.Dart, Corner.MultiplyByPhi + new Vector(0, -1, 1, -1).Rotate(Angle), Angle + 6);
+                        yield return new Penrose(Kind.Dart, Corner.MultiplyByPhi + new Vector(1, -1, 1, 0).Rotate(Angle), Angle + 4);
+                        yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 5);
+
+                        // Extra
+                        yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 7);
+                        yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 3);
+                        yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi, Angle + 4);
+                        yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi, Angle + 6);
+                        yield break;
 
                     case Kind.ThickRhomb:
                         yield return new Penrose(Kind.ThickRhomb, (Corner + Vector.Base(Angle)).MultiplyByPhi, Angle + 5);
@@ -114,8 +136,29 @@ namespace RT.Coordinates
                 switch (TileKind)
                 {
                     case Kind.Kite:
+                        yield return new Link<Penrose>(arr[0], arr[1]);
+                        yield return new Link<Penrose>(arr[0], arr[2]);
+                        yield return new Link<Penrose>(arr[0], arr[5]);
+                        yield return new Link<Penrose>(arr[1], arr[3]);
+                        yield return new Link<Penrose>(arr[1], arr[4]);
+                        yield return new Link<Penrose>(arr[2], arr[3]);
+                        yield return new Link<Penrose>(arr[2], arr[5]);
+                        yield return new Link<Penrose>(arr[3], arr[4]);
+
+                        yield return new Link<Penrose>(arr[2], new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 9)).MultiplyByPhi, Angle + 1));
+                        yield break;
+
                     case Kind.Dart:
-                        throw new NotImplementedException();
+                        yield return new Link<Penrose>(arr[0], arr[2]);
+                        yield return new Link<Penrose>(arr[0], arr[3]);
+                        yield return new Link<Penrose>(arr[0], arr[6]);
+                        yield return new Link<Penrose>(arr[1], arr[2]);
+                        yield return new Link<Penrose>(arr[1], arr[4]);
+                        yield return new Link<Penrose>(arr[1], arr[5]);
+                        yield return new Link<Penrose>(arr[2], arr[3]);
+                        yield return new Link<Penrose>(arr[2], arr[4]);
+                        yield return new Link<Penrose>(arr[5], arr[6]);
+                        yield break;
 
                     case Kind.ThickRhomb:
                         yield return new Link<Penrose>(arr[0], arr[3]);
@@ -342,10 +385,14 @@ namespace RT.Coordinates
             private static GridInfo tempGridInfo;
             /// <summary>
             ///     Constructs a grid consisting of <see cref="Penrose"/> tiles obtained by deflating (subdividing) a star
-            ///     consisting of five <see cref="Kind.ThickRhomb"/> shapes.</summary>
+            ///     consisting of five initial shapes.</summary>
+            /// <param name="useRhombs">
+            ///     If <c>true</c>, the initial shapes are <see cref="Kind.ThickRhomb"/> tiles and the final grid will consist
+            ///     of those and <see cref="Kind.ThinRhomb"/> tiles. If <c>false</c>, the initial shapes are <see
+            ///     cref="Kind.Kite"/> tiles and the final grid will consist of those and <see cref="Kind.Dart"/> tiles.</param>
             /// <param name="numIterations">
             ///     Number of deflation iterations to perform.</param>
-            public Grid(int numIterations) : base((tempGridInfo = GenerateGrid(numIterations)).Cells, tempGridInfo.Links)
+            public Grid(bool useRhombs, int numIterations) : base((tempGridInfo = GenerateGrid(useRhombs, numIterations)).Cells, tempGridInfo.Links)
             {
             }
 
@@ -368,9 +415,9 @@ namespace RT.Coordinates
             ///     The current structure is disjointed (consists of more than one piece).</exception>
             public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
 
-            private static GridInfo GenerateGrid(int numIterations)
+            private static GridInfo GenerateGrid(bool useRhombs, int numIterations)
             {
-                var tiles = Enumerable.Range(0, 5).Select(angle => new Penrose(Kind.ThickRhomb, default, 2 * angle));
+                var tiles = Enumerable.Range(0, 5).Select(angle => new Penrose(useRhombs ? Kind.ThickRhomb : Kind.Kite, default, 2 * angle));
 
                 IEnumerable<Penrose> prev = null;
                 for (var i = 0; i < numIterations; i++)

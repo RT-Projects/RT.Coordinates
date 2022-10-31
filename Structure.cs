@@ -46,7 +46,7 @@ namespace RT.Coordinates
         {
             _cells = new HashSet<TCell>(cells);
             if (links != null)
-                _links = new HashSet<Link<TCell>>(links);
+                _links = new HashSet<Link<TCell>>(links.Where(l => l.Cells.All(_cells.Contains)));
             else
             {
                 _links = new HashSet<Link<TCell>>();
