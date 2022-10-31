@@ -315,12 +315,12 @@ namespace RT.Coordinates
         public static readonly IEnumerable<Direction> AllDirections = (Direction[]) Enum.GetValues(typeof(Direction));
 
         /// <summary>Describes a 2D grid of flat-topped hexagonal cells.</summary>
-        public class HexGrid : Structure<Hex>
+        public class Grid : Structure<Hex>
         {
             /// <summary>
             ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
             ///     IEnumerable{TCell}})"/>.</summary>
-            public HexGrid(IEnumerable<Hex> cells, IEnumerable<Link<Hex>> links = null, Func<Hex, IEnumerable<Hex>> getNeighbors = null)
+            public Grid(IEnumerable<Hex> cells, IEnumerable<Link<Hex>> links = null, Func<Hex, IEnumerable<Hex>> getNeighbors = null)
                 : base(cells, links, getNeighbors)
             {
             }
@@ -329,13 +329,13 @@ namespace RT.Coordinates
             ///     Constructs a hexagonal grid of the specified <paramref name="sideLength"/>.</summary>
             /// <param name="sideLength">
             ///     Size of the grid.</param>
-            public HexGrid(int sideLength)
+            public Grid(int sideLength)
                 : base(Hex.LargeHexagon(sideLength))
             {
             }
 
             /// <inheritdoc/>
-            protected override Structure<Hex> makeModifiedStructure(IEnumerable<Hex> cells, IEnumerable<Link<Hex>> traversible) => new HexGrid(cells, traversible);
+            protected override Structure<Hex> makeModifiedStructure(IEnumerable<Hex> cells, IEnumerable<Link<Hex>> traversible) => new Grid(cells, traversible);
 
             /// <summary>
             ///     Generates a maze on this structure.</summary>
@@ -343,7 +343,7 @@ namespace RT.Coordinates
             ///     A random number generator.</param>
             /// <exception cref="InvalidOperationException">
             ///     The current structure is disjointed (consists of more than one piece).</exception>
-            public new HexGrid GenerateMaze(Random rnd = null) => (HexGrid) base.GenerateMaze(rnd);
+            public new Grid GenerateMaze(Random rnd = null) => (Grid) base.GenerateMaze(rnd);
 
             /// <summary>
             ///     Generates a maze on this structure.</summary>
@@ -351,10 +351,10 @@ namespace RT.Coordinates
             ///     A delegate that can provide random numbers.</param>
             /// <exception cref="InvalidOperationException">
             ///     The current structure is disjointed (consists of more than one piece).</exception>
-            public new HexGrid GenerateMaze(Func<int, int, int> rndNext) => (HexGrid) base.GenerateMaze(rndNext);
+            public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
         }
 
-        /// <summary>Describes a vertex (gridline intersection) in a hexagonal grid (<see cref="HexGrid"/>).</summary>
+        /// <summary>Describes a vertex (gridline intersection) in a hexagonal grid (<see cref="Grid"/>).</summary>
         public class Vertex : Coordinates.Vertex
         {
             /// <summary>Returns the hex just below this vertex.</summary>
