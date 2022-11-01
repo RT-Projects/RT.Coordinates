@@ -146,8 +146,8 @@ namespace RT.Coordinates
         public override string ToString() => $"{Cell};{(int) Pos}";
 
         /// <summary>
-        ///     Describes a grid structure consisting of <see cref="Cairo"/> cells that join up in groups of 4 to form
-        ///     (horizontally or vertically stretched) hexagons, which in turn tile the plane.</summary>
+        ///     Describes a grid structure consisting of <see cref="Cairo"/> cells that join up in groups of 4 to form a
+        ///     pattern that tiles the plane.</summary>
         public class Grid : Structure<Cairo>
         {
             /// <summary>
@@ -189,7 +189,7 @@ namespace RT.Coordinates
         /// <summary>Describes one of the vertices of a <see cref="Cairo"/>.</summary>
         public class Vertex : Coordinates.Vertex
         {
-            /// <summary>The <see cref="Cell"/> tile that this <see cref="Vertex"/> is within.</summary>
+            /// <summary>The <see cref="Coord"/> tile that this <see cref="Vertex"/> is within.</summary>
             public Coord Cell { get; private set; }
             /// <summary>Which position within the <see cref="Cell"/> this vertex is.</summary>
             public Position Pos { get; private set; }
