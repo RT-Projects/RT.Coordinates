@@ -44,8 +44,8 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public PointD Center => TileKind switch
         {
-            Kind.Dart => (3 * Corner + Vector.Base(Angle).DivideByPhi).Point / 3,
-            Kind.Kite => (18 * Corner + 11 * Vector.Base(Angle)).Point / 18,
+            Kind.Dart => (3 * Corner.MultiplyByPhi + Vector.Base(Angle)).Point / 3,
+            Kind.Kite => (18 * (Corner + 11 * Vector.Base(Angle)).MultiplyByPhi).Point / 18,
             Kind.ThinRhomb => (2 * (Corner + Vector.Base(Angle)) + Vector.Base(Angle + 3).DivideByPhi).Point / 2,
             Kind.ThickRhomb => (2 * Corner + Vector.Base(Angle).MultiplyByPhi).Point / 2,
             _ => throw new InvalidOperationException($"Invalid TileKind value ‘{TileKind}’.")
@@ -56,8 +56,8 @@ namespace RT.Coordinates
         ///     (<see cref="Corner"/>).</summary>
         public Coordinates.Vertex[] Vertices => TileKind switch
         {
-            Kind.Dart => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle + 7).DivideByPhi, Corner + Vector.Base(Angle).DivideByPhi, Corner + Vector.Base(Angle + 3).DivideByPhi },
-            Kind.Kite => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle + 9), Corner + Vector.Base(Angle), Corner + Vector.Base(Angle + 1) },
+            Kind.Dart => new Coordinates.Vertex[] { Corner.MultiplyByPhi, Corner.MultiplyByPhi + Vector.Base(Angle + 7), Corner.MultiplyByPhi + Vector.Base(Angle), Corner.MultiplyByPhi + Vector.Base(Angle + 3) },
+            Kind.Kite => new Coordinates.Vertex[] { Corner.MultiplyByPhi, (Corner + Vector.Base(Angle + 9)).MultiplyByPhi, (Corner + Vector.Base(Angle)).MultiplyByPhi, (Corner + Vector.Base(Angle + 1)).MultiplyByPhi },
             Kind.ThickRhomb => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle + 9), Corner + Vector.Base(Angle + 9) + Vector.Base(Angle + 1), Corner + Vector.Base(Angle + 1) },
             Kind.ThinRhomb => new Coordinates.Vertex[] { Corner, Corner + Vector.Base(Angle), Corner + Vector.Base(Angle) + Vector.Base(Angle + 1), Corner + Vector.Base(Angle + 1) },
             _ => throw new InvalidOperationException($"Invalid TileKind value ‘{TileKind}’."),
@@ -80,8 +80,8 @@ namespace RT.Coordinates
                         yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 1)).MultiplyByPhi, Angle + 7);
 
                         // Extra
-                        //yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 1)).MultiplyByPhi, Angle + 5);
-                        //yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 9)).MultiplyByPhi, Angle + 5);
+                        yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 1)).MultiplyByPhi, Angle + 5);
+                        yield return new Penrose(Kind.Kite, (Corner + Vector.Base(Angle + 9)).MultiplyByPhi, Angle + 5);
                         yield break;
 
                     case Kind.Dart:
@@ -90,8 +90,8 @@ namespace RT.Coordinates
                         yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 5);
 
                         // Extra
-                        //yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 7);
-                        //yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 3);
+                        yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 7);
+                        yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi + Vector.Base(Angle), Angle + 3);
                         //yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi, Angle + 4);
                         //yield return new Penrose(Kind.Kite, Corner.MultiplyByPhi, Angle + 6);
                         yield break;
@@ -104,8 +104,8 @@ namespace RT.Coordinates
                         yield return new Penrose(Kind.ThinRhomb, Corner.MultiplyByPhi + new Vector(1, 0, 1, 0).Rotate(Angle), Angle + 8);
 
                         // Extra
-                        //yield return new Penrose(Kind.ThickRhomb, Corner.MultiplyByPhi + new Vector(1, 0, 1, 0).Rotate(Angle), Angle + 7);
-                        //yield return new Penrose(Kind.ThickRhomb, Corner.MultiplyByPhi + new Vector(0, -1, 0, -1).Rotate(Angle), Angle + 3);
+                        yield return new Penrose(Kind.ThickRhomb, Corner.MultiplyByPhi + new Vector(1, 0, 1, 0).Rotate(Angle), Angle + 7);
+                        yield return new Penrose(Kind.ThickRhomb, Corner.MultiplyByPhi + new Vector(0, -1, 0, -1).Rotate(Angle), Angle + 3);
                         yield break;
 
                     case Kind.ThinRhomb:
@@ -130,7 +130,35 @@ namespace RT.Coordinates
         {
             get
             {
-                if (TileKind == Kind.ThickRhomb)
+                if (TileKind == Kind.Kite)
+                {
+                    // Neighbors left/right of the Corner vertex
+                    yield return new Penrose(Kind.Kite, Corner, Angle + 8);
+                    yield return new Penrose(Kind.Kite, Corner, Angle + 2);
+                    yield return new Penrose(Kind.Dart, Corner + new Vector(0, -1, 1, -1).Rotate(Angle), Angle);
+                    yield return new Penrose(Kind.Dart, Corner + new Vector(1, -1, 1, 0).Rotate(Angle), Angle);
+
+                    // Neighbors left/right of the opposite vertex
+                    yield return new Penrose(Kind.Dart, Corner + new Vector(0, 0, 0, -1).Rotate(Angle), Angle + 9);
+                    yield return new Penrose(Kind.Dart, Corner + new Vector(1, 0, 0, 0).Rotate(Angle), Angle + 1);
+                    yield return new Penrose(Kind.Kite, Corner + new Vector(1, -1, 1, -2).Rotate(Angle), Angle + 4);
+                    yield return new Penrose(Kind.Kite, Corner + new Vector(2, -1, 1, -1).Rotate(Angle), Angle + 6);
+                }
+                else if (TileKind == Kind.Dart)
+                {
+                    // Neighbors left/right of the Corner vertex
+                    yield return new Penrose(Kind.Kite, Corner + new Vector(-1, 1, -1, 1).Rotate(Angle), Angle + 9);
+                    yield return new Penrose(Kind.Kite, Corner + new Vector(-1, 1, -1, 1).Rotate(Angle), Angle + 1);
+
+                    // Neighbors of the left/right edge
+                    yield return new Penrose(Kind.Kite, Corner + new Vector(-1, 1, -1, 0).Rotate(Angle), Angle);
+                    yield return new Penrose(Kind.Kite, Corner + new Vector(0, 1, -1, 1).Rotate(Angle), Angle);
+
+                    // Neighbors left/right of the opposite vertex
+                    yield return new Penrose(Kind.Dart, Corner + new Vector(0, 2, -2, 1).Rotate(Angle), Angle + 8);
+                    yield return new Penrose(Kind.Dart, Corner + new Vector(-1, 2, -2, 0).Rotate(Angle), Angle + 2);
+                }
+                else if (TileKind == Kind.ThickRhomb)
                 {
                     // Neighbors left/right of the Corner vertex
                     yield return new Penrose(Kind.ThickRhomb, Corner, Angle + 2);
@@ -149,10 +177,15 @@ namespace RT.Coordinates
                     // Neighbors left/right of the Corner vertex
                     yield return new Penrose(Kind.ThickRhomb, Corner, Angle + 9);
                     yield return new Penrose(Kind.ThickRhomb, Corner + new Vector(0, 0, 0, 1).Rotate(Angle), Angle);
-                    yield return new Penrose(Kind.ThinRhomb, Corner + new Vector(1, 1, 0, 0), Angle + 6);
+                    yield return new Penrose(Kind.ThinRhomb, Corner + new Vector(1, 1, 0, 0).Rotate(Angle), Angle + 6);
+
+                    // Neighbors left/right of the opposite vertex
+                    yield return new Penrose(Kind.ThickRhomb, Corner + new Vector(2, -1, 1, -1).Rotate(Angle), Angle + 7);
+                    yield return new Penrose(Kind.ThickRhomb, Corner + new Vector(2, 0, 1, -1).Rotate(Angle), Angle + 6);
+                    yield return new Penrose(Kind.ThinRhomb, Corner + new Vector(2, -1, 1, -1).Rotate(Angle), Angle + 4);
                 }
                 else
-                    throw new NotImplementedException();
+                    throw new InvalidOperationException($"Invalid Penrose.TileKind value ‘{TileKind}’.");
             }
         }
 
