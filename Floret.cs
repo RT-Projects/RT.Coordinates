@@ -237,7 +237,7 @@ namespace RT.Coordinates
             /// <inheritdoc/>
             public override bool Equals(object obj) => obj is Vertex kv && kv.Hex.Equals(Hex) && kv.Pos == Pos;
             /// <inheritdoc/>
-            public override int GetHashCode() => Hex.GetHashCode() * 6 + (int) Pos;
+            public override int GetHashCode() => unchecked(Hex.GetHashCode() * 11 + (int) Pos);
         }
     }
 }

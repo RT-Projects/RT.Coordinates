@@ -5,61 +5,64 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>
-    ///     Represents a cell in a <see cref="Grid"/>. Each cairo is a pentagon. Four cairos form a hexagon that is either
-    ///     horizontally or vertically stretched.</summary>
+    ///     Represents a cell in a <see cref="Grid"/>. The gridlines form an interlocking pattern of perpendicular stretched
+    ///     hexagons. Each cairo is an irregular pentagon, one vertex of which can be thought of as the center of a square,
+    ///     while the vertex two clockwise from that is a vertex of the same square. The remaining vertices are off from the
+    ///     square’s edge but in such a way that 4 cairos make a flower-like shape which tiles the plane in a rectilinear
+    ///     pattern. The inner angles of each pentagon are 120°, 90°, 120°, 120°, and 90°.</summary>
     public struct Cairo : IEquatable<Cairo>, INeighbor<Cairo>, INeighbor<object>, IHasSvgGeometry
     {
-        /// <summary>Identifies a hexagon. Each Cairo is one quarter of a hexagon.</summary>
-        public Hex Hex { get; private set; }
-        /// <summary>Identifies which Cairo within <see cref="Hex"/> this is.</summary>
+        /// <summary>Identifies a square. Each cairo forms one quarter of this square.</summary>
+        public Coord Cell { get; private set; }
+        /// <summary>Identifies which cairo within <see cref="Cell"/> this is.</summary>
         public Position Pos { get; private set; }
 
         /// <summary>Constructor.</summary>
-        public Cairo(Hex hex, Position pos)
+        public Cairo(Coord cell, Position pos)
         {
-            Hex = hex;
+            Cell = cell;
             Pos = pos;
         }
 
         /// <summary>
         ///     Constructor.</summary>
-        /// <param name="q">
-        ///     Q-coordinate of the underlying hexagon.</param>
-        /// <param name="r">
-        ///     R-coordinate of the underlying hexagon.</param>
+        /// <param name="x">
+        ///     X-coordinate of the underlying square.</param>
+        /// <param name="y">
+        ///     Y-coordinate of the underlying square.</param>
         /// <param name="pos">
-        ///     Position of the <see cref="Cairo"/> within the hexagon.</param>
-        public Cairo(int q, int r, Position pos)
+        ///     Position of the <see cref="Cairo"/> within the square.</param>
+        public Cairo(int x, int y, Position pos)
         {
-            Hex = new Hex(q, r);
+            Cell = new Coord(x, y);
             Pos = pos;
         }
 
-        /// <summary>Identifies one of the <see cref="Cairo"/> cells that make up a hexagon.</summary>
+        /// <summary>Identifies one of the <see cref="Cairo"/> cells that make up a square.</summary>
         public enum Position
         {
-            /// <summary>The top <see cref="Cairo"/> within a hexagon.</summary>
-            Top,
-            /// <summary>The right <see cref="Cairo"/> within a hexagon.</summary>
-            Right,
-            /// <summary>The bottom <see cref="Cairo"/> within a hexagon.</summary>
-            Bottom,
-            /// <summary>The left <see cref="Cairo"/> within a hexagon.</summary>
-            Left
+            /// <summary>The top-left <see cref="Cairo"/> within a square.</summary>
+            TopLeft,
+            /// <summary>The top-right <see cref="Cairo"/> within a square.</summary>
+            TopRight,
+            /// <summary>The bottom-right <see cref="Cairo"/> within a square.</summary>
+            BottomRight,
+            /// <summary>The bottom-left <see cref="Cairo"/> within a square.</summary>
+            BottomLeft
         }
 
         /// <summary>
-        ///     Constructs a hexagonal grid of the specified <paramref name="sideLength"/> and divides each hexagon into four
-        ///     <see cref="Cairo"/> cells.</summary>
-        public static IEnumerable<Cairo> LargeHexagon(int sideLength) => Hex.LargeHexagon(sideLength).SelectMany(hex => _cairoPositions.Select(pos => new Cairo(hex, pos)));
+        ///     Constructs a grid of the specified <paramref name="width"/> and <paramref name="height"/> and divides each
+        ///     square into four <see cref="Cairo"/> cells.</summary>
+        public static IEnumerable<Cairo> Rectangle(int width, int height) => Coord.Rectangle(width, height).SelectMany(cell => _cairoPositions.Select(pos => new Cairo(cell, pos)));
         private static readonly Position[] _cairoPositions = (Position[]) Enum.GetValues(typeof(Position));
 
         /// <inheritdoc/>
-        public bool Equals(Cairo other) => other.Hex.Equals(Hex) && other.Pos == Pos;
+        public bool Equals(Cairo other) => other.Cell.Equals(Cell) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Cairo other && other.Hex.Equals(Hex) && other.Pos == Pos;
+        public override bool Equals(object obj) => obj is Cairo other && other.Cell.Equals(Cell) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override int GetHashCode() => Hex.GetHashCode() * 4 + (int) Pos;
+        public override int GetHashCode() => Cell.GetHashCode() * 4 + (int) Pos;
         /// <summary>Equality operator.</summary>
         public static bool operator ==(Cairo one, Cairo two) => one.Equals(two);
         /// <summary>Inequality operator.</summary>
@@ -70,43 +73,11 @@ namespace RT.Coordinates
         {
             get
             {
-                switch (Pos)
-                {
-                    case Position.Top:
-                        yield return new Cairo(Hex.Move(Hex.Direction.Up), Position.Bottom);
-                        yield return new Cairo(Hex.Move(Hex.Direction.UpRight), Position.Left);
-                        yield return new Cairo(Hex, Position.Right);
-                        yield return new Cairo(Hex, Position.Left);
-                        yield return new Cairo(Hex.Move(Hex.Direction.UpLeft), Position.Right);
-                        break;
-
-                    case Position.Right:
-                        yield return new Cairo(Hex, Position.Bottom);
-                        yield return new Cairo(Hex, Position.Left);
-                        yield return new Cairo(Hex, Position.Top);
-                        yield return new Cairo(Hex.Move(Hex.Direction.UpRight), Position.Bottom);
-                        yield return new Cairo(Hex.Move(Hex.Direction.DownRight), Position.Top);
-                        break;
-
-                    case Position.Bottom:
-                        yield return new Cairo(Hex.Move(Hex.Direction.DownRight), Position.Left);
-                        yield return new Cairo(Hex, Position.Right);
-                        yield return new Cairo(Hex, Position.Left);
-                        yield return new Cairo(Hex.Move(Hex.Direction.DownLeft), Position.Right);
-                        yield return new Cairo(Hex.Move(Hex.Direction.Down), Position.Top);
-                        break;
-
-                    case Position.Left:
-                        yield return new Cairo(Hex, Position.Top);
-                        yield return new Cairo(Hex, Position.Right);
-                        yield return new Cairo(Hex, Position.Bottom);
-                        yield return new Cairo(Hex.Move(Hex.Direction.DownLeft), Position.Top);
-                        yield return new Cairo(Hex.Move(Hex.Direction.UpLeft), Position.Bottom);
-                        break;
-
-                    default:
-                        throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.");
-                }
+                yield return new Cairo(Cell, (Position) (((int) Pos + 1) % 4));
+                yield return new Cairo(Cell, (Position) (((int) Pos + 3) % 4));
+                yield return new Cairo(Cell.Move((Coord.Direction) ((2 * (int) Pos + 6) % 8)), (Position) (((int) Pos + 1) % 4));
+                yield return new Cairo(Cell.Move((Coord.Direction) (2 * (int) Pos)), (Position) (((int) Pos + 3) % 4));
+                yield return new Cairo(Cell.Move((Coord.Direction) (2 * (int) Pos)), (Position) (((int) Pos + 2) % 4));
             }
         }
 
@@ -116,50 +87,46 @@ namespace RT.Coordinates
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
-        ///     Returns the vertices along the perimeter of this <see cref="Cairo"/>, going clockwise from the “tip” of the
-        ///     pentagon (the vertex opposite the horizontal or vertical edge).</summary>
+        ///     Returns the vertices along the perimeter of this <see cref="Cairo"/>, going clockwise from the vertex at the
+        ///     center of <see cref="Cell"/>.</summary>
         public Coordinates.Vertex[] Vertices => Pos switch
         {
-            Position.Top => new Coordinates.Vertex[] {
-                new Vertex(Hex, Vertex.Position.CenterTop),
-                new Vertex(Hex, Vertex.Position.MidTopLeft),
-                new Vertex(Hex, Vertex.Position.TopLeft),
-                new Vertex(Hex.Move(Hex.Direction.UpRight), Vertex.Position.Left),
-                new Vertex(Hex.Move(Hex.Direction.UpRight), Vertex.Position.MidBottomLeft)
+            Position.TopLeft => new Coordinates.Vertex[] {
+                new Vertex(Cell, Vertex.Position.Center),
+                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.TopRightPlus1),
+                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.TopRight),
+                new Vertex(Cell, Vertex.Position.TopLeftPlus1),
+                new Vertex(Cell, Vertex.Position.TopRightMinus1)
             },
-            Position.Right => new Coordinates.Vertex[] {
-                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft),
-                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.MidTopLeft),
-                new Vertex(Hex, Vertex.Position.CenterBottom),
-                new Vertex(Hex, Vertex.Position.CenterTop),
-                new Vertex(Hex.Move(Hex.Direction.UpRight), Vertex.Position.MidBottomLeft)
+            Position.TopRight => new Coordinates.Vertex[] {
+                new Vertex(Cell, Vertex.Position.Center),
+                new Vertex(Cell, Vertex.Position.TopRightMinus1),
+                new Vertex(Cell, Vertex.Position.TopRight),
+                new Vertex(Cell, Vertex.Position.TopRightPlus1),
+                new Vertex(Cell, Vertex.Position.BottomRightMinus1)
             },
-            Position.Bottom => new Coordinates.Vertex[] {
-                new Vertex(Hex, Vertex.Position.CenterBottom),
-                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.MidTopLeft),
-                new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.Left),
-                new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft),
-                new Vertex(Hex, Vertex.Position.MidBottomLeft)
+            Position.BottomRight => new Coordinates.Vertex[] {
+                new Vertex(Cell, Vertex.Position.Center),
+                new Vertex(Cell, Vertex.Position.BottomRightMinus1),
+                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopRight),
+                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopRightMinus1),
+                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopLeftPlus1)
             },
-            Position.Left => new Coordinates.Vertex[] {
-                new Vertex(Hex, Vertex.Position.Left),
-                new Vertex(Hex, Vertex.Position.MidTopLeft),
-                new Vertex(Hex, Vertex.Position.CenterTop),
-                new Vertex(Hex, Vertex.Position.CenterBottom),
-                new Vertex(Hex, Vertex.Position.MidBottomLeft)
+            Position.BottomLeft => new Coordinates.Vertex[] {
+                new Vertex(Cell, Vertex.Position.Center),
+                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopLeftPlus1),
+                new Vertex(Cell.Move(Coord.Direction.DownLeft), Vertex.Position.TopRight),
+                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.BottomRightMinus1),
+                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.TopRightPlus1)
             },
             _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.")
         };
 
-        private const double sqrt7 = 2.6457513110645905905016157536392604257102591830825;
-        private static readonly double[] xs = { 0, sqrt7 / 4, 0, -sqrt7 / 4 };
-        private static readonly double[] ys = { -sqrt7 / 4 - .5, 0, sqrt7 / 4 + .5, 0 };
+        /// <inheritdoc/>
+        public PointD Center => Cell.Center;
 
         /// <inheritdoc/>
-        public PointD Center => new PointD(Hex.Q * (sqrt7 + 1) / 2 + xs[(int) Pos], Hex.Q * (sqrt7 + 1) / 2 + Hex.R * (sqrt7 + 1) + ys[(int) Pos]);
-
-        /// <inheritdoc/>
-        public override string ToString() => $"{Hex};{(int) Pos}";
+        public override string ToString() => $"{Cell};{(int) Pos}";
 
         /// <summary>
         ///     Describes a grid structure consisting of <see cref="Cairo"/> cells that join up in groups of 4 to form
@@ -175,10 +142,10 @@ namespace RT.Coordinates
             }
 
             /// <summary>
-            ///     Constructs a <see cref="Grid"/> consisting of a hexagonal grid of the specified <paramref
-            ///     name="sideLength"/>.</summary>
-            public Grid(int sideLength)
-                : base(Cairo.LargeHexagon(sideLength))
+            ///     Constructs a <see cref="Grid"/> consisting of a rectangular grid of the specified <paramref name="width"/>
+            ///     and <paramref name="height"/>.</summary>
+            public Grid(int width, int height)
+                : base(Rectangle(width, height))
             {
             }
 
@@ -205,53 +172,54 @@ namespace RT.Coordinates
         /// <summary>Describes one of the vertices of a <see cref="Cairo"/>.</summary>
         public class Vertex : Coordinates.Vertex
         {
-            /// <summary>The <see cref="Hex"/> tile that this <see cref="Vertex"/> is within.</summary>
-            public Hex Hex { get; private set; }
-            /// <summary>Which position within the <see cref="Hex"/> this vertex is.</summary>
+            /// <summary>The <see cref="Cell"/> tile that this <see cref="Vertex"/> is within.</summary>
+            public Coord Cell { get; private set; }
+            /// <summary>Which position within the <see cref="Cell"/> this vertex is.</summary>
             public Position Pos { get; private set; }
 
             /// <summary>Constructor.</summary>
-            public Vertex(Hex hex, Position pos)
+            public Vertex(Coord cell, Position pos)
             {
-                Hex = hex;
+                Cell = cell;
                 Pos = pos;
             }
 
             /// <summary>
             ///     Describes the position of a <see cref="Vertex"/> in relation to the vertices of its containing <see
-            ///     cref="Hex"/>.</summary>
+            ///     cref="Cell"/>.</summary>
             public enum Position
             {
-                /// <summary>Midpoint of the lower-left edge of the hex.</summary>
-                MidBottomLeft,
-                /// <summary>Left vertex of the hex.</summary>
-                Left,
-                /// <summary>Midpoint of the upper-left edge of the hex.</summary>
-                MidTopLeft,
-                /// <summary>Top-left vertex of the hex.</summary>
-                TopLeft,
-                /// <summary>Top of the two Cairo vertices that are inside of the hexagon.</summary>
-                CenterTop,
-                /// <summary>Bottom of the two Cairo vertices that are inside of the hexagon.</summary>
-                CenterBottom
+                /// <summary>The vertex one clockwise from the top-left vertex of the referenced <see cref="Cell"/>.</summary>
+                TopLeftPlus1,
+                /// <summary>The vertex one counter-clockwise from <see cref="TopRight"/>.</summary>
+                TopRightMinus1,
+                /// <summary>The top-right vertex of the referenced <see cref="Cell"/>.</summary>
+                TopRight,
+                /// <summary>The vertex one clockwise from <see cref="TopRight"/>.</summary>
+                TopRightPlus1,
+                /// <summary>
+                ///     The vertex one counter-clockwise from the bottom-right vertex of the referenced <see cref="Cell"/>.</summary>
+                BottomRightMinus1,
+                /// <summary>The vertex at the center of the referenced <see cref="Cell"/>.</summary>
+                Center
             }
 
-            private const double sqrt7 = 2.6457513110645905905016157536392604257102591830825;
-            private const double h = (sqrt7 + 1) / 2;
-            private static readonly double[] xs = { -(sqrt7 + 1) / 4, -sqrt7 / 2, -(sqrt7 + 1) / 4, -.5, 0, 0 };
-            private static readonly double[] ys = { h / 2, 0, -h / 2, -h, -.5, .5 };
+            private const double x = .35714285714285714286; // = 5/14
+            private const double y = .12371791482634837811; // = √(3)/14
+            private static readonly double[] xs = { x, 1 - x, 1, 1 + y, 1 - y, .5 };
+            private static readonly double[] ys = { -y, y, 0, x, 1 - x, .5 };
 
             /// <inheritdoc/>
-            public override double X => Hex.Q * h + xs[(int) Pos];
+            public override double X => Cell.X + xs[(int) Pos];
             /// <inheritdoc/>
-            public override double Y => Hex.Q * h + Hex.R * (sqrt7 + 1) + ys[(int) Pos];
+            public override double Y => Cell.Y + ys[(int) Pos];
 
             /// <inheritdoc/>
-            public override bool Equals(Coordinates.Vertex other) => other is Vertex cv && cv.Hex.Equals(Hex) && cv.Pos == Pos;
+            public override bool Equals(Coordinates.Vertex other) => other is Vertex cv && cv.Cell.Equals(Cell) && cv.Pos == Pos;
             /// <inheritdoc/>
-            public override bool Equals(object obj) => obj is Vertex cv && cv.Hex.Equals(Hex) && cv.Pos == Pos;
+            public override bool Equals(object obj) => obj is Vertex cv && cv.Cell.Equals(Cell) && cv.Pos == Pos;
             /// <inheritdoc/>
-            public override int GetHashCode() => Hex.GetHashCode() * 11 + (int) Pos;
+            public override int GetHashCode() => unchecked(Cell.GetHashCode() * 7 + (int) Pos);
         }
     }
 }
