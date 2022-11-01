@@ -4,26 +4,21 @@ namespace RT.Coordinates
     public class GenericVertex : Vertex
     {
         private readonly object _baseObject;
-        private readonly double _x, _y;
+        private readonly PointD _point;
 
         /// <inheritdoc/>
-        public override double X => _x;
-        /// <inheritdoc/>
-        public override double Y => _y;
+        public override PointD Point => _point;
 
         /// <summary>
         ///     Constructor.</summary>
         /// <param name="baseObject">
         ///     A base object used for equality comparison. Note that differing vertices must use different objects here.</param>
-        /// <param name="x">
-        ///     The X coordinate of this vertex.</param>
-        /// <param name="y">
-        ///     The Y coordinate of this vertex.</param>
-        public GenericVertex(object baseObject, double x, double y)
+        /// <param name="point">
+        ///     The coordinates of this vertex.</param>
+        public GenericVertex(object baseObject, PointD point)
         {
             _baseObject = baseObject;
-            _x = x;
-            _y = y;
+            _point = point;
         }
 
         /// <inheritdoc/>

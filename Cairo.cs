@@ -9,7 +9,11 @@ namespace RT.Coordinates
     ///     hexagons. Each cairo is an irregular pentagon, one vertex of which can be thought of as the center of a square,
     ///     while the vertex two clockwise from that is a vertex of the same square. The remaining vertices are off from the
     ///     square’s edge but in such a way that 4 cairos make a flower-like shape which tiles the plane in a rectilinear
-    ///     pattern. The inner angles of each pentagon are 120°, 90°, 120°, 120°, and 90°.</summary>
+    ///     pattern.</summary>
+    /// <remarks>
+    ///     The length of each side of the pentagons is √2 (√7 − 1)/3, or about .7758146 (assuming a side length of 2 for the
+    ///     underlying squares). The inner angles of each pentagon are: 2π − 2arccos(1/4−√(7)/4) (apex; about 131.409°), 90°,
+    ///     arccos(1/4−√(7)/4) (about 114.296°), arccos(1/4−√(7)/4) again, and 90° again.</remarks>
     public struct Cairo : IEquatable<Cairo>, INeighbor<Cairo>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>Identifies a square. Each cairo forms one quarter of this square.</summary>
@@ -122,8 +126,21 @@ namespace RT.Coordinates
             _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.")
         };
 
+        private static readonly PointD[] _centers =
+        {
+            // The formula for the first one is:
+            //  x = 3/182 × √3 − 21/104
+            //  y = 1/52 × √3 − 269/728
+            // This point is halfway between (1/4, 1/4) and the intersection point of two of the pentagon’s diagonals.
+            // The others are 90° rotations of that about the origin.
+            new PointD(-0.1733727889, -0.3361968251),
+            new PointD(0.3361968251, -0.1733727889),
+            new PointD(0.1733727889, 0.3361968251),
+            new PointD(-0.3361968251, 0.1733727889)
+        };
+
         /// <inheritdoc/>
-        public PointD Center => Cell.Center;
+        public PointD Center => (Cell.Center + _centers[(int) Pos]) * 2;
 
         /// <inheritdoc/>
         public override string ToString() => $"{Cell};{(int) Pos}";
@@ -204,15 +221,13 @@ namespace RT.Coordinates
                 Center
             }
 
-            private const double x = .35714285714285714286; // = 5/14
-            private const double y = .12371791482634837811; // = √(3)/14
+            private const double x = .36285405741128411746; // = 7/12 − 1/12 √7    = x-difference between top-left vertex and next clockwise
+            private const double y = .13714594258871588254; // = 1/12 √7 − 1/12    = y-difference between top-left vertex and next clockwise
             private static readonly double[] xs = { x, 1 - x, 1, 1 + y, 1 - y, .5 };
             private static readonly double[] ys = { -y, y, 0, x, 1 - x, .5 };
 
             /// <inheritdoc/>
-            public override double X => Cell.X + xs[(int) Pos];
-            /// <inheritdoc/>
-            public override double Y => Cell.Y + ys[(int) Pos];
+            public override PointD Point => new PointD(Cell.X + xs[(int) Pos], Cell.Y + ys[(int) Pos]) * 2;
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex cv && cv.Cell.Equals(Cell) && cv.Pos == Pos;

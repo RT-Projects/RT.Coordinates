@@ -376,9 +376,7 @@ namespace RT.Coordinates
             }
 
             /// <inheritdoc/>
-            public override double X => Hex.Q * .75 + (Right ? .25 : -.25);
-            /// <inheritdoc/>
-            public override double Y => (Hex.Q * .5 + Hex.R - .5) * WidthToHeight;
+            public override PointD Point => new PointD(Hex.Q * .75 + (Right ? .25 : -.25), (Hex.Q * .5 + Hex.R - .5) * WidthToHeight);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex hv && hv.Hex == Hex && hv.Right == Right;

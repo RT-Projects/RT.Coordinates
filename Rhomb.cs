@@ -204,9 +204,9 @@ namespace RT.Coordinates
             public override int GetHashCode() => Hex.GetHashCode() * 13 + (int) Pos;
 
             /// <inheritdoc/>
-            public override double X => Hex.Q * 1.125 + (Pos switch { Position.TopLeft => -.375, Position.TopRight => .375, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") });
-            /// <inheritdoc/>
-            public override double Y => Hex.WidthToHeight * (Hex.Q * .75 + Hex.R * 1.5 + (Pos switch { Position.TopLeft => -.75, Position.TopRight => -.75, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") }));
+            public override PointD Point => new PointD(
+                Hex.Q * 1.125 + (Pos switch { Position.TopLeft => -.375, Position.TopRight => .375, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") }),
+                Hex.WidthToHeight * (Hex.Q * .75 + Hex.R * 1.5 + (Pos switch { Position.TopLeft => -.75, Position.TopRight => -.75, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") })));
         }
     }
 }

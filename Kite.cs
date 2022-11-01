@@ -214,9 +214,7 @@ namespace RT.Coordinates
             private static readonly double[] ys = { -.5, -.5, -.25, 0, .25, 0 };
 
             /// <inheritdoc/>
-            public override double X => (Hex.Q * .75 + xs[(int) Pos]) * 2;
-            /// <inheritdoc/>
-            public override double Y => (Hex.Q * .5 + Hex.R + ys[(int) Pos]) * Hex.WidthToHeight * 2;
+            public override PointD Point => new PointD((Hex.Q * .75 + xs[(int) Pos]) * 2, (Hex.Q * .5 + Hex.R + ys[(int) Pos]) * Hex.WidthToHeight * 2);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex kv && kv.Hex.Equals(Hex) && kv.Pos == Pos;

@@ -318,12 +318,8 @@ namespace RT.Coordinates
             private const double sin54 = .80901699437494742410;
             private const double cos54 = .58778525229247312918;
 
-            /// <summary>Returns the X-coordinate of the 2D point represented by this vector.</summary>
-            public double X => cos54 * (A + D) + cos18 * (B + C);
-            /// <summary>Returns the Y-coordinate of the 2D point represented by this vector.</summary>
-            public double Y => sin54 * (D - A) + sin18 * (C - B);
             /// <summary>Returns the 2D point represented by this vector.</summary>
-            public PointD Point => new PointD(X, Y);
+            public PointD Point => new PointD(cos54 * (A + D) + cos18 * (B + C), sin54 * (D - A) + sin18 * (C - B));
 
             /// <summary>Implicit operator converting <see cref="Vector"/> to <see cref="Vertex"/>.</summary>
             public static implicit operator Coordinates.Vertex(Vector v) => new Vertex(v);
@@ -367,9 +363,7 @@ namespace RT.Coordinates
             /// <inheritdoc/>
             public override int GetHashCode() => Vector.GetHashCode();
             /// <inheritdoc/>
-            public override double X => Vector.X;
-            /// <inheritdoc/>
-            public override double Y => Vector.Y;
+            public override PointD Point => Vector.Point;
         }
 
         /// <summary>Represents a grid of <see cref="Penrose"/> cells. The grid conforms to Penrose tiling P2 or P3.</summary>

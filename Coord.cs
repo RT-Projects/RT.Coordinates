@@ -277,9 +277,7 @@ namespace RT.Coordinates
             }
 
             /// <inheritdoc/>
-            public override double X => Cell.X;
-            /// <inheritdoc/>
-            public override double Y => Cell.Y;
+            public override PointD Point => new PointD(Cell.X, Cell.Y);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex cv && cv.Cell.Equals(Cell);

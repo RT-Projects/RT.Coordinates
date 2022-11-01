@@ -43,6 +43,9 @@ namespace RT.Coordinates
         ///     implement <see cref="IHasSvgGeometry"/>.</summary>
         public Func<object, PointD?> GetCenter;
 
+        /// <summary>Returns the 2D point for the specified vertex.</summary>
+        public Func<Vertex, PointD> GetVertexPoint = v => v.Point;
+
         /// <summary>Provides some additional SVG code to add at the start of the file.</summary>
         public string ExtraSvg1;
 

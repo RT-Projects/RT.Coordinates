@@ -228,9 +228,7 @@ namespace RT.Coordinates
             private static readonly double[] ys = { -0.494871659305394, -0.371153744479045, -0.433012701892219, -0.309294787065871, -0.123717914826348, 0, 0.185576872239522, 0.247435829652697, 0 };
 
             /// <inheritdoc/>
-            public override double X => (Hex.Q * .75 + xs[(int) Pos]) * 3;
-            /// <inheritdoc/>
-            public override double Y => ((Hex.Q * .5 + Hex.R) * Hex.WidthToHeight + ys[(int) Pos]) * 3;
+            public override PointD Point => new PointD((Hex.Q * .75 + xs[(int) Pos]) * 3, ((Hex.Q * .5 + Hex.R) * Hex.WidthToHeight + ys[(int) Pos]) * 3);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex kv && kv.Hex.Equals(Hex) && kv.Pos == Pos;

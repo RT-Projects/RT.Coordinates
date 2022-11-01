@@ -140,8 +140,9 @@ namespace RT.Coordinates
                     allEdges.AddSafe(edge, cell);
 
             var highlights = new StringBuilder();
-            StringBuilder addFill(TCell cell, string fill) => fill == null ? null : highlights.Append($"<path d='{svgPath(getEdges(cell, inf))}' fill='{fill}' stroke='none' />");
-            StringBuilder addFillAndOpacity(TCell cell, string fill, string opacity) => opacity == null ? addFill(cell, fill) : highlights.Append($"<path d='{svgPath(getEdges(cell, inf))}' fill='{fill}' fill-opacity='{opacity}' stroke='none' />");
+            var getVertexPoint = inf?.GetVertexPoint ?? (v => v.Point);
+            StringBuilder addFill(TCell cell, string fill) => fill == null ? null : highlights.Append($"<path d='{svgPath(getEdges(cell, inf), getVertexPoint)}' fill='{fill}' stroke='none' />");
+            StringBuilder addFillAndOpacity(TCell cell, string fill, string opacity) => opacity == null ? addFill(cell, fill) : highlights.Append($"<path d='{svgPath(getEdges(cell, inf), getVertexPoint)}' fill='{fill}' fill-opacity='{opacity}' stroke='none' />");
             StringBuilder addFillColor(TCell cell, SvgColor color) => addFillAndOpacity(cell, color.SvgFillColor, color.SvgFillOpacity);
             StringBuilder addFillObject(TCell cell, object fill) => fill == null ? null : fill is SvgColor color ? addFillColor(cell, color) : addFill(cell, fill.ToString());
 
@@ -194,14 +195,15 @@ namespace RT.Coordinates
                     tunnels.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
                 }
 
-            var outline = svgPath(outlineEdges);
-            var walls = svgPath(wallEdges);
-            var passages = svgPath(passageEdges);
+            var outline = svgPath(outlineEdges, inf?.GetVertexPoint);
+            var walls = svgPath(wallEdges, inf?.GetVertexPoint);
+            var passages = svgPath(passageEdges, inf?.GetVertexPoint);
 
-            var minX = allEdges.SelectMany(kvp => kvp.Key.Cells).Min(v => v.X);
-            var minY = allEdges.SelectMany(kvp => kvp.Key.Cells).Min(v => v.Y);
-            var maxX = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.X);
-            var maxY = allEdges.SelectMany(kvp => kvp.Key.Cells).Max(v => v.Y);
+            var allPoints = new HashSet<PointD>(allEdges.SelectMany(kvp => kvp.Key.Cells.Select(getVertexPoint)));
+            var minX = allPoints.Min(v => v.X);
+            var minY = allPoints.Min(v => v.Y);
+            var maxX = allPoints.Max(v => v.X);
+            var maxY = allPoints.Max(v => v.Y);
             return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}' font-size='.2' text-anchor='middle'>" +
                 inf?.ExtraSvg1 +
                 highlights +
@@ -313,17 +315,18 @@ namespace RT.Coordinates
                     yield return new SvgSegment(segments[i], closed[i]);
         }
 
-        private string svgPath(IEnumerable<Link<Vertex>> edges)
+        private string svgPath(IEnumerable<Link<Vertex>> edges, Func<Vertex, PointD> getVertexPoint)
         {
             var sb = new StringBuilder();
             foreach (var segment in combineSegments(edges))
             {
-                sb.AppendFormat("M{0} {1}", segment.Vertices[0].X, segment.Vertices[0].Y);
+                var p = getVertexPoint(segment.Vertices[0]);
+                sb.AppendFormat("M{0} {1}", p.X, p.Y);
                 for (var i = 1; i < segment.Vertices.Count; i++)
-                    sb.Append(segment.Vertices[i].SvgPathFragment(segment.Vertices[i - 1]));
+                    sb.Append(segment.Vertices[i].SvgPathFragment(segment.Vertices[i - 1], getVertexPoint, isLast: false));
                 if (segment.Closed)
                 {
-                    sb.Append(segment.Vertices[0].SvgPathFragment(segment.Vertices[segment.Vertices.Count - 1]));
+                    sb.Append(segment.Vertices[0].SvgPathFragment(segment.Vertices[segment.Vertices.Count - 1], getVertexPoint, isLast: true));
                     sb.Append("z");
                 }
             }

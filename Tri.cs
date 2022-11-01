@@ -196,9 +196,9 @@ namespace RT.Coordinates
             public override int GetHashCode() => unchecked(Tri.GetHashCode() + 47);
 
             /// <inheritdoc/>
-            public override double X => Tri.X * .5; // cos 60°
-            /// <inheritdoc/>
-            public override double Y => Tri.Y * 0.86602540378443864676372317075294; // sin 60°
+            public override PointD Point => new PointD(Tri.X * cos60, Tri.Y * sin60);
+            private const double cos60 = .5;
+            private const double sin60 = .86602540378443864676372317075294;
         }
     }
 }
