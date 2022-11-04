@@ -5,7 +5,11 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>
-    ///     Describes a cell in a <see cref="Grid"/>. Three cells of this kind form a hexagon, which in turn tiles the plane.</summary>
+    ///     <code type="raw">
+    ///         &lt;svg style='width:7cm;float:right' xmlns='http://www.w3.org/2000/svg' viewBox='-3.25 -3.06698729810778 7 7'&gt;&lt;path d='M4 -3.46410161513775L3.5 -2.59807621135332L2.5 -2.59807621135332L3 -3.46410161513775M2 -3.46410161513775L2.5 -2.59807621135332L1.5 -2.59807621135332L1 -3.46410161513775L0.5 -2.59807621135332L-0.5 -2.59807621135332L0 -3.46410161513775M3.5 -2.59807621135332L4 -1.73205080756888L3 -1.73205080756888L2.5 -2.59807621135332L2 -1.73205080756888L1 -1.73205080756888L1.5 -2.59807621135332M0.5 -2.59807621135332L1 -1.73205080756888L0 -1.73205080756888L-0.5 -2.59807621135332L-1 -1.73205080756888L-2 -1.73205080756888L-1.5 -2.59807621135332M4 -1.73205080756888L3.5 -0.866025403784439L2.5 -0.866025403784439L3 -1.73205080756888M2 -1.73205080756888L2.5 -0.866025403784439L1.5 -0.866025403784439L1 -1.73205080756888L0.5 -0.866025403784439L-0.5 -0.866025403784439L0 -1.73205080756888M3.5 -0.866025403784439L4 0L3 0L2.5 -0.866025403784439L2 0L1 0L1.5 -0.866025403784439M-2.5 -2.59807621135332L-2 -1.73205080756888L-3 -1.73205080756888L-3.5 -2.59807621135332L-2.5 -2.59807621135332L-2 -3.46410161513775L-1.5 -2.59807621135332L-0.5 -2.59807621135332L-1 -3.46410161513775M-1 -1.73205080756888L-0.5 -0.866025403784439L-1.5 -0.866025403784439L-2 -1.73205080756888L-2.5 -0.866025403784439L-3.5 -0.866025403784439L-3 -1.73205080756888M0.5 -0.866025403784439L1 0L0 0L-0.5 -0.866025403784439L-1 0L-2 0L-1.5 -0.866025403784439M4 0L3.5 0.866025403784439L2.5 0.866025403784439L3 0M2 0L2.5 0.866025403784439L1.5 0.866025403784439L1 0L0.5 0.866025403784439L-0.5 0.866025403784439L0 0M3.5 0.866025403784439L4 1.73205080756888L3 1.73205080756888L2.5 0.866025403784439L2 1.73205080756888L1 1.73205080756888L1.5 0.866025403784439M-2.5 -0.866025403784439L-2 0L-3 0L-3.5 -0.866025403784439M-1 0L-0.5 0.866025403784439L-1.5 0.866025403784439L-2 0L-2.5 0.866025403784439L-3.5 0.866025403784439L-3 0M0.5 0.866025403784439L1 1.73205080756888L0 1.73205080756888L-0.5 0.866025403784439L-1 1.73205080756888L-2 1.73205080756888L-1.5 0.866025403784439M4 1.73205080756888L3.5 2.59807621135332L2.5 2.59807621135332L3 1.73205080756888M2 1.73205080756888L2.5 2.59807621135332L1.5 2.59807621135332L1 1.73205080756888L0.5 2.59807621135332L-0.5 2.59807621135332L0 1.73205080756888M3.5 2.59807621135332L4 3.46410161513775L3 3.46410161513775L2.5 2.59807621135332L2 3.46410161513775L1 3.46410161513775L1.5 2.59807621135332M-2.5 0.866025403784439L-2 1.73205080756888L-3 1.73205080756888L-3.5 0.866025403784439M-1 1.73205080756888L-0.5 2.59807621135332L-1.5 2.59807621135332L-2 1.73205080756888L-2.5 2.59807621135332L-3.5 2.59807621135332L-3 1.73205080756888M0.5 2.59807621135332L1 3.46410161513775L0 3.46410161513775L-0.5 2.59807621135332L-1 3.46410161513775L-2 3.46410161513775L-1.5 2.59807621135332M2 3.46410161513775L2.5 4.33012701892219L3 3.46410161513775M-2.5 2.59807621135332L-2 3.46410161513775L-3 3.46410161513775L-3.5 2.59807621135332M1.5 4.33012701892219L1 3.46410161513775L0.5 4.33012701892219M-1 3.46410161513775L-0.5 4.33012701892219L0 3.46410161513775M-1.5 4.33012701892219L-2 3.46410161513775L-2.5 4.33012701892219M-3.5 4.33012701892219L-3 3.46410161513775' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</code>
+    ///     <para>
+    ///         Describes a cell in a <see cref="Grid"/>. Three cells of this kind form a hexagon, which in turn tiles the
+    ///         plane.</para></summary>
     public struct Rhomb : IEquatable<Rhomb>, INeighbor<Rhomb>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>The underlying hex tile. This rhomb forms one third of that hexagon.</summary>
@@ -122,8 +126,18 @@ namespace RT.Coordinates
             _ => throw new InvalidOperationException($"{nameof(Pos)} has an invalid value of {Pos}.")
         };
 
+        private static readonly PointD[] _ps = { new PointD(.25, -.433012701892220), new PointD(.25, .433012701892220), new PointD(-.5, 0) };
+
         /// <inheritdoc/>
-        public PointD Center => Hex.Center * 1.5;
+        public PointD Center => Hex.Center * 2 + _ps[(int) Pos];
+
+        private static readonly Position[] _rhombPositions = (Position[]) Enum.GetValues(typeof(Position));
+
+        /// <summary>
+        ///     Returns a collection of <see cref="Rhomb"/> tiles that form a larger hexagonal structure.</summary>
+        /// <param name="sideLength">
+        ///     Side length of the hexagon structure to produce.</param>
+        public static IEnumerable<Rhomb> LargeHexagon(int sideLength) => Hex.LargeHexagon(sideLength).SelectMany(hex => _rhombPositions.Select(pos => new Rhomb(hex, pos)));
 
         /// <summary>
         ///     Describes a grid structure consisting of <see cref="Rhomb"/> cells that join up in groups of 3 to form
@@ -141,12 +155,9 @@ namespace RT.Coordinates
             /// <summary>
             ///     Constructs a <see cref="Grid"/> consisting of a hexagonal grid of the specified <paramref
             ///     name="sideLength"/>.</summary>
-            public Grid(int sideLength)
-                : base(Hex.LargeHexagon(sideLength).SelectMany(hex => _rhombPositions.Select(pos => new Rhomb(hex, pos))))
+            public Grid(int sideLength) : base(LargeHexagon(sideLength))
             {
             }
-
-            private static readonly Position[] _rhombPositions = (Position[]) Enum.GetValues(typeof(Position));
 
             /// <inheritdoc/>
             protected override Structure<Rhomb> makeModifiedStructure(IEnumerable<Rhomb> cells, IEnumerable<Link<Rhomb>> traversible) => new Grid(cells, traversible);
@@ -205,8 +216,8 @@ namespace RT.Coordinates
 
             /// <inheritdoc/>
             public override PointD Point => new PointD(
-                Hex.Q * 1.125 + (Pos switch { Position.TopLeft => -.375, Position.TopRight => .375, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") }),
-                Hex.WidthToHeight * (Hex.Q * .75 + Hex.R * 1.5 + (Pos switch { Position.TopLeft => -.75, Position.TopRight => -.75, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") })));
+                Hex.Q * 1.5 + (Pos switch { Position.TopLeft => -.5, Position.TopRight => .5, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") }),
+                Hex.WidthToHeight * (Hex.Q + Hex.R * 2 + (Pos switch { Position.TopLeft => -1, Position.TopRight => -1, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") })));
         }
     }
 }

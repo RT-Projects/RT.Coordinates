@@ -46,6 +46,18 @@ namespace RT.Coordinates
         /// <summary>Returns the 2D point for the specified vertex.</summary>
         public Func<Vertex, PointD> GetVertexPoint = v => v.Point;
 
+        /// <summary>
+        ///     Returns the type of edge to use for a particular pair of vertices. The second parameter receives a list of the
+        ///     cells that share the vertex; this will be of runtime type <c>System.Collections.Generic.List&lt;TCell&gt;</c>,
+        ///     where <c>TCell</c> is the generic type argument used on <see cref="Structure{TCell}"/>.</summary>
+        /// <remarks>
+        ///     In cases where this is specified and the <see cref="Structure{TCell}"/> derived class also overrides <see
+        ///     cref="Structure{TCell}.svgEdgeType(Link{Vertex}, List{TCell})"/>, this delegate takes precedence.</remarks>
+        public Func<Link<Vertex>, IList, EdgeType> GetEdgeType = null;
+
+        /// <summary>Specifies the attributes on the main <c>&lt;svg&gt;</c> tag.</summary>
+        public string SvgAttributes = "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'";
+
         /// <summary>Provides some additional SVG code to add at the start of the file.</summary>
         public string ExtraSvg1;
 

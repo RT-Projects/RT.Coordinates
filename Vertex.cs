@@ -2,7 +2,13 @@ using System;
 
 namespace RT.Coordinates
 {
-    /// <summary>Describes a vertex in a 2D structure.</summary>
+    /// <summary>
+    ///     Describes a vertex in a 2D structure.</summary>
+    /// <remarks>
+    ///     <para>
+    ///         Use this to describe vertices abstractly, while <see cref="PointD"/> describes a concrete point in 2D space.
+    ///         This class is intended to allow vertices to be reliably compared for equality without the pitfall of
+    ///         floating-point rounding errors throwing off equality comparisons.</para></remarks>
     public abstract class Vertex : IEquatable<Vertex>
     {
         /// <summary>Returns the coordinates of this vertex in SVG space.</summary>

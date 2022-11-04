@@ -51,7 +51,7 @@ namespace RT.Coordinates
             {
                 _links = new HashSet<Link<TCell>>();
                 foreach (var cell in cells)
-                    foreach (var neighbor in getNeighbors != null ? getNeighbors(cell) : cell is INeighbor<TCell> cn ? cn.Neighbors : throw new InvalidOperationException($"The ‘{nameof(Structure<TCell>)}’ constructor expects that either ‘{nameof(links)}’ or ‘{nameof(getNeighbors)}’ is specified or that ‘{typeof(TCell).FullName}’ implements ‘{typeof(INeighbor<TCell>).FullName}’."))
+                    foreach (var neighbor in getNeighbors != null ? getNeighbors(cell) : cell is INeighbor<TCell> cn ? cn.Neighbors : throw new InvalidOperationException($"The ‘{nameof(Structure<TCell>)}’ constructor expects that either ‘{nameof(links)}’ or ‘{nameof(getNeighbors)}’ is specified or that every cell type (e.g. {cell.GetType().FullName}) implements ‘{typeof(INeighbor<TCell>).FullName}’."))
                         if (_cells.Contains(neighbor))
                             _links.Add(new Link<TCell>(cell, neighbor));
             }
@@ -174,7 +174,7 @@ namespace RT.Coordinates
             var passageEdges = new List<Link<Vertex>>();
 
             foreach (var kvp in allEdges)
-                (svgEdgeType(kvp.Key, kvp.Value) switch
+                ((inf?.GetEdgeType?.Invoke(kvp.Key, kvp.Value) ?? svgEdgeType(kvp.Key, kvp.Value)) switch
                 {
                     EdgeType.Outline => outlineEdges,
                     EdgeType.Passage => passageEdges,
@@ -183,35 +183,35 @@ namespace RT.Coordinates
                 })
                     .Add(kvp.Key);
 
-            var tunnels = new StringBuilder();
-            foreach (var tunnel in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
-                if (drawTunnel(tunnel))
+            var bridges = new StringBuilder();
+            foreach (var bridge in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
+                if (drawBridge(bridge))
                 {
-                    var c = tunnel.Cells.First();
+                    var c = bridge.Cells.First();
                     var start = getCenter(c, inf);
-                    var end = getCenter(tunnel.Other(c), inf);
+                    var end = getCenter(bridge.Other(c), inf);
                     var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
                     var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
-                    tunnels.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
+                    bridges.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
                 }
 
-            var outline = svgPath(outlineEdges, inf?.GetVertexPoint);
-            var walls = svgPath(wallEdges, inf?.GetVertexPoint);
-            var passages = svgPath(passageEdges, inf?.GetVertexPoint);
+            var outline = svgPath(outlineEdges, getVertexPoint);
+            var walls = svgPath(wallEdges, getVertexPoint);
+            var passages = svgPath(passageEdges, getVertexPoint);
 
             var allPoints = new HashSet<PointD>(allEdges.SelectMany(kvp => kvp.Key.Cells.Select(getVertexPoint)));
             var minX = allPoints.Min(v => v.X);
             var minY = allPoints.Min(v => v.Y);
             var maxX = allPoints.Max(v => v.X);
             var maxY = allPoints.Max(v => v.Y);
-            return $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='{minX - .1} {minY - .1} {maxX - minX + .2} {maxY - minY + .2}' font-size='.2' text-anchor='middle'>" +
+            return $"<svg {string.Format(inf?.SvgAttributes ?? "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'", minX - .1, minY - .1, maxX - minX + .2, maxY - minY + .2)}>" +
                 inf?.ExtraSvg1 +
                 highlights +
                 inf?.ExtraSvg2 +
-                (inf?.PassagesPath?.Invoke(passages) ?? $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />") +
-                (inf?.WallsPath?.Invoke(walls) ?? $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />") +
-                (inf?.OutlinePath?.Invoke(outline) ?? $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />") +
-                (tunnels.Length == 0 ? "" : $"<path d='{tunnels}' fill='none' stroke-width='.3' stroke='black' /><path d='{tunnels}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />") +
+                (passages.Length > 0 ? inf?.PassagesPath?.Invoke(passages) ?? $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />" : "") +
+                (walls.Length > 0 ? inf?.WallsPath?.Invoke(walls) ?? $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />" : "") +
+                (outline.Length > 0 ? inf?.OutlinePath?.Invoke(outline) ?? $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />" : "") +
+                (bridges.Length > 0 ? $"<path d='{bridges}' fill='none' stroke-width='.3' stroke='black' /><path d='{bridges}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />" : "") +
                 inf?.ExtraSvg3 +
                 (inf?.PerCell == null ? "" : _cells.Select(cell => processCellSvg(cell, inf)).JoinString()) +
                 inf?.ExtraSvg4 +
@@ -243,12 +243,12 @@ namespace RT.Coordinates
         protected virtual EdgeType svgEdgeType(Link<Vertex> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
 
         /// <summary>
-        ///     When overridden in a derived class, determines whether a tunnel should be drawn for the specified <paramref
+        ///     When overridden in a derived class, determines whether a bridge should be drawn for the specified <paramref
         ///     name="link"/>. This method is only called for links between cells that have no edges in common; otherwise,
         ///     <see cref="svgEdgeType(Link{Vertex}, List{TCell})"/> is called instead.</summary>
         /// <param name="link">
-        ///     Specifies the link for which to decide whether to draw a tunnel.</param>
-        protected virtual bool drawTunnel(Link<TCell> link) => true;
+        ///     Specifies the link for which to decide whether to draw a bridge.</param>
+        protected virtual bool drawBridge(Link<TCell> link) => true;
 
         private static IEnumerable<SvgSegment> combineSegments(IEnumerable<Link<Vertex>> edges)
         {
@@ -355,6 +355,8 @@ namespace RT.Coordinates
         public void RemoveCells(params TCell[] cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
         /// <summary>Removes the specified cells from this structure.</summary>
         public void RemoveCells(IEnumerable<TCell> cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
+        /// <summary>Removes all cells from this structure that match the specified <paramref name="predicate"/>.</summary>
+        public void RemoveCells(Predicate<TCell> predicate) { _cells.RemoveWhere(predicate); _links.RemoveWhere(l => l.Cells.Any(c => !_cells.Contains(c))); }
 
         /// <summary>Adds the specified cells to this structure.</summary>
         public void AddCell(TCell cell) { _cells.Add(cell); }

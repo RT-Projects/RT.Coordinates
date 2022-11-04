@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace RT.Coordinates
 {
-    /// <summary>Exposes a sequence of vertices that allow a cell to be rendered in SVG.</summary>
+    /// <summary>Exposes properties that allow a cell to be rendered in SVG.</summary>
     public interface IHasSvgGeometry
     {
         /// <summary>Returns a sequence of edges (line segments) describing the perimeter of the cell.</summary>

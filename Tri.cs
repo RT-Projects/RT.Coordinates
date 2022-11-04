@@ -5,7 +5,10 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>
-    ///     Represents a tile in a 2D triangular grid.</summary>
+    ///     <code type="raw">
+    ///         &lt;svg style='width:7cm;float:right' xmlns='http://www.w3.org/2000/svg' viewBox='0.25 0.39711432 7 7'&gt;&lt;path d='M0 0L0.75 1.29903810567666L-0.75 1.29903810567666M2.25 1.29903810567666L1.5 0L0.75 1.29903810567666zM3.75 1.29903810567666L3 0L2.25 1.29903810567666zM5.25 1.29903810567666L4.5 0L3.75 1.29903810567666zM6.75 1.29903810567666L6 0L5.25 1.29903810567666zM7.5 0L6.75 1.29903810567666L8.25 1.29903810567666M1.5 2.59807621135332L0.75 1.29903810567666L0 2.59807621135332zM3 2.59807621135332L2.25 1.29903810567666L1.5 2.59807621135332zM4.5 2.59807621135332L3.75 1.29903810567666L3 2.59807621135332zM6 2.59807621135332L5.25 1.29903810567666L4.5 2.59807621135332zM7.5 2.59807621135332L6.75 1.29903810567666L6 2.59807621135332zM0 2.59807621135332L0.75 3.89711431702997L-0.75 3.89711431702997M2.25 3.89711431702997L1.5 2.59807621135332L0.75 3.89711431702997zM3.75 3.89711431702997L3 2.59807621135332L2.25 3.89711431702997zM5.25 3.89711431702997L4.5 2.59807621135332L3.75 3.89711431702997zM6.75 3.89711431702997L6 2.59807621135332L5.25 3.89711431702997zM7.5 2.59807621135332L6.75 3.89711431702997L8.25 3.89711431702997M1.5 5.19615242270663L0.75 3.89711431702997L0 5.19615242270663zM3 5.19615242270663L2.25 3.89711431702997L1.5 5.19615242270663zM4.5 5.19615242270663L3.75 3.89711431702997L3 5.19615242270663zM6 5.19615242270663L5.25 3.89711431702997L4.5 5.19615242270663zM7.5 5.19615242270663L6.75 3.89711431702997L6 5.19615242270663zM0 5.19615242270663L0.75 6.49519052838329L-0.75 6.49519052838329M2.25 6.49519052838329L1.5 5.19615242270663L0.75 6.49519052838329zM3.75 6.49519052838329L3 5.19615242270663L2.25 6.49519052838329zM5.25 6.49519052838329L4.5 5.19615242270663L3.75 6.49519052838329zM6.75 6.49519052838329L6 5.19615242270663L5.25 6.49519052838329zM7.5 5.19615242270663L6.75 6.49519052838329L8.25 6.49519052838329M7.5 7.79422863405995L6.75 6.49519052838329L6 7.79422863405995L5.25 6.49519052838329L4.5 7.79422863405995L3.75 6.49519052838329L3 7.79422863405995L2.25 6.49519052838329L1.5 7.79422863405995L0.75 6.49519052838329L0 7.79422863405995' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</code>
+    ///     <para>
+    ///         Represents a tile in a 2D triangular grid.</para></summary>
     /// <remarks>
     ///     Represents a triangular tile in a two-dimensional grid in which the tiles alternative between being up-pointing
     ///     and down-pointing triangles. Each tri is represented as a pair of coordinates (X, Y), where X counts the tris in a
@@ -144,8 +147,11 @@ namespace RT.Coordinates
             ? new Coordinates.Vertex[] { new Vertex(this), new Vertex(new Tri(X + 1, Y + 1)), new Vertex(new Tri(X - 1, Y + 1)) }
             : new Coordinates.Vertex[] { new Vertex(new Tri(X - 1, Y)), new Vertex(new Tri(X + 1, Y)), new Vertex(new Tri(X, Y + 1)) };
 
+        private const double cos60 = .5;
+        private const double sin60 = .86602540378443864676372317075294;
+
         /// <inheritdoc/>
-        public PointD Center => new PointD(X / 2d, (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * 0.86602540378443864676372317075294);
+        public PointD Center => new PointD(X * (1.5d * cos60), (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * (1.5d * sin60));
 
         /// <inheritdoc/>
         public override string ToString() => $"({X}, {Y})";
@@ -196,9 +202,7 @@ namespace RT.Coordinates
             public override int GetHashCode() => unchecked(Tri.GetHashCode() + 47);
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(Tri.X * cos60, Tri.Y * sin60);
-            private const double cos60 = .5;
-            private const double sin60 = .86602540378443864676372317075294;
+            public override PointD Point => new PointD(Tri.X * cos60 * 1.5, Tri.Y * sin60 * 1.5);
         }
     }
 }

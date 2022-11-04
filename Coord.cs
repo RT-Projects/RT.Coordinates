@@ -4,7 +4,11 @@ using System.Linq;
 
 namespace RT.Coordinates
 {
-    /// <summary>Represents a square cell in a 2D rectilinear grid.</summary>
+    /// <summary>
+    ///     <code type="raw">
+    ///         &lt;svg style='width:7cm;float:right;margin-left:.5cm' xmlns='http://www.w3.org/2000/svg' viewBox='0.5 0.5 7 7'&gt;&lt;path d='M1 0L1 1L0 1M2 0L2 1L1 1L1 2L0 2M3 0L3 1L2 1L2 2L1 2L1 3L0 3M4 0L4 1L3 1L3 2L2 2L2 3L1 3L1 4L0 4M5 0L5 1L4 1L4 2L3 2L3 3L2 3L2 4L1 4L1 5L0 5M6 0L6 1L5 1L5 2L4 2L4 3L3 3L3 4L2 4L2 5L1 5L1 6L0 6M7 0L7 1L6 1L6 2L5 2L5 3L4 3L4 4L3 4L3 5L2 5L2 6L1 6L1 7L0 7M8 1L7 1L7 2L6 2L6 3L5 3L5 4L4 4L4 5L3 5L3 6L2 6L2 7L1 7L1 8M8 2L7 2L7 3L6 3L6 4L5 4L5 5L4 5L4 6L3 6L3 7L2 7L2 8M8 3L7 3L7 4L6 4L6 5L5 5L5 6L4 6L4 7L3 7L3 8M8 4L7 4L7 5L6 5L6 6L5 6L5 7L4 7L4 8M8 5L7 5L7 6L6 6L6 7L5 7L5 8M8 6L7 6L7 7L6 7L6 8M8 7L7 7L7 8' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</code>
+    ///     <para>
+    ///         Represents a square cell in a 2D rectilinear grid.</para></summary>
     public struct Coord : IEquatable<Coord>, INeighbor<Coord>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Coord, Coord.Direction>
     {
         /// <summary>Returns the X coordinate of the cell.</summary>
@@ -123,7 +127,7 @@ namespace RT.Coordinates
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Coord"/>, going clockwise from the top-left.</summary>
-        private Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
+        public Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
             new Vertex(X, Y),
             new Vertex(X + 1, Y),
@@ -143,6 +147,36 @@ namespace RT.Coordinates
         public IEnumerable<Coord> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
         private static readonly Coord[] _knightsMoveOffsets = { new Coord(1, -2), new Coord(2, -1), new Coord(2, 1), new Coord(1, 2), new Coord(-1, 2), new Coord(-2, 1), new Coord(-2, -1), new Coord(-1, -2) };
 
+        /// <summary>
+        ///     Tests whether this coordinate is within a given rectangular range.</summary>
+        /// <param name="width">
+        ///     The width of the rectangle to check.</param>
+        /// <param name="height">
+        ///     The height of the rectangle to check.</param>
+        /// <param name="left">
+        ///     The left edge of the rectangle to check.</param>
+        /// <param name="top">
+        ///     The top edge of the rectangle to check.</param>
+        /// <returns>
+        ///     Note that numerically, the <paramref name="width"/> and <paramref name="height"/> parameters are exclusive: a
+        ///     coordinate at (5, 0) is outside of a rectangle of width 5 and left edge 0.</returns>
+        public bool InRange(int width, int height, int left = 0, int top = 0) => X >= left && X - left < width && Y >= top && Y - top < height;
+
+        /// <summary>
+        ///     Returns the index that this coordinate would have in a rectangle of width <paramref name="width"/> in which
+        ///     the cells are numbered from 0 in reading order.</summary>
+        /// <param name="width">
+        ///     The width of the rectangle.</param>
+        /// <returns>
+        ///     This method does not check if <see cref="X"/> is within range. If it is not, the returned result is
+        ///     meaningless.</returns>
+        public int GetIndex(int width) => X + width * Y;
+
+        /// <summary>
+        ///     Calculates the Manhattan distance between this coordinate and <paramref name="other"/>. This is the number of
+        ///     orthogonal steps required to reach one from the other.</summary>
+        public int ManhattanDistance(Coord other) => Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
+
         /// <summary>Describes a 2D grid of square cells.</summary>
         public class Grid : Structure<Coord>
         {
@@ -155,8 +189,8 @@ namespace RT.Coordinates
             }
 
             /// <summary>
-            ///     Constructs a rectilinear grid that is <paramref name="width"/> cells wide and <paramref name="height"/> cells
-            ///     tall.</summary>
+            ///     Constructs a rectilinear grid that is <paramref name="width"/> cells wide and <paramref name="height"/>
+            ///     cells tall.</summary>
             /// <param name="width">
             ///     Width of the grid.</param>
             /// <param name="height">
@@ -245,7 +279,7 @@ namespace RT.Coordinates
             }
 
             /// <inheritdoc/>
-            protected override bool drawTunnel(Link<Coord> link)
+            protected override bool drawBridge(Link<Coord> link)
             {
                 var c = link.Cells.First();
                 var d = link.Other(c);
@@ -314,5 +348,10 @@ namespace RT.Coordinates
         public static readonly IEnumerable<Direction> DiagonalDirections = new[] { Direction.UpRight, Direction.DownRight, Direction.DownLeft, Direction.UpLeft };
         /// <summary>Provides a collection of all directions.</summary>
         public static readonly IEnumerable<Direction> AllDirections = (Direction[]) Enum.GetValues(typeof(Direction));
+
+        /// <summary>Addition operator.</summary>
+        public static Coord operator +(Coord one, Coord two) => new Coord(one.X + two.X, one.Y + two.Y);
+        /// <summary>Subtraction operator.</summary>
+        public static Coord operator -(Coord one, Coord two) => new Coord(one.X - two.X, one.Y - two.Y);
     }
 }
