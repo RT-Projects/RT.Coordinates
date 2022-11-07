@@ -37,8 +37,8 @@ namespace RT.Coordinates
         ///     The number of octagons in the y direction.</param>
         public static IEnumerable<OctoCell> Rectangle(int width, int height)
         {
-            for (var x = 0; x < width; x++)
-                for (var y = 0; y < height; y++)
+            for (var y = 0; y < height; y++)
+                for (var x = 0; x < width; x++)
                 {
                     yield return new OctoCell(x, y, false);
                     if (x < width - 1 && y < height - 1)

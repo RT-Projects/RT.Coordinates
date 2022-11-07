@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace RT.Coordinates
 {
     /// <summary>Contains some extension methods.</summary>
-    public static class Extensions
+    public static class GridUtils
     {
         /// <summary>
         ///     Given the output from <see cref="Structure{TCell}.FindPath(TCell, TCell)"/>, reconstructs a path from the
@@ -71,8 +72,7 @@ namespace RT.Coordinates
                 structure.Cells.Where(c => c.Count > 1 || !combo.Contains(c.First())).Concat(new CombinedCell<TCell>[] { combo }),
                 structure.Links.Select(link =>
                 {
-                    var cc1 = link.Cells.First();
-                    var cc2 = link.Other(cc1);
+                    var (cc1, cc2) = link;
                     var c1 = cc1.First();
                     var c2 = cc2.First();
                     if (cc1.Count == 1 && combo.Contains(c1))
@@ -199,5 +199,95 @@ namespace RT.Coordinates
         /// <param name="amount">
         ///     Number of 60° turns to perform. Use negative numbers to go counter-clockwise.</param>
         public static Hex.Direction Clockwise(this Hex.Direction dir, int amount = 1) => (Hex.Direction) ((((int) dir + amount) % 6 + 6) % 6);
+
+        /// <summary>
+        ///     Returns an SVG path string (usable in the <c>d</c> attribute of a <c>&lt;path&gt;</c> element) that draws all
+        ///     of the specified edges.</summary>
+        /// <param name="edges">
+        ///     A set of edges to render.</param>
+        /// <param name="getVertexPoint">
+        ///     An optional function that can customize the coordinates of each vertex.</param>
+        public static string SvgEdgesPath(IEnumerable<Link<Vertex>> edges, Func<Vertex, PointD> getVertexPoint = null)
+        {
+            getVertexPoint ??= (v => v.Point);
+            var sb = new StringBuilder();
+            foreach (var segment in combineSegments(edges))
+            {
+                var p = getVertexPoint(segment.Vertices[0]);
+                sb.AppendFormat("M{0} {1}", p.X, p.Y);
+                for (var i = 1; i < segment.Vertices.Count; i++)
+                    sb.Append(segment.Vertices[i].SvgPathFragment(segment.Vertices[i - 1], getVertexPoint, isLast: false));
+                if (segment.Closed)
+                {
+                    sb.Append(segment.Vertices[0].SvgPathFragment(segment.Vertices[segment.Vertices.Count - 1], getVertexPoint, isLast: true));
+                    sb.Append("z");
+                }
+            }
+            return sb.ToString();
+        }
+
+        private static IEnumerable<SvgSegment> combineSegments(IEnumerable<Link<Vertex>> edges)
+        {
+            var segments = new List<List<Vertex>>();
+            var closed = new List<bool>();
+            var endPoints = new Dictionary<Vertex, int>();
+
+            foreach (var edge in edges)
+            {
+                var (v1, v2) = edge;
+                if (endPoints.TryGetValue(v1, out var ix1))
+                {
+                    if (endPoints.TryGetValue(v2, out var ix2))
+                    {
+                        if (ix1 == ix2)
+                        {
+                            // The edge completes a closed loop
+                            closed[ix1] = true;
+                        }
+                        else
+                        {
+                            // The edge connects two existing segments
+                            if (segments[ix1][0].Equals(v1))
+                                segments[ix1].Reverse();
+                            segments[ix1].AddRange(segments[ix2][0].Equals(v2) ? segments[ix2] : segments[ix2].AsEnumerable().Reverse());
+                            segments[ix2] = null;
+                            endPoints[segments[ix1].Last()] = ix1;
+                        }
+                        endPoints.Remove(v1);
+                        endPoints.Remove(v2);
+                    }
+                    else
+                    {
+                        if (segments[ix1][0].Equals(v1))
+                            segments[ix1].Insert(0, v2);
+                        else
+                            segments[ix1].Add(v2);
+                        endPoints.Remove(v1);
+                        endPoints[v2] = ix1;
+                    }
+                }
+                else if (endPoints.TryGetValue(v2, out var ix2))
+                {
+                    if (segments[ix2][0].Equals(v2))
+                        segments[ix2].Insert(0, v1);
+                    else
+                        segments[ix2].Add(v1);
+                    endPoints.Remove(v2);
+                    endPoints[v1] = ix2;
+                }
+                else
+                {
+                    // This is an entirely new segment
+                    endPoints[v1] = segments.Count;
+                    endPoints[v2] = segments.Count;
+                    segments.Add(new List<Vertex> { v1, v2 });
+                    closed.Add(false);
+                }
+            }
+
+            for (var i = 0; i < segments.Count; i++)
+                if (segments[i] != null)
+                    yield return new SvgSegment(segments[i], closed[i]);
+        }
     }
 }

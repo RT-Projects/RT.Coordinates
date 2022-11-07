@@ -141,8 +141,8 @@ namespace RT.Coordinates
 
             var highlights = new StringBuilder();
             var getVertexPoint = inf?.GetVertexPoint ?? (v => v.Point);
-            StringBuilder addFill(TCell cell, string fill) => fill == null ? null : highlights.Append($"<path d='{svgPath(getEdges(cell, inf), getVertexPoint)}' fill='{fill}' stroke='none' />");
-            StringBuilder addFillAndOpacity(TCell cell, string fill, string opacity) => opacity == null ? addFill(cell, fill) : highlights.Append($"<path d='{svgPath(getEdges(cell, inf), getVertexPoint)}' fill='{fill}' fill-opacity='{opacity}' stroke='none' />");
+            StringBuilder addFill(TCell cell, string fill) => fill == null ? null : highlights.Append($"<path d='{GridUtils.SvgEdgesPath(getEdges(cell, inf), getVertexPoint)}' fill='{fill}' stroke='none' />");
+            StringBuilder addFillAndOpacity(TCell cell, string fill, string opacity) => opacity == null ? addFill(cell, fill) : highlights.Append($"<path d='{GridUtils.SvgEdgesPath(getEdges(cell, inf), getVertexPoint)}' fill='{fill}' fill-opacity='{opacity}' stroke='none' />");
             StringBuilder addFillColor(TCell cell, SvgColor color) => addFillAndOpacity(cell, color.SvgFillColor, color.SvgFillOpacity);
             StringBuilder addFillObject(TCell cell, object fill) => fill == null ? null : fill is SvgColor color ? addFillColor(cell, color) : addFill(cell, fill.ToString());
 
@@ -170,36 +170,75 @@ namespace RT.Coordinates
                     addFillColor(cell, fnc3(cell));
 
             var outlineEdges = new List<Link<Vertex>>();
+            var outlineCells = new List<TCell>();
             var wallEdges = new List<Link<Vertex>>();
+            var wallLinks = new List<Link<TCell>>();
             var passageEdges = new List<Link<Vertex>>();
+            var passageLinks = new List<Link<TCell>>();
 
             foreach (var kvp in allEdges)
-                ((inf?.GetEdgeType?.Invoke(kvp.Key, kvp.Value) ?? svgEdgeType(kvp.Key, kvp.Value)) switch
+            {
+                EdgeType edgeType;
+                TCell cell1, cell2;
+                var objInf = inf?.GetEdgeType?.Invoke(kvp.Key, kvp.Value);
+                if (objInf == null)
+                    (edgeType, cell1, cell2) = svgEdgeType(kvp.Key, kvp.Value);
+                else
                 {
-                    EdgeType.Outline => outlineEdges,
-                    EdgeType.Passage => passageEdges,
-                    EdgeType.Wall => wallEdges,
-                    EdgeType e => throw new InvalidOperationException($"Invalid {nameof(EdgeType)} value encountered: {e}")
-                })
-                    .Add(kvp.Key);
+                    edgeType = objInf.Value.EdgeType;
+                    cell1 = (TCell) objInf.Value.Cell1;
+                    cell2 = (TCell) objInf.Value.Cell2;
+                }
+
+                switch (edgeType)
+                {
+                    case EdgeType.Outline:
+                        outlineEdges.Add(kvp.Key);
+                        outlineCells.Add(cell1);
+                        break;
+                    case EdgeType.Passage:
+                        passageEdges.Add(kvp.Key);
+                        passageLinks.Add(new Link<TCell>(cell1, cell2));
+                        break;
+                    case EdgeType.Wall:
+                        wallEdges.Add(kvp.Key);
+                        wallLinks.Add(new Link<TCell>(cell1, cell2));
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Invalid {nameof(EdgeType)} value encountered: {edgeType}");
+                }
+            }
 
             var bridges = new StringBuilder();
             foreach (var bridge in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
                 if (drawBridge(bridge))
                 {
-                    var c = bridge.Cells.First();
-                    var start = getCenter(c, inf);
-                    var end = getCenter(bridge.Other(c), inf);
-                    var control1 = ((start * 2 + end) / 3 - start).RotateDeg(30) + start;
-                    var control2 = ((start + end * 2) / 3 - end).RotateDeg(-30) + end;
-                    bridges.Append($"M{start.X} {start.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {end.X} {end.Y}");
+                    var (cell1, cell2) = bridge;
+                    var center1 = getCenter(cell1, inf);
+                    var center2 = getCenter(cell2, inf);
+                    bridges.Append(inf?.BridgeSvg?.Invoke(cell1, center1, cell2, center2) ?? SvgInstructions.DrawBridge(center1, center2));
                 }
 
-            var outline = svgPath(outlineEdges, getVertexPoint);
-            var walls = svgPath(wallEdges, getVertexPoint);
-            var passages = svgPath(passageEdges, getVertexPoint);
+            // Slightly dirty trick using inline assignment to ensure that ‘path’ is evaluated only once and only if needed:
+            //  • If ‘inf?.OutlineSeparate ?? false’ is false, it should not be evaluated at all, because we don’t need it and GridUtils.SvgEdgesPath() is costly
+            //  • If ‘inf?.OutlinePath’ is null, the invocation is skipped and ‘path’ remains null, so GridUtils.SvgEdgesPath() will get evaluated inside the default string
+            //  • If ‘inf?.OutlinePath’ is not null, ‘path’ will get assigned in the invocation parameter list; but if that invocation RETURNS null, we need to re-use the value in the default string
+            string path = null;
+            var outline = outlineEdges.Count == 0 ? "" : (inf?.OutlineSeparate ?? false)
+                ? outlineEdges.Select((edge, ix) => inf.OutlinePaths(svgEdgePath(edge, getVertexPoint), outlineCells[ix])).JoinString()
+                : inf?.OutlinePath?.Invoke(path = GridUtils.SvgEdgesPath(outlineEdges, getVertexPoint)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(outlineEdges, getVertexPoint)}' fill='none' stroke-width='.1' stroke='black' />";
 
-            var allPoints = new HashSet<PointD>(allEdges.SelectMany(kvp => kvp.Key.Cells.Select(getVertexPoint)));
+            path = null;
+            var walls = wallEdges.Count == 0 ? "" : (inf?.WallsSeparate ?? false)
+                ? wallEdges.Select((edge, ix) => inf.WallsPaths(svgEdgePath(edge, getVertexPoint), wallLinks[ix].Apart(out var cc), cc)).JoinString()
+                : inf?.WallsPath?.Invoke(path = GridUtils.SvgEdgesPath(wallEdges, getVertexPoint)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(wallEdges, getVertexPoint)}' fill='none' stroke-width='.05' stroke='black' />";
+
+            path = null;
+            var passages = passageEdges.Count == 0 ? "" : (inf?.PassagesSeparate ?? false)
+                ? passageEdges.Select((edge, ix) => inf.PassagesPaths(svgEdgePath(edge, getVertexPoint), passageLinks[ix].Apart(out var cc), cc)).JoinString()
+                : inf?.PassagesPath?.Invoke(path = GridUtils.SvgEdgesPath(passageEdges, getVertexPoint)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(passageEdges, getVertexPoint)}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />";
+
+            var allPoints = allEdges.SelectMany(kvp => kvp.Key.Cells.Select(getVertexPoint)).ToList();
             var minX = allPoints.Min(v => v.X);
             var minY = allPoints.Min(v => v.Y);
             var maxX = allPoints.Max(v => v.X);
@@ -208,10 +247,10 @@ namespace RT.Coordinates
                 inf?.ExtraSvg1 +
                 highlights +
                 inf?.ExtraSvg2 +
-                (passages.Length > 0 ? inf?.PassagesPath?.Invoke(passages) ?? $"<path d='{passages}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />" : "") +
-                (walls.Length > 0 ? inf?.WallsPath?.Invoke(walls) ?? $"<path d='{walls}' fill='none' stroke-width='.05' stroke='black' />" : "") +
-                (outline.Length > 0 ? inf?.OutlinePath?.Invoke(outline) ?? $"<path d='{outline}' fill='none' stroke-width='.1' stroke='black' />" : "") +
-                (bridges.Length > 0 ? $"<path d='{bridges}' fill='none' stroke-width='.3' stroke='black' /><path d='{bridges}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />" : "") +
+                passages +
+                walls +
+                outline +
+                bridges +
                 inf?.ExtraSvg3 +
                 (inf?.PerCell == null ? "" : _cells.Select(cell => processCellSvg(cell, inf)).JoinString()) +
                 inf?.ExtraSvg4 +
@@ -240,7 +279,14 @@ namespace RT.Coordinates
         ///     The edge.</param>
         /// <param name="cells">
         ///     The set of cells adjacent to this edge, in no guaranteed order.</param>
-        protected virtual EdgeType svgEdgeType(Link<Vertex> edge, List<TCell> cells) => cells.Count == 1 ? EdgeType.Outline : cells.Count == 2 && _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall;
+        /// <returns>
+        ///     An <see cref="EdgeInfo{TCell}"/> structure that determines the desired edge type via <see
+        ///     cref="EdgeInfo{TCell}.EdgeType"/> and the adjacent cell(s) via <see cref="EdgeInfo{TCell}.Cell1"/> and
+        ///     (optionally) <see cref="EdgeInfo{TCell}.Cell2"/>.</returns>
+        protected virtual EdgeInfo<TCell> svgEdgeType(Link<Vertex> edge, List<TCell> cells) =>
+            cells == null || cells.Count == 0 ? throw new InvalidOperationException($"‘{nameof(cells)}’ cannot be null or empty.") : cells.Count == 1
+                ? new EdgeInfo<TCell> { EdgeType = EdgeType.Outline, Cell1 = cells[0] }
+                : new EdgeInfo<TCell> { EdgeType = _links.Contains(new Link<TCell>(cells[0], cells[1])) ? EdgeType.Passage : EdgeType.Wall, Cell1 = cells[0], Cell2 = cells[1] };
 
         /// <summary>
         ///     When overridden in a derived class, determines whether a bridge should be drawn for the specified <paramref
@@ -250,87 +296,11 @@ namespace RT.Coordinates
         ///     Specifies the link for which to decide whether to draw a bridge.</param>
         protected virtual bool drawBridge(Link<TCell> link) => true;
 
-        private static IEnumerable<SvgSegment> combineSegments(IEnumerable<Link<Vertex>> edges)
+        private string svgEdgePath(Link<Vertex> segment, Func<Vertex, PointD> getVertexPoint)
         {
-            var segments = new List<List<Vertex>>();
-            var closed = new List<bool>();
-            var endPoints = new Dictionary<Vertex, int>();
-
-            foreach (var edge in edges)
-            {
-                var v1 = edge.Cells.First();
-                var v2 = edge.Other(v1);
-                if (endPoints.TryGetValue(v1, out var ix1))
-                {
-                    if (endPoints.TryGetValue(v2, out var ix2))
-                    {
-                        if (ix1 == ix2)
-                        {
-                            // The edge completes a closed loop
-                            closed[ix1] = true;
-                        }
-                        else
-                        {
-                            // The edge connects two existing segments
-                            if (segments[ix1][0].Equals(v1))
-                                segments[ix1].Reverse();
-                            segments[ix1].AddRange(segments[ix2][0].Equals(v2) ? segments[ix2] : segments[ix2].AsEnumerable().Reverse());
-                            segments[ix2] = null;
-                            endPoints[segments[ix1].Last()] = ix1;
-                        }
-                        endPoints.Remove(v1);
-                        endPoints.Remove(v2);
-                    }
-                    else
-                    {
-                        if (segments[ix1][0].Equals(v1))
-                            segments[ix1].Insert(0, v2);
-                        else
-                            segments[ix1].Add(v2);
-                        endPoints.Remove(v1);
-                        endPoints[v2] = ix1;
-                    }
-                }
-                else if (endPoints.TryGetValue(v2, out var ix2))
-                {
-                    if (segments[ix2][0].Equals(v2))
-                        segments[ix2].Insert(0, v1);
-                    else
-                        segments[ix2].Add(v1);
-                    endPoints.Remove(v2);
-                    endPoints[v1] = ix2;
-                }
-                else
-                {
-                    // This is an entirely new segment
-                    endPoints[v1] = segments.Count;
-                    endPoints[v2] = segments.Count;
-                    segments.Add(new List<Vertex> { v1, v2 });
-                    closed.Add(false);
-                }
-            }
-
-            for (var i = 0; i < segments.Count; i++)
-                if (segments[i] != null)
-                    yield return new SvgSegment(segments[i], closed[i]);
-        }
-
-        private string svgPath(IEnumerable<Link<Vertex>> edges, Func<Vertex, PointD> getVertexPoint)
-        {
-            var sb = new StringBuilder();
-            foreach (var segment in combineSegments(edges))
-            {
-                var p = getVertexPoint(segment.Vertices[0]);
-                sb.AppendFormat("M{0} {1}", p.X, p.Y);
-                for (var i = 1; i < segment.Vertices.Count; i++)
-                    sb.Append(segment.Vertices[i].SvgPathFragment(segment.Vertices[i - 1], getVertexPoint, isLast: false));
-                if (segment.Closed)
-                {
-                    sb.Append(segment.Vertices[0].SvgPathFragment(segment.Vertices[segment.Vertices.Count - 1], getVertexPoint, isLast: true));
-                    sb.Append("z");
-                }
-            }
-            return sb.ToString();
+            var f = segment.Cells.First();
+            var p = getVertexPoint(f);
+            return string.Format("M{0} {1}{2}", p.X, p.Y, segment.Other(f).SvgPathFragment(f, getVertexPoint, isLast: false));
         }
 
         /// <summary>Adds the specified link to this structure.</summary>
@@ -422,7 +392,7 @@ namespace RT.Coordinates
         ///         Note that the type of the structure changes from <c>Structure&lt;TCell&gt;</c> to
         ///         <c>Structure&lt;CombinedCell&lt;TCell&gt;&gt;</c>. If you wish to combine multiple groups of cells, call
         ///         this overload with zero parameters first just to change the type, then subsequently use <see
-        ///         cref="Extensions.CombineCells{TCell}(Structure{CombinedCell{TCell}}, TCell[])"/> to combine each group.
+        ///         cref="GridUtils.CombineCells{TCell}(Structure{CombinedCell{TCell}}, TCell[])"/> to combine each group.
         ///         The following example code illustrates this principle by creating a grid in which some horizontal or
         ///         vertical pairs of cells are combined:</para>
         ///     <code>
@@ -446,13 +416,12 @@ namespace RT.Coordinates
             if (combo.Count == 0)
                 return new Structure<CombinedCell<TCell>>(
                     _cells.Select(c => new CombinedCell<TCell>(c)),
-                    _links.Select(link => { var c = link.Cells.First(); return new Link<CombinedCell<TCell>>(new CombinedCell<TCell>(c), new CombinedCell<TCell>(link.Other(c))); }));
+                    _links.Select(link => new Link<CombinedCell<TCell>>(new CombinedCell<TCell>(link.Apart(out var other)), new CombinedCell<TCell>(other))));
             return new Structure<CombinedCell<TCell>>(
                 _cells.Where(c => !combo.Contains(c)).Select(c => new CombinedCell<TCell>(c)).Concat(new CombinedCell<TCell>[] { combo }),
                 _links.Select(link =>
                 {
-                    var c1 = link.Cells.First();
-                    var c2 = link.Other(c1);
+                    var (c1, c2) = link;
                     if (combo.Contains(c1))
                         return combo.Contains(c2) ? null : new Link<CombinedCell<TCell>>(combo, new CombinedCell<TCell>(c2)).Nullable();
                     if (combo.Contains(c2))

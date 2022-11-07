@@ -53,7 +53,7 @@ namespace RT.Coordinates
         /// <remarks>
         ///     In cases where this is specified and the <see cref="Structure{TCell}"/> derived class also overrides <see
         ///     cref="Structure{TCell}.svgEdgeType(Link{Vertex}, List{TCell})"/>, this delegate takes precedence.</remarks>
-        public Func<Link<Vertex>, IList, EdgeType> GetEdgeType = null;
+        public Func<Link<Vertex>, IList, EdgeInfo<object>> GetEdgeType = null;
 
         /// <summary>Specifies the attributes on the main <c>&lt;svg&gt;</c> tag.</summary>
         public string SvgAttributes = "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'";
@@ -74,18 +74,70 @@ namespace RT.Coordinates
         public string ExtraSvg4;
 
         /// <summary>
-        ///     Generates the SVG path object for passable edges between cells. The function parameter is the path’s <c>d</c>
-        ///     attribute.</summary>
-        public Func<string, string> PassagesPath = d => $"<path d='{d}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />";
+        ///     If <c>true</c>, <see cref="PassagesPaths"/> is used to render each passable edge separately. Otherwise, <see
+        ///     cref="PassagesPath"/> is used to render all passable edges as a single SVG path.</summary>
+        public bool PassagesSeparate = false;
 
         /// <summary>
-        ///     Generates the SVG path object for impassable edges between cells (walls). The function parameter is the path’s
-        ///     <c>d</c> attribute.</summary>
+        ///     Generates the SVG path object for passable edges between cells, assuming <see cref="PassagesSeparate"/> is
+        ///     <c>false</c>. The function is invoked once only. The function parameter is the path’s <c>d</c> attribute,
+        ///     describing the entirety of all passages in the structure.</summary>
+        public Func<string, string> PassagesPath = d => $"<path d='{d}' fill='none' stroke-width='.02' stroke='#aaa' stroke-dasharray='.1' />";
+
+        /// <summary>
+        ///     Generates SVG path objects for passable edges between cells, assuming <see cref="PassagesSeparate"/> is
+        ///     <c>true</c>. The function is invoked once for each separate passable edge. The first function parameter is the
+        ///     path’s <c>d</c> attribute. The remaining parameters are the two cells connected by the passage, in no
+        ///     particular order.</summary>
+        public Func<string, object, object, string> PassagesPaths = (d, c1, c2) => $"<path d='{d}' fill='none' stroke-width='.02' stroke='#aaa' stroke-dasharray='.1' />";
+
+        /// <summary>
+        ///     If <c>true</c>, <see cref="WallsPaths"/> is used to render each impassable edge (wall) separately. Otherwise,
+        ///     <see cref="WallsPath"/> is used to render all impassable edges (walls) as a single SVG path.</summary>
+        public bool WallsSeparate = false;
+
+        /// <summary>
+        ///     Generates the SVG path object for impassable edges (walls) between cells, assuming <see cref="WallsSeparate"/>
+        ///     is <c>false</c>. The function is invoked once only. The function parameter is the path’s <c>d</c> attribute,
+        ///     describing the entirety of all walls in the structure.</summary>
         public Func<string, string> WallsPath = d => $"<path d='{d}' fill='none' stroke-width='.05' stroke='black' />";
 
         /// <summary>
-        ///     Generates the SVG path object for the outline of the structure. The function parameter is the path’s <c>d</c>
-        ///     attribute.</summary>
+        ///     Generates SVG path objects for impassable edges (walls) between cells, assuming <see cref="WallsSeparate"/> is
+        ///     <c>true</c>. The function is invoked once for each separate impassable edge (wall). The first function
+        ///     parameter is the path’s <c>d</c> attribute. The remaining parameters are the two cells on either side of the
+        ///     wall, in no particular order.</summary>
+        public Func<string, object, object, string> WallsPaths = (d, c1, c2) => $"<path d='{d}' fill='none' stroke-width='.05' stroke='black' />";
+
+        /// <summary>
+        ///     If <c>true</c>, <see cref="OutlinePaths"/> is used to render each edge of the outline (perimeter) separately.
+        ///     Otherwise, <see cref="OutlinePath"/> is used to render the entire outline as a single SVG path.</summary>
+        public bool OutlineSeparate = false;
+
+        /// <summary>
+        ///     Generates the SVG path object for the structure’s outline (perimeter), assuming <see cref="OutlineSeparate"/>
+        ///     is <c>false</c>. The function is invoked once only. The function parameter is the path’s <c>d</c> attribute,
+        ///     describing the entirety of the outline of the structure.</summary>
         public Func<string, string> OutlinePath = d => $"<path d='{d}' fill='none' stroke-width='.1' stroke='black' />";
+
+        /// <summary>
+        ///     Generates SVG path objects for each segment of the outline (perimeter), assuming <see cref="OutlineSeparate"/>
+        ///     is <c>true</c>. The function is invoked once for each separate edge along the perimeter. The first function
+        ///     parameter is the path’s <c>d</c> attribute. The second parameter is the cell the edge belongs to.</summary>
+        public Func<string, object, string> OutlinePaths = (d, c) => $"<path d='{d}' fill='none' stroke-width='.1' stroke='black' />";
+
+        /// <summary>
+        ///     Generates SVG code for a bridge — a connection between cells that have no edges in common. The first and third
+        ///     parameter are the cells; the second and fourth are their center points.</summary>
+        public Func<object, PointD, object, PointD, string> BridgeSvg = null;
+
+        /// <summary>Provides a default implementation for <see cref="BridgeSvg"/>.</summary>
+        public static string DrawBridge(PointD center1, PointD center2)
+        {
+            var control1 = ((center1 * 2 + center2) / 3 - center1).RotateDeg(30) + center1;
+            var control2 = ((center1 + center2 * 2) / 3 - center2).RotateDeg(-30) + center2;
+            var d = $"M{center1.X} {center1.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {center2.X} {center2.Y}";
+            return $"<path d='{d}' fill='none' stroke-width='.3' stroke='black' /><path d='{d}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />";
+        }
     }
 }

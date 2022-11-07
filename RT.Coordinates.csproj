@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Cairo.cs" />
+    <Compile Include="EdgeInfo.cs" />
     <Compile Include="Floret.cs" />
     <Compile Include="Penrose.cs" />
     <Compile Include="Rhomb.cs" />
@@ -39,7 +40,7 @@
     <Compile Include="CellWithDistance.cs" />
     <Compile Include="CombinedCell.cs" />
     <Compile Include="Coord.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="GridUtils.cs" />
     <Compile Include="GenericVertex.cs" />
     <Compile Include="Kite.cs" />
     <Compile Include="OctoCell.cs" />

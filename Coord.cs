@@ -96,7 +96,12 @@ namespace RT.Coordinates
         ///     Specifies the x-coordinate of the top-left corner. Default is <c>0</c>.</param>
         /// <param name="dy">
         ///     Specifies the y-coordinate of the top-left corner. Default is <c>0</c>.</param>
-        public static IEnumerable<Coord> Rectangle(int width, int height, int dx = 0, int dy = 0) => Enumerable.Range(0, width * height).Select(ix => new Coord(ix % width + dx, ix / width + dy));
+        public static IEnumerable<Coord> Rectangle(int width, int height, int dx = 0, int dy = 0)
+        {
+            for (var y = 0; y < height; y++)
+                for (var x = 0; x < width; x++)
+                    yield return new Coord(x + dx, y + dy);
+        }
 
         /// <summary>
         ///     Determines whether two cells are orthogonally adjacent (not including diagonals).</summary>
@@ -261,19 +266,19 @@ namespace RT.Coordinates
             public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
 
             /// <inheritdoc/>
-            protected override EdgeType svgEdgeType(Link<Coordinates.Vertex> edge, List<Coord> cells)
+            protected override EdgeInfo<Coord> svgEdgeType(Link<Coordinates.Vertex> edge, List<Coord> cells)
             {
                 if (cells.Count == 1)
                 {
                     var c = cells[0];
                     if (_toroidalX && c.X == 0 && edge.Cells.All(v => v is Vertex cv && cv.Cell.X == 0))
-                        return _links.Contains(new Link<Coord>(c, c.MoveX(_width - 1))) ? EdgeType.Passage : EdgeType.Wall;
+                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveX(_width - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(_width - 1) };
                     else if (_toroidalX && c.X == _width - 1 && edge.Cells.All(v => v is Vertex cv && cv.Cell.X == _width))
-                        return _links.Contains(new Link<Coord>(c, c.MoveX(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall;
+                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveX(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(-_width + 1) };
                     else if (_toroidalY && c.Y == 0 && edge.Cells.All(v => v is Vertex cv && cv.Cell.Y == 0))
-                        return _links.Contains(new Link<Coord>(c, c.MoveY(_height - 1))) ? EdgeType.Passage : EdgeType.Wall;
+                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveY(_height - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(_height - 1) };
                     else if (_toroidalY && c.Y == _height - 1 && edge.Cells.All(v => v is Vertex cv && cv.Cell.Y == _height))
-                        return _links.Contains(new Link<Coord>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall;
+                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(-_height + 1) };
                 }
                 return base.svgEdgeType(edge, cells);
             }
@@ -281,8 +286,7 @@ namespace RT.Coordinates
             /// <inheritdoc/>
             protected override bool drawBridge(Link<Coord> link)
             {
-                var c = link.Cells.First();
-                var d = link.Other(c);
+                var c = link.Apart(out var d);
                 return !(_toroidalX && Math.Abs(c.X - d.X) + 1 == _width || _toroidalY && Math.Abs(c.Y - d.Y) + 1 == _height);
             }
         }

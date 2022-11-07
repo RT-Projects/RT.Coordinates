@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace RT.Coordinates
@@ -20,6 +20,8 @@ namespace RT.Coordinates
         ///     One of the cells to link.</param>
         public Link(TCell cell1, TCell cell2)
         {
+            if (cell2.Equals(cell1))
+                throw new ArgumentException($"‘{nameof(cell1)}’ and ‘{nameof(cell2)}’ must be different.", nameof(cell2));
             _cell1 = cell1;
             _cell2 = cell2;
         }
@@ -34,6 +36,9 @@ namespace RT.Coordinates
         /// <exception cref="ArgumentException">
         ///     The specified cell is not part of this link.</exception>
         public TCell Other(TCell one) => _cell1.Equals(one) ? _cell2 : _cell2.Equals(one) ? _cell1 : throw new ArgumentException("Cell is not part of the link.", nameof(one));
+
+        /// <summary>Returns the cells of this link in no particular order.</summary>
+        public TCell Apart(out TCell other) { other = _cell2; return _cell1; }
 
         /// <inheritdoc/>
         public bool Equals(Link<TCell> other) => (_cell1.Equals(other._cell1) && _cell2.Equals(other._cell2)) || (_cell1.Equals(other._cell2) && _cell2.Equals(other._cell1));
@@ -61,5 +66,15 @@ namespace RT.Coordinates
         public static bool operator ==(Link<TCell> one, Link<TCell> two) => one.Equals(two);
         /// <summary>Compares two <see cref="Link{TCell}"/> values for inequality.</summary>
         public static bool operator !=(Link<TCell> one, Link<TCell> two) => !one.Equals(two);
+
+        /// <summary>
+        ///     Deconstructor.</summary>
+        /// <remarks>
+        ///     The cells are not returned in any predictable order.</remarks>
+        public void Deconstruct(out TCell cell1, out TCell cell2)
+        {
+            cell1 = _cell1;
+            cell2 = _cell2;
+        }
     }
 }
