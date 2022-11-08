@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RT.Coordinates
 {
@@ -288,6 +289,50 @@ namespace RT.Coordinates
             for (var i = 0; i < segments.Count; i++)
                 if (segments[i] != null)
                     yield return new SvgSegment(segments[i], closed[i]);
+        }
+
+        /// <summary>
+        ///     Converts a string representation of a cell into the original cell.</summary>
+        /// <param name="str">
+        ///     A string representation in the same format as returned by the original cell’s <c>ToString()</c> method.</param>
+        /// <returns>
+        ///     This method can parse cells of type <see cref="Cairo"/>, <see cref="CircularCell"/>, <see cref="Coord"/>, <see
+        ///     cref="Floret"/>, <see cref="Hex"/>, <see cref="Kite"/>, <see cref="OctoCell"/>, <see cref="Penrose"/>, <see
+        ///     cref="Rhomb"/>, <see cref="Rhombihexadel"/> and <see cref="Tri"/>.</returns>
+        public static object Parse(string str)
+        {
+            Match m;
+            foreach (var parser in _parsers)
+                if ((m = parser.Regex.Match(str)).Success)
+                    return parser.Generator(m);
+            throw new InvalidOperationException($"The string ‘{str}’ cannot be parsed into a cell type.");
+        }
+
+        private static readonly CellParserInfo[] _parsers = new CellParserInfo[]
+        {
+            new CellParserInfo(@"^C\((-?\d+),(-?\d+)\)/([0-3])$", m => new Cairo(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Cairo.Position) int.Parse(m.Groups[3].Value))),
+            new CellParserInfo(@"^C\((\d+);(\d+)/(\d+)→(\d+)/(\d+)\)$", m => new CircularCell(int.Parse(m.Groups[1].Value), new CircleFraction(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value)), new CircleFraction(int.Parse(m.Groups[4].Value), int.Parse(m.Groups[5].Value)))),
+            new CellParserInfo(@"^C\((-?\d+),(-?\d+)\)$", m => new Coord(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
+            new CellParserInfo(@"^F\((-?\d+),(-?\d+)\)/([0-5])$", m => new Floret(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Floret.Position) int.Parse(m.Groups[3].Value))),
+            new CellParserInfo(@"^H\((-?\d+),(-?\d+)\)$", m => new Hex(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
+            new CellParserInfo(@"^K\((-?\d+),(-?\d+)\)/([0-5])$", m => new Kite(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Kite.Position) int.Parse(m.Groups[3].Value))),
+            new CellParserInfo(@"^M\((-?\d+),(-?\d+)\)/([0-5])$", m => new Rhombihexadel(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Rhombihexadel.Tile) int.Parse(m.Groups[3].Value))),
+            new CellParserInfo(@"^([Oo])\((-?\d+),(-?\d+)\)$", m => new OctoCell(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), m.Groups[1].Value[0] == 'o')),
+            new CellParserInfo(@"^P\((-?\d+),(-?\d+),(-?\d+),(-?\d+)\)/([0-3])/([0-9])$", m => new Penrose((Penrose.Kind) int.Parse(m.Groups[5].Value), new Penrose.Vector(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), int.Parse(m.Groups[4].Value)), int.Parse(m.Groups[6].Value))),
+            new CellParserInfo(@"^R\((-?\d+),(-?\d+)\)/([0-2])$", m => new Rhomb(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Rhomb.Position) int.Parse(m.Groups[3].Value))),
+            new CellParserInfo(@"^T\((-?\d+),(-?\d+)\)$", m => new Tri(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value)))
+        };
+
+        private struct CellParserInfo
+        {
+            public Regex Regex { get; private set; }
+            public Func<Match, object> Generator { get; private set; }
+
+            public CellParserInfo(string regex, Func<Match, object> generator)
+            {
+                Regex = new Regex(regex, RegexOptions.Compiled);
+                Generator = generator;
+            }
         }
     }
 }

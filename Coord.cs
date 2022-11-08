@@ -5,10 +5,15 @@ using System.Linq;
 namespace RT.Coordinates
 {
     /// <summary>
-    ///     <code type="raw">
-    ///         &lt;svg style='width:7cm;float:right;margin-left:.5cm' xmlns='http://www.w3.org/2000/svg' viewBox='0.5 0.5 7 7'&gt;&lt;path d='M1 0L1 1L0 1M2 0L2 1L1 1L1 2L0 2M3 0L3 1L2 1L2 2L1 2L1 3L0 3M4 0L4 1L3 1L3 2L2 2L2 3L1 3L1 4L0 4M5 0L5 1L4 1L4 2L3 2L3 3L2 3L2 4L1 4L1 5L0 5M6 0L6 1L5 1L5 2L4 2L4 3L3 3L3 4L2 4L2 5L1 5L1 6L0 6M7 0L7 1L6 1L6 2L5 2L5 3L4 3L4 4L3 4L3 5L2 5L2 6L1 6L1 7L0 7M8 1L7 1L7 2L6 2L6 3L5 3L5 4L4 4L4 5L3 5L3 6L2 6L2 7L1 7L1 8M8 2L7 2L7 3L6 3L6 4L5 4L5 5L4 5L4 6L3 6L3 7L2 7L2 8M8 3L7 3L7 4L6 4L6 5L5 5L5 6L4 6L4 7L3 7L3 8M8 4L7 4L7 5L6 5L6 6L5 6L5 7L4 7L4 8M8 5L7 5L7 6L6 6L6 7L5 7L5 8M8 6L7 6L7 7L6 7L6 8M8 7L7 7L7 8' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</code>
     ///     <para>
     ///         Represents a square cell in a 2D rectilinear grid.</para></summary>
+    /// <image type="raw">
+    ///     &lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0.5 0.5 7 7'&gt;&lt;path d='M1 0L1 1L0 1M2 0L2 1L1 1L1 2L0 2M3
+    ///     0L3 1L2 1L2 2L1 2L1 3L0 3M4 0L4 1L3 1L3 2L2 2L2 3L1 3L1 4L0 4M5 0L5 1L4 1L4 2L3 2L3 3L2 3L2 4L1 4L1 5L0 5M6 0L6
+    ///     1L5 1L5 2L4 2L4 3L3 3L3 4L2 4L2 5L1 5L1 6L0 6M7 0L7 1L6 1L6 2L5 2L5 3L4 3L4 4L3 4L3 5L2 5L2 6L1 6L1 7L0 7M8 1L7
+    ///     1L7 2L6 2L6 3L5 3L5 4L4 4L4 5L3 5L3 6L2 6L2 7L1 7L1 8M8 2L7 2L7 3L6 3L6 4L5 4L5 5L4 5L4 6L3 6L3 7L2 7L2 8M8 3L7
+    ///     3L7 4L6 4L6 5L5 5L5 6L4 6L4 7L3 7L3 8M8 4L7 4L7 5L6 5L6 6L5 6L5 7L4 7L4 8M8 5L7 5L7 6L6 6L6 7L5 7L5 8M8 6L7 6L7
+    ///     7L6 7L6 8M8 7L7 7L7 8' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</image>
     public struct Coord : IEquatable<Coord>, INeighbor<Coord>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Coord, Coord.Direction>
     {
         /// <summary>Returns the X coordinate of the cell.</summary>
@@ -24,7 +29,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override string ToString() => $"({X}, {Y})";
+        public override string ToString() => $"C({X},{Y})";
 
         /// <summary>
         ///     Moves the current cell <paramref name="dx"/> number of spaces to the right.</summary>
