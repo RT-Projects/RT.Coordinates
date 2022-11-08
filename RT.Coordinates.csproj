@@ -30,30 +30,32 @@
     <DocumentationFile>builds\Release\RT.Coordinates.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Cairo.cs" />
-    <Compile Include="EdgeInfo.cs" />
-    <Compile Include="Floret.cs" />
-    <Compile Include="Penrose.cs" />
-    <Compile Include="Rhomb.cs" />
-    <Compile Include="Rhombihexadel.cs" />
-    <Compile Include="SvgColor.cs" />
     <Compile Include="CellWithDistance.cs" />
+    <Compile Include="CircleFraction.cs" />
+    <Compile Include="CircularCell.cs" />
     <Compile Include="CombinedCell.cs" />
     <Compile Include="Coord.cs" />
-    <Compile Include="GridUtils.cs" />
-    <Compile Include="GenericVertex.cs" />
-    <Compile Include="Kite.cs" />
-    <Compile Include="OctoCell.cs" />
+    <Compile Include="CoordinatesHelpers.cs" />
+    <Compile Include="EdgeInfo.cs" />
     <Compile Include="EdgeType.cs" />
+    <Compile Include="Floret.cs" />
+    <Compile Include="GenericVertex.cs" />
+    <Compile Include="GridUtils.cs" />
     <Compile Include="Hex.cs" />
     <Compile Include="IHasDirection.cs" />
     <Compile Include="IHasSvgGeometry.cs" />
     <Compile Include="INeighbor.cs" />
+    <Compile Include="Kite.cs" />
     <Compile Include="Link.cs" />
-    <Compile Include="CoordinatesHelpers.cs" />
+    <Compile Include="OctoCell.cs" />
+    <Compile Include="Penrose.cs" />
     <Compile Include="PointD.cs" />
-    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Rhomb.cs" />
+    <Compile Include="Rhombihexadel.cs" />
     <Compile Include="Structure.cs" />
+    <Compile Include="SvgColor.cs" />
     <Compile Include="SvgInstructions.cs" />
     <Compile Include="SvgSegment.cs" />
     <Compile Include="Tri.cs" />
