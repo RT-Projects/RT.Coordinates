@@ -202,21 +202,11 @@ namespace RT.Coordinates
             /// <inheritdoc/>
             protected override Structure<OctoCell> makeModifiedStructure(IEnumerable<OctoCell> cells, IEnumerable<Link<OctoCell>> traversible) => new Grid(cells, traversible);
 
-            /// <summary>
-            ///     Generates a maze on this structure.</summary>
-            /// <param name="rnd">
-            ///     A random number generator.</param>
-            /// <exception cref="InvalidOperationException">
-            ///     The current structure is disjointed (consists of more than one piece).</exception>
-            public new Grid GenerateMaze(Random rnd = null) => (Grid) base.GenerateMaze(rnd);
+            /// <summary>See <see cref="Structure{TCell}.GenerateMaze(Random, MazeBias)"/>.</summary>
+            public new Grid GenerateMaze(Random rnd = null, MazeBias bias = MazeBias.Default) => (Grid) base.GenerateMaze(rnd, bias);
 
-            /// <summary>
-            ///     Generates a maze on this structure.</summary>
-            /// <param name="rndNext">
-            ///     A delegate that can provide random numbers.</param>
-            /// <exception cref="InvalidOperationException">
-            ///     The current structure is disjointed (consists of more than one piece).</exception>
-            public new Grid GenerateMaze(Func<int, int, int> rndNext) => (Grid) base.GenerateMaze(rndNext);
+            /// <summary>See <see cref="Structure{TCell}.GenerateMaze(Func{int, int, int}, MazeBias)"/>.</summary>
+            public new Grid GenerateMaze(Func<int, int, int> rndNext, MazeBias bias = MazeBias.Default) => (Grid) base.GenerateMaze(rndNext, bias);
         }
 
         /// <summary>Describes a vertex (gridline intersection) in an <see cref="Grid"/>.</summary>

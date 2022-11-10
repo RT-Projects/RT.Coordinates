@@ -74,17 +74,21 @@ namespace RT.Coordinates
         ///     Generates a maze on this structure.</summary>
         /// <param name="rnd">
         ///     A random number generator.</param>
+        /// <param name="bias">
+        ///     Provides a means to influence the algorithm.</param>
         /// <exception cref="InvalidOperationException">
         ///     The current structure is disjointed (consists of more than one piece).</exception>
-        public Structure<TCell> GenerateMaze(Random rnd = null) => GenerateMaze((rnd ?? new Random()).Next);
+        public Structure<TCell> GenerateMaze(Random rnd = null, MazeBias bias = MazeBias.Default) => GenerateMaze((rnd ?? new Random()).Next, bias);
 
         /// <summary>
         ///     Generates a maze on this structure.</summary>
         /// <param name="rndNext">
         ///     A delegate that can provide random numbers.</param>
+        /// <param name="bias">
+        ///     Provides a means to influence the algorithm.</param>
         /// <exception cref="InvalidOperationException">
         ///     The current structure is disjointed (consists of more than one piece).</exception>
-        public Structure<TCell> GenerateMaze(Func<int, int, int> rndNext)
+        public Structure<TCell> GenerateMaze(Func<int, int, int> rndNext, MazeBias bias = MazeBias.Default)
         {
             if (rndNext == null)
                 throw new ArgumentNullException(nameof(rndNext));
@@ -109,7 +113,13 @@ namespace RT.Coordinates
             {
                 if (todo.Count == 0)
                     throw new InvalidOperationException("The specified set of links for the maze is disjointed (consists of more than one piece).");
-                var ix = rndNext(0, todo.Count);
+                var ix = bias switch
+                {
+                    MazeBias.Default => rndNext(0, todo.Count),
+                    MazeBias.Straight => 0,
+                    MazeBias.Winding => todo.Count - 1,
+                    _ => throw new ArgumentException($"Invalid ‘{nameof(bias)}’ value: ‘{bias}’.")
+                };
                 var cell = todo[ix];
 
                 var availableLinks = (lnks.TryGetValue(cell, out var otherCells) ? otherCells : throw new InvalidOperationException($"The cell {cell} has no links."))
@@ -396,9 +406,9 @@ namespace RT.Coordinates
         ///         Note that the type of the structure changes from <c>Structure&lt;TCell&gt;</c> to
         ///         <c>Structure&lt;CombinedCell&lt;TCell&gt;&gt;</c>. If you wish to combine multiple groups of cells, call
         ///         this overload with zero parameters first just to change the type, then subsequently use <see
-        ///         cref="GridUtils.CombineCells{TCell}(Structure{CombinedCell{TCell}}, TCell[])"/> to combine each group.
-        ///         The following example code illustrates this principle by creating a grid in which some horizontal or
-        ///         vertical pairs of cells are combined:</para>
+        ///         cref="GridUtils.CombineCells{TCell}(Structure{CombinedCell{TCell}}, TCell[])"/> to combine each group. The
+        ///         following example code illustrates this principle by creating a grid in which some horizontal or vertical
+        ///         pairs of cells are combined:</para>
         ///     <code>
         ///         var grid = new Grid(12, 12).CombineCells();
         ///         foreach (var cell in grid.Cells.Select(cc =&gt; cc.First()))

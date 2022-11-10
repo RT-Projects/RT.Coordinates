@@ -49,6 +49,7 @@
     <Compile Include="INeighbor.cs" />
     <Compile Include="Kite.cs" />
     <Compile Include="Link.cs" />
+    <Compile Include="MazeBias.cs" />
     <Compile Include="OctoCell.cs" />
     <Compile Include="Penrose.cs" />
     <Compile Include="PointD.cs" />
