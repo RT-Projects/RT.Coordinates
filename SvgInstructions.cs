@@ -55,7 +55,9 @@ namespace RT.Coordinates
         ///     cref="Structure{TCell}.svgEdgeType(Link{Vertex}, List{TCell})"/>, this delegate takes precedence.</remarks>
         public Func<Link<Vertex>, IList, EdgeInfo<object>> GetEdgeType = null;
 
-        /// <summary>Specifies the attributes on the main <c>&lt;svg&gt;</c> tag.</summary>
+        /// <summary>
+        ///     Specifies the attributes on the main <c>&lt;svg&gt;</c> tag. Set this to <c>null</c> to omit the SVG tag
+        ///     entirely.</summary>
         public string SvgAttributes = "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'";
 
         /// <summary>Provides some additional SVG code to add at the start of the file.</summary>

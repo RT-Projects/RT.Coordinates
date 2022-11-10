@@ -243,7 +243,11 @@ namespace RT.Coordinates
             var minY = allPoints.Min(v => v.Y);
             var maxX = allPoints.Max(v => v.X);
             var maxY = allPoints.Max(v => v.Y);
-            return $"<svg {string.Format(inf?.SvgAttributes ?? "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'", minX - .1, minY - .1, maxX - minX + .2, maxY - minY + .2)}>" +
+            var startTag = inf != null && inf.SvgAttributes == null ? "" :
+                $"<svg {string.Format(inf?.SvgAttributes ?? "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'", minX - .1, minY - .1, maxX - minX + .2, maxY - minY + .2)}>";
+            var endTag = inf != null && inf.SvgAttributes == null ? "" : "</svg>";
+
+            return startTag +
                 inf?.ExtraSvg1 +
                 highlights +
                 inf?.ExtraSvg2 +
@@ -254,7 +258,7 @@ namespace RT.Coordinates
                 inf?.ExtraSvg3 +
                 (inf?.PerCell == null ? "" : _cells.Select(cell => processCellSvg(cell, inf)).JoinString()) +
                 inf?.ExtraSvg4 +
-                $"</svg>";
+                endTag;
         }
 
         private static string processCellSvg(TCell cell, SvgInstructions inf)
