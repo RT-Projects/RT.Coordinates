@@ -11,7 +11,7 @@ namespace RT.Coordinates
         public Func<object, string> PerCell = null;
 
         /// <summary>
-        ///     Instructs <see cref="Structure{TCell}.Svg(SvgInstructions)"/> to paint some cells with a background color.</summary>
+        ///     Paints some cells with a background color.</summary>
         /// <remarks>
         ///     <para>
         ///         Possible values for this field are:</para>
@@ -21,9 +21,9 @@ namespace RT.Coordinates
         ///             will color each cell in the color specified by <see cref="HighlightColor"/>. Cells that are not part
         ///             of this structure, or any other objects, are ignored.</description></item>
         ///         <item><description>
-        ///             An <see cref="IDictionary"/> in which the keys are the cells. The values can be <see cref="SvgColor"/>
-        ///             objects, or they are converted to strings and assumed to be SVG colors without opacity. Cells that are
-        ///             not part of this structure, or any other keys, are ignored.</description></item>
+        ///             Any <see cref="IDictionary"/> in which the keys are the cells. The values can be <see
+        ///             cref="SvgColor"/> objects, or they are converted to strings and assumed to be SVG colors without
+        ///             opacity. Cells that are not part of this structure, or any other keys, are ignored.</description></item>
         ///         <item><description>
         ///             A <c>Func&lt;object, <see cref="SvgColor"/>&gt;</c>, <c>Func&lt;object, string&gt;</c>, or
         ///             <c>Func&lt;object, object&gt;</c> which returns the color information for each cell. The function will
@@ -47,9 +47,10 @@ namespace RT.Coordinates
         public Func<Vertex, PointD> GetVertexPoint = v => v.Point;
 
         /// <summary>
-        ///     Returns the type of edge to use for a particular pair of vertices. The second parameter receives a list of the
-        ///     cells that share the vertex; this will be of runtime type <c>System.Collections.Generic.List&lt;TCell&gt;</c>,
-        ///     where <c>TCell</c> is the generic type argument used on <see cref="Structure{TCell}"/>.</summary>
+        ///     Returns the type of edge to draw in SVG for a particular pair of vertices. The second parameter receives a
+        ///     list of the cells that share the edge; this will be of runtime type
+        ///     <c>System.Collections.Generic.List&lt;TCell&gt;</c>, where <c>TCell</c> is the generic type argument used on
+        ///     <see cref="Structure{TCell}"/>.</summary>
         /// <remarks>
         ///     In cases where this is specified and the <see cref="Structure{TCell}"/> derived class also overrides <see
         ///     cref="Structure{TCell}.svgEdgeType(Link{Vertex}, List{TCell})"/>, this delegate takes precedence.</remarks>
