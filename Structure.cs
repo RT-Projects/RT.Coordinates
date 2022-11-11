@@ -46,7 +46,7 @@ namespace RT.Coordinates
         {
             _cells = new HashSet<TCell>(cells);
             if (links != null)
-                _links = new HashSet<Link<TCell>>(links.Where(l => l.Cells.All(_cells.Contains)));
+                _links = new HashSet<Link<TCell>>(links.Where(l => l.All(_cells.Contains)));
             else
             {
                 _links = new HashSet<Link<TCell>>();
@@ -95,7 +95,7 @@ namespace RT.Coordinates
 
             var lnks = new Dictionary<TCell, List<TCell>>();
             foreach (var lnk in _links)
-                foreach (var cell in lnk.Cells)
+                foreach (var cell in lnk)
                     lnks.AddSafe(cell, lnk.Other(cell));
 
             var cells = new HashSet<TCell>(_cells);
@@ -248,7 +248,7 @@ namespace RT.Coordinates
                 ? passageEdges.Select((edge, ix) => inf.PassagesPaths(svgEdgePath(edge, getVertexPoint), passageLinks[ix].Apart(out var cc), cc)).JoinString()
                 : inf?.PassagesPath?.Invoke(path = GridUtils.SvgEdgesPath(passageEdges, getVertexPoint)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(passageEdges, getVertexPoint)}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />";
 
-            var allPoints = allEdges.SelectMany(kvp => kvp.Key.Cells.Select(getVertexPoint)).ToList();
+            var allPoints = allEdges.SelectMany(kvp => kvp.Key.Select(getVertexPoint)).ToList();
             var minX = allPoints.Min(v => v.X);
             var minY = allPoints.Min(v => v.Y);
             var maxX = allPoints.Max(v => v.X);
@@ -312,9 +312,9 @@ namespace RT.Coordinates
 
         private string svgEdgePath(Link<Vertex> segment, Func<Vertex, PointD> getVertexPoint)
         {
-            var f = segment.Cells.First();
-            var p = getVertexPoint(f);
-            return string.Format("M{0} {1}{2}", p.X, p.Y, segment.Other(f).SvgPathFragment(f, getVertexPoint, isLast: false));
+            var one = segment.Apart(out var two);
+            var p = getVertexPoint(one);
+            return string.Format("M{0} {1}{2}", p.X, p.Y, two.SvgPathFragment(one, getVertexPoint, isLast: false));
         }
 
         /// <summary>Adds the specified link to this structure.</summary>
@@ -334,13 +334,13 @@ namespace RT.Coordinates
         public void RemoveLinks(IEnumerable<Link<TCell>> links) { foreach (var link in links) _links.Remove(link); }
 
         /// <summary>Removes the specified cell from this structure.</summary>
-        public void RemoveCell(TCell cell) { _cells.Remove(cell); _links.RemoveWhere(l => l.Cells.Contains(cell)); }
+        public void RemoveCell(TCell cell) { _cells.Remove(cell); _links.RemoveWhere(l => l.Contains(cell)); }
         /// <summary>Removes the specified cells from this structure.</summary>
-        public void RemoveCells(params TCell[] cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
+        public void RemoveCells(params TCell[] cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Contains(c))); }
         /// <summary>Removes the specified cells from this structure.</summary>
-        public void RemoveCells(IEnumerable<TCell> cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Cells.Contains(c))); }
+        public void RemoveCells(IEnumerable<TCell> cells) { foreach (var cell in cells) _cells.Remove(cell); _links.RemoveWhere(l => cells.Any(c => l.Contains(c))); }
         /// <summary>Removes all cells from this structure that match the specified <paramref name="predicate"/>.</summary>
-        public void RemoveCells(Predicate<TCell> predicate) { _cells.RemoveWhere(predicate); _links.RemoveWhere(l => l.Cells.Any(c => !_cells.Contains(c))); }
+        public void RemoveCells(Predicate<TCell> predicate) { _cells.RemoveWhere(predicate); _links.RemoveWhere(l => l.Any(c => !_cells.Contains(c))); }
 
         /// <summary>Adds the specified cells to this structure.</summary>
         public void AddCell(TCell cell) { _cells.Add(cell); }
@@ -375,7 +375,7 @@ namespace RT.Coordinates
         {
             var links = new Dictionary<TCell, List<TCell>>();
             foreach (var link in _links)
-                foreach (var c in link.Cells)
+                foreach (var c in link)
                     (links.TryGetValue(c, out var list) ? list : (links[c] = new List<TCell>())).Add(link.Other(c));
 
             var result = new Dictionary<TCell, CellWithDistance<TCell>>();

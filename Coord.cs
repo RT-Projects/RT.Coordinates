@@ -266,13 +266,13 @@ namespace RT.Coordinates
                 if (cells.Count == 1)
                 {
                     var c = cells[0];
-                    if (_toroidalX && c.X == 0 && edge.Cells.All(v => v is Vertex cv && cv.Cell.X == 0))
+                    if (_toroidalX && c.X == 0 && edge.All(v => v is Vertex cv && cv.Cell.X == 0))
                         return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveX(_width - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(_width - 1) };
-                    else if (_toroidalX && c.X == _width - 1 && edge.Cells.All(v => v is Vertex cv && cv.Cell.X == _width))
+                    else if (_toroidalX && c.X == _width - 1 && edge.All(v => v is Vertex cv && cv.Cell.X == _width))
                         return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveX(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(-_width + 1) };
-                    else if (_toroidalY && c.Y == 0 && edge.Cells.All(v => v is Vertex cv && cv.Cell.Y == 0))
+                    else if (_toroidalY && c.Y == 0 && edge.All(v => v is Vertex cv && cv.Cell.Y == 0))
                         return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveY(_height - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(_height - 1) };
-                    else if (_toroidalY && c.Y == _height - 1 && edge.Cells.All(v => v is Vertex cv && cv.Cell.Y == _height))
+                    else if (_toroidalY && c.Y == _height - 1 && edge.All(v => v is Vertex cv && cv.Cell.Y == _height))
                         return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(-_height + 1) };
                 }
                 return base.svgEdgeType(edge, cells);
