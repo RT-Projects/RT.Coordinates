@@ -314,6 +314,7 @@ namespace RT.Coordinates
             new CellParserInfo(@"^C\((\d+);(\d+)/(\d+)→(\d+)/(\d+)\)$", m => new CircularCell(int.Parse(m.Groups[1].Value), new CircleFraction(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value)), new CircleFraction(int.Parse(m.Groups[4].Value), int.Parse(m.Groups[5].Value)))),
             new CellParserInfo(@"^F\((-?\d+),(-?\d+)\)/([0-5])$", m => new Floret(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Floret.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^H\((-?\d+),(-?\d+)\)$", m => new Hex(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
+            new CellParserInfo(@"^H\((-?\d+),(-?\d+)\)/([0-4])$", m => new Chamf(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Chamf.Tile) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^K\((-?\d+),(-?\d+)\)/([0-5])$", m => new Kite(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Kite.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^M\((-?\d+),(-?\d+)\)/([0-5])$", m => new Rhombihexadel(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Rhombihexadel.Tile) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^([Oo])\((-?\d+),(-?\d+)\)$", m => new OctoCell(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), m.Groups[1].Value[0] == 'o')),
