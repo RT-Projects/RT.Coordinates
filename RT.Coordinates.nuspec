@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>RT.Coordinates</id>
-    <version>2.5.0</version>
+    <version>2.6.0</version>
     <authors>Timwi</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <owners>Timwi</owners>
@@ -11,7 +11,7 @@
     <icon>Icon.png</icon>
     <title>RT.Coordinates</title>
     <description>A library to work with grids of various geometries (rectilinear, hexagonal, triangular, octagonal, etc.), generate mazes, find paths and generate SVG graphics. Useful for 2D games and puzzles.</description>
-    <copyright>Copyright © 2022 Timwi</copyright>
+    <copyright>Copyright © 2022–23 Timwi</copyright>
     <tags>game games puzzle puzzles grid grids coordinate coordinates maze graphics svg hexagonal hexagon hex triangle triangular tri octagon octagonal</tags>
     <dependencies>
       <group targetFramework=".NETFramework3.5" />
