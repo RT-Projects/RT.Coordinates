@@ -13,7 +13,7 @@ namespace RT.Coordinates
     ///         This type is used in this library for two purposes:</para>
     ///     <list type="bullet">
     ///         <item><description>
-    ///             When used with cell types (<see cref="Coord"/>, <see cref="Hex"/>, etc.), it represents a traversible link
+    ///             When used with cell types (<see cref="Square"/>, <see cref="Hex"/>, etc.), it represents a traversible link
     ///             between two cells.</description></item>
     ///         <item><description>
     ///             When used with <see cref="Vertex"/>, it represents an edge connecting two vertices when rendering SVG.</description></item></list>

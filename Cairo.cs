@@ -65,12 +65,12 @@ namespace RT.Coordinates
     public struct Cairo : IEquatable<Cairo>, INeighbor<Cairo>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>Identifies a square. Each cairo forms one quarter of this square.</summary>
-        public Coord Cell { get; private set; }
+        public Square Cell { get; private set; }
         /// <summary>Identifies which cairo within <see cref="Cell"/> this is.</summary>
         public Position Pos { get; private set; }
 
         /// <summary>Constructor.</summary>
-        public Cairo(Coord cell, Position pos)
+        public Cairo(Square cell, Position pos)
         {
             Cell = cell;
             Pos = pos;
@@ -86,7 +86,7 @@ namespace RT.Coordinates
         ///     Position of the <see cref="Cairo"/> within the square.</param>
         public Cairo(int x, int y, Position pos)
         {
-            Cell = new Coord(x, y);
+            Cell = new Square(x, y);
             Pos = pos;
         }
 
@@ -106,7 +106,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Constructs a grid of the specified <paramref name="width"/> and <paramref name="height"/> and divides each
         ///     square into four <see cref="Cairo"/> cells.</summary>
-        public static IEnumerable<Cairo> Rectangle(int width, int height) => Coord.Rectangle(width, height).SelectMany(cell => _cairoPositions.Select(pos => new Cairo(cell, pos)));
+        public static IEnumerable<Cairo> Rectangle(int width, int height) => Square.Rectangle(width, height).SelectMany(cell => _cairoPositions.Select(pos => new Cairo(cell, pos)));
         private static readonly Position[] _cairoPositions = (Position[]) Enum.GetValues(typeof(Position));
 
         /// <inheritdoc/>
@@ -127,9 +127,9 @@ namespace RT.Coordinates
             {
                 yield return new Cairo(Cell, (Position) (((int) Pos + 1) % 4));
                 yield return new Cairo(Cell, (Position) (((int) Pos + 3) % 4));
-                yield return new Cairo(Cell.Move((Coord.Direction) ((2 * (int) Pos + 6) % 8)), (Position) (((int) Pos + 1) % 4));
-                yield return new Cairo(Cell.Move((Coord.Direction) (2 * (int) Pos)), (Position) (((int) Pos + 3) % 4));
-                yield return new Cairo(Cell.Move((Coord.Direction) (2 * (int) Pos)), (Position) (((int) Pos + 2) % 4));
+                yield return new Cairo(Cell.Move((Square.Direction) ((2 * (int) Pos + 6) % 8)), (Position) (((int) Pos + 1) % 4));
+                yield return new Cairo(Cell.Move((Square.Direction) (2 * (int) Pos)), (Position) (((int) Pos + 3) % 4));
+                yield return new Cairo(Cell.Move((Square.Direction) (2 * (int) Pos)), (Position) (((int) Pos + 2) % 4));
             }
         }
 
@@ -145,8 +145,8 @@ namespace RT.Coordinates
         {
             Position.TopLeft => new Coordinates.Vertex[] {
                 new Vertex(Cell, Vertex.Position.Center),
-                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.TopRightPlus1),
-                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.TopRight),
+                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRightPlus1),
+                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRight),
                 new Vertex(Cell, Vertex.Position.TopLeftPlus1),
                 new Vertex(Cell, Vertex.Position.TopRightMinus1)
             },
@@ -160,16 +160,16 @@ namespace RT.Coordinates
             Position.BottomRight => new Coordinates.Vertex[] {
                 new Vertex(Cell, Vertex.Position.Center),
                 new Vertex(Cell, Vertex.Position.BottomRightMinus1),
-                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopRight),
-                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopRightMinus1),
-                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopLeftPlus1)
+                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopRight),
+                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopRightMinus1),
+                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopLeftPlus1)
             },
             Position.BottomLeft => new Coordinates.Vertex[] {
                 new Vertex(Cell, Vertex.Position.Center),
-                new Vertex(Cell.Move(Coord.Direction.Down), Vertex.Position.TopLeftPlus1),
-                new Vertex(Cell.Move(Coord.Direction.DownLeft), Vertex.Position.TopRight),
-                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.BottomRightMinus1),
-                new Vertex(Cell.Move(Coord.Direction.Left), Vertex.Position.TopRightPlus1)
+                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopLeftPlus1),
+                new Vertex(Cell.Move(Square.Direction.DownLeft), Vertex.Position.TopRight),
+                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.BottomRightMinus1),
+                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRightPlus1)
             },
             _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.")
         };
@@ -227,13 +227,13 @@ namespace RT.Coordinates
         /// <summary>Describes one of the vertices of a <see cref="Cairo"/>.</summary>
         public class Vertex : Coordinates.Vertex
         {
-            /// <summary>The <see cref="Coord"/> tile that this <see cref="Vertex"/> is within.</summary>
-            public Coord Cell { get; private set; }
+            /// <summary>The <see cref="Square"/> tile that this <see cref="Vertex"/> is within.</summary>
+            public Square Cell { get; private set; }
             /// <summary>Which position within the <see cref="Cell"/> this vertex is.</summary>
             public Position Pos { get; private set; }
 
             /// <summary>Constructor.</summary>
-            public Vertex(Coord cell, Position pos)
+            public Vertex(Square cell, Position pos)
             {
                 Cell = cell;
                 Pos = pos;

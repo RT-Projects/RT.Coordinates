@@ -13,7 +13,7 @@ namespace RT.Coordinates
         ///     Given the output from <see cref="Structure{TCell}.FindPath(TCell, TCell)"/>, reconstructs a path from the
         ///     origin cell to the specified <paramref name="destination"/> cell.</summary>
         /// <typeparam name="TCell">
-        ///     Type of cell (e.g., <see cref="Coord"/>, <see cref="Hex"/> or <see cref="Tri"/>).</typeparam>
+        ///     Type of cell (e.g., <see cref="Square"/>, <see cref="Hex"/> or <see cref="Tri"/>).</typeparam>
         /// <param name="paths">
         ///     The output from <see cref="Structure{TCell}.FindPath(TCell, TCell)"/>.</param>
         /// <param name="destination">
@@ -184,13 +184,13 @@ namespace RT.Coordinates
         }
 
         /// <summary>
-        ///     Returns a new <see cref="Coord.Direction"/> which is the specified multiple of 45° clockwise from the current
+        ///     Returns a new <see cref="Square.Direction"/> which is the specified multiple of 45° clockwise from the current
         ///     direction.</summary>
         /// <param name="dir">
         ///     Original starting direction.</param>
         /// <param name="amount">
         ///     Number of 45° turns to perform. Use negative numbers to go counter-clockwise.</param>
-        public static Coord.Direction Clockwise(this Coord.Direction dir, int amount = 1) => (Coord.Direction) ((((int) dir + amount) % 8 + 8) % 8);
+        public static Square.Direction Clockwise(this Square.Direction dir, int amount = 1) => (Square.Direction) ((((int) dir + amount) % 8 + 8) % 8);
 
         /// <summary>
         ///     Returns a new <see cref="Hex.Direction"/> which is the specified multiple of 60° clockwise from the current
@@ -296,7 +296,7 @@ namespace RT.Coordinates
         /// <param name="str">
         ///     A string representation in the same format as returned by the original cell’s <c>ToString()</c> method.</param>
         /// <returns>
-        ///     This method can parse cells of type <see cref="Cairo"/>, <see cref="CircularCell"/>, <see cref="Coord"/>, <see
+        ///     This method can parse cells of type <see cref="Cairo"/>, <see cref="CircularCell"/>, <see cref="Square"/>, <see
         ///     cref="Floret"/>, <see cref="Hex"/>, <see cref="Kite"/>, <see cref="OctoCell"/>, <see cref="Penrose"/>, <see
         ///     cref="Rhomb"/>, <see cref="Rhombihexadel"/> and <see cref="Tri"/>.</returns>
         public static object Parse(string str)
@@ -312,7 +312,6 @@ namespace RT.Coordinates
         {
             new CellParserInfo(@"^C\((-?\d+),(-?\d+)\)/([0-3])$", m => new Cairo(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Cairo.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^C\((\d+);(\d+)/(\d+)→(\d+)/(\d+)\)$", m => new CircularCell(int.Parse(m.Groups[1].Value), new CircleFraction(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value)), new CircleFraction(int.Parse(m.Groups[4].Value), int.Parse(m.Groups[5].Value)))),
-            new CellParserInfo(@"^C\((-?\d+),(-?\d+)\)$", m => new Coord(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
             new CellParserInfo(@"^F\((-?\d+),(-?\d+)\)/([0-5])$", m => new Floret(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Floret.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^H\((-?\d+),(-?\d+)\)$", m => new Hex(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
             new CellParserInfo(@"^K\((-?\d+),(-?\d+)\)/([0-5])$", m => new Kite(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Kite.Position) int.Parse(m.Groups[3].Value))),
@@ -320,6 +319,7 @@ namespace RT.Coordinates
             new CellParserInfo(@"^([Oo])\((-?\d+),(-?\d+)\)$", m => new OctoCell(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), m.Groups[1].Value[0] == 'o')),
             new CellParserInfo(@"^P\((-?\d+),(-?\d+),(-?\d+),(-?\d+)\)/([0-3])/([0-9])$", m => new Penrose((Penrose.Kind) int.Parse(m.Groups[5].Value), new Penrose.Vector(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), int.Parse(m.Groups[4].Value)), int.Parse(m.Groups[6].Value))),
             new CellParserInfo(@"^R\((-?\d+),(-?\d+)\)/([0-2])$", m => new Rhomb(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Rhomb.Position) int.Parse(m.Groups[3].Value))),
+            new CellParserInfo(@"^S\((-?\d+),(-?\d+)\)$", m => new Square(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
             new CellParserInfo(@"^T\((-?\d+),(-?\d+)\)$", m => new Tri(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value)))
         };
 

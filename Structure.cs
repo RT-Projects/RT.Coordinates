@@ -9,7 +9,7 @@ namespace RT.Coordinates
     /// <summary>
     ///     Describes a structure of connected cells, such as a grid.</summary>
     /// <typeparam name="TCell">
-    ///     The type of cells in the structure; for example, <see cref="Coord"/> or <see cref="Hex"/>.</typeparam>
+    ///     The type of cells in the structure; for example, <see cref="Square"/> or <see cref="Hex"/>.</typeparam>
     public class Structure<TCell>
     {
         /// <summary>Contains the set of cells the structure consists of.</summary>
@@ -20,7 +20,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Constructs a structure with the specified cells and links between them.</summary>
         /// <param name="cells">
-        ///     The set of cells the structure consists of; for example, <see cref="Coord.Rectangle(int, int, int, int)"/> or
+        ///     The set of cells the structure consists of; for example, <see cref="Square.Rectangle(int, int, int, int)"/> or
         ///     <see cref="Hex.LargeHexagon(int, Hex)"/>.</param>
         /// <param name="links">
         ///     An explicit set of links (connections) between cells, defining which pairs of cells are neighbors. See

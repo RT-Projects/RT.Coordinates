@@ -6,7 +6,7 @@ namespace RT.Coordinates
     /// <summary>
     ///     Encapsulates a cell and its distance from an origin cell within a structure.</summary>
     /// <typeparam name="TCell">
-    ///     Type of cell (e.g., <see cref="Coord"/>, <see cref="Hex"/> or <see cref="Tri"/>).</typeparam>
+    ///     Type of cell (e.g., <see cref="Square"/>, <see cref="Hex"/> or <see cref="Tri"/>).</typeparam>
     /// <remarks>
     ///     Used in the return value of <see cref="Structure{TCell}.FindPaths(TCell)"/>.</remarks>
     public struct CellWithDistance<TCell>

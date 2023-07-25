@@ -14,15 +14,15 @@ namespace RT.Coordinates
     ///     1L7 2L6 2L6 3L5 3L5 4L4 4L4 5L3 5L3 6L2 6L2 7L1 7L1 8M8 2L7 2L7 3L6 3L6 4L5 4L5 5L4 5L4 6L3 6L3 7L2 7L2 8M8 3L7
     ///     3L7 4L6 4L6 5L5 5L5 6L4 6L4 7L3 7L3 8M8 4L7 4L7 5L6 5L6 6L5 6L5 7L4 7L4 8M8 5L7 5L7 6L6 6L6 7L5 7L5 8M8 6L7 6L7
     ///     7L6 7L6 8M8 7L7 7L7 8' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</image>
-    public struct Coord : IEquatable<Coord>, INeighbor<Coord>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Coord, Coord.Direction>
+    public struct Square : IEquatable<Square>, INeighbor<Square>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Square, Square.Direction>
     {
         /// <summary>Returns the X coordinate of the cell.</summary>
         public int X { get; private set; }
         /// <summary>Returns the Y coordinate of the cell.</summary>
         public int Y { get; private set; }
 
-        /// <summary>Constructs a <see cref="Coord"/> from an X and Y coordinate.</summary>
-        public Coord(int x, int y)
+        /// <summary>Constructs a <see cref="Square"/> from an X and Y coordinate.</summary>
+        public Square(int x, int y)
         {
             X = x;
             Y = y;
@@ -36,16 +36,16 @@ namespace RT.Coordinates
         /// <param name="dx">
         ///     Amount of cells to move by.</param>
         /// <returns>
-        ///     The new <see cref="Coord"/> value.</returns>
-        public Coord MoveX(int dx) => Move(dx, 0);
+        ///     The new <see cref="Square"/> value.</returns>
+        public Square MoveX(int dx) => Move(dx, 0);
 
         /// <summary>
         ///     Moves the current cell <paramref name="dy"/> number of spaces down.</summary>
         /// <param name="dy">
         ///     Amount of cells to move by.</param>
         /// <returns>
-        ///     The new <see cref="Coord"/> value.</returns>
-        public Coord MoveY(int dy) => Move(0, dy);
+        ///     The new <see cref="Square"/> value.</returns>
+        public Square MoveY(int dy) => Move(0, dy);
 
         /// <summary>
         ///     Moves the current cell <paramref name="dx"/> number of spaces to the right and <paramref name="dy"/> number of
@@ -55,8 +55,8 @@ namespace RT.Coordinates
         /// <param name="dy">
         ///     Amount of cells to move by in the Y direction.</param>
         /// <returns>
-        ///     The new <see cref="Coord"/> value.</returns>
-        public Coord Move(int dx, int dy) => new Coord(X + dx, Y + dy);
+        ///     The new <see cref="Square"/> value.</returns>
+        public Square Move(int dx, int dy) => new Square(X + dx, Y + dy);
 
         /// <summary>
         ///     Moves the current cell a number of spaces in the specified direction.</summary>
@@ -66,7 +66,7 @@ namespace RT.Coordinates
         ///     Number of cells to move by. Default is <c>1</c>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The value of <paramref name="dir"/> was not one of the defined enum values of <see cref="Direction"/>.</exception>
-        public Coord Move(Direction dir, int amount = 1) => dir switch
+        public Square Move(Direction dir, int amount = 1) => dir switch
         {
             Direction.Up => Move(0, -amount),
             Direction.UpRight => Move(amount, -amount),
@@ -80,16 +80,16 @@ namespace RT.Coordinates
         };
 
         /// <summary>Compares this cell to another for equality.</summary>
-        public bool Equals(Coord other) => other.X == X && other.Y == Y;
+        public bool Equals(Square other) => other.X == X && other.Y == Y;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Coord other && Equals(other);
+        public override bool Equals(object obj) => obj is Square other && Equals(other);
         /// <inheritdoc/>
         public override int GetHashCode() => unchecked(X * 1048583 + Y);
 
-        /// <summary>Compares two <see cref="Coord"/> values for equality.</summary>
-        public static bool operator ==(Coord one, Coord two) => one.Equals(two);
-        /// <summary>Compares two <see cref="Coord"/> values for inequality.</summary>
-        public static bool operator !=(Coord one, Coord two) => !one.Equals(two);
+        /// <summary>Compares two <see cref="Square"/> values for equality.</summary>
+        public static bool operator ==(Square one, Square two) => one.Equals(two);
+        /// <summary>Compares two <see cref="Square"/> values for inequality.</summary>
+        public static bool operator !=(Square one, Square two) => !one.Equals(two);
 
         /// <summary>
         ///     Returns a collection of all cells in a grid of the specified size.</summary>
@@ -101,11 +101,11 @@ namespace RT.Coordinates
         ///     Specifies the x-coordinate of the top-left corner. Default is <c>0</c>.</param>
         /// <param name="dy">
         ///     Specifies the y-coordinate of the top-left corner. Default is <c>0</c>.</param>
-        public static IEnumerable<Coord> Rectangle(int width, int height, int dx = 0, int dy = 0)
+        public static IEnumerable<Square> Rectangle(int width, int height, int dx = 0, int dy = 0)
         {
             for (var y = 0; y < height; y++)
                 for (var x = 0; x < width; x++)
-                    yield return new Coord(x + dx, y + dy);
+                    yield return new Square(x + dx, y + dy);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace RT.Coordinates
         ///     Other cell to compare against.</param>
         /// <param name="includeDiagonal">
         ///     If <c>true</c>, diagonal neighbors are allowed.</param>
-        public bool IsAdjacentTo(Coord other, bool includeDiagonal = false)
+        public bool IsAdjacentTo(Square other, bool includeDiagonal = false)
         {
             for (var i = 0; i < 8; i++)
                 if ((includeDiagonal || i % 2 == 0) && Move((Direction) i) == other)
@@ -126,7 +126,7 @@ namespace RT.Coordinates
         ///     Returns a collection of all of this cell’s neighbors.</summary>
         /// <param name="includeDiagonal">
         ///     If <c>true</c>, diagonal neighbors are included.</param>
-        public IEnumerable<Coord> GetNeighbors(bool includeDiagonal = false)
+        public IEnumerable<Square> GetNeighbors(bool includeDiagonal = false)
         {
             for (var i = 0; i < 8; i++)
                 if (includeDiagonal || i % 2 == 0)
@@ -136,7 +136,7 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
-        /// <summary>Returns the vertices along the perimeter of this <see cref="Coord"/>, going clockwise from the top-left.</summary>
+        /// <summary>Returns the vertices along the perimeter of this <see cref="Square"/>, going clockwise from the top-left.</summary>
         public Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
             new Vertex(X, Y),
@@ -149,13 +149,13 @@ namespace RT.Coordinates
         public PointD Center => new PointD(X + .5, Y + .5);
 
         /// <summary>Returns a collection of all of this cell’s orthogonal neighbors (no diagonals).</summary>
-        public IEnumerable<Coord> Neighbors => GetNeighbors();
+        public IEnumerable<Square> Neighbors => GetNeighbors();
 
         IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <summary>Returns the set of chess knight’s moves from the current cell.</summary>
-        public IEnumerable<Coord> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
-        private static readonly Coord[] _knightsMoveOffsets = { new Coord(1, -2), new Coord(2, -1), new Coord(2, 1), new Coord(1, 2), new Coord(-1, 2), new Coord(-2, 1), new Coord(-2, -1), new Coord(-1, -2) };
+        public IEnumerable<Square> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
+        private static readonly Square[] _knightsMoveOffsets = { new Square(1, -2), new Square(2, -1), new Square(2, 1), new Square(1, 2), new Square(-1, 2), new Square(-2, 1), new Square(-2, -1), new Square(-1, -2) };
 
         /// <summary>
         ///     Tests whether this coordinate is within a given rectangular range.</summary>
@@ -185,15 +185,15 @@ namespace RT.Coordinates
         /// <summary>
         ///     Calculates the Manhattan distance between this coordinate and <paramref name="other"/>. This is the number of
         ///     orthogonal steps required to reach one from the other.</summary>
-        public int ManhattanDistance(Coord other) => Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
+        public int ManhattanDistance(Square other) => Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
 
         /// <summary>Describes a 2D grid of square cells.</summary>
-        public class Grid : Structure<Coord>
+        public class Grid : Structure<Square>
         {
             /// <summary>
             ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
             ///     IEnumerable{TCell}})"/>.</summary>
-            public Grid(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> links = null, Func<Coord, IEnumerable<Coord>> getNeighbors = null)
+            public Grid(IEnumerable<Square> cells, IEnumerable<Link<Square>> links = null, Func<Square, IEnumerable<Square>> getNeighbors = null)
                 : base(cells, links, getNeighbors)
             {
             }
@@ -218,7 +218,7 @@ namespace RT.Coordinates
                 _toroidalY = toroidalY;
             }
 
-            private Grid(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> links, int width, int height, bool toroidalX, bool toroidalY)
+            private Grid(IEnumerable<Square> cells, IEnumerable<Link<Square>> links, int width, int height, bool toroidalX, bool toroidalY)
                 : base(cells, links, null)
             {
                 _width = width;
@@ -227,22 +227,22 @@ namespace RT.Coordinates
                 _toroidalY = toroidalY;
             }
 
-            private static Func<Coord, IEnumerable<Coord>> getNeighborsGetter(int width, int height, bool toroidalX, bool toroidalY)
+            private static Func<Square, IEnumerable<Square>> getNeighborsGetter(int width, int height, bool toroidalX, bool toroidalY)
             {
                 return get;
-                IEnumerable<Coord> get(Coord c)
+                IEnumerable<Square> get(Square c)
                 {
                     foreach (var neighbor in c.GetNeighbors())
                         if (neighbor.X >= 0 && neighbor.X < width && neighbor.Y >= 0 && neighbor.Y <= height)
                             yield return neighbor;
                     if (toroidalX && c.X == 0)
-                        yield return new Coord(width - 1, c.Y);
+                        yield return new Square(width - 1, c.Y);
                     if (toroidalX && c.X == width - 1)
-                        yield return new Coord(0, c.Y);
+                        yield return new Square(0, c.Y);
                     if (toroidalY && c.Y == 0)
-                        yield return new Coord(c.X, height - 1);
+                        yield return new Square(c.X, height - 1);
                     if (toroidalY && c.Y == height - 1)
-                        yield return new Coord(c.X, 0);
+                        yield return new Square(c.X, 0);
                 }
             }
 
@@ -252,7 +252,7 @@ namespace RT.Coordinates
             private readonly bool _toroidalY;
 
             /// <inheritdoc/>
-            protected override Structure<Coord> makeModifiedStructure(IEnumerable<Coord> cells, IEnumerable<Link<Coord>> traversible) => new Grid(cells, traversible, _width, _height, _toroidalX, _toroidalY);
+            protected override Structure<Square> makeModifiedStructure(IEnumerable<Square> cells, IEnumerable<Link<Square>> traversible) => new Grid(cells, traversible, _width, _height, _toroidalX, _toroidalY);
 
             /// <summary>See <see cref="Structure{TCell}.GenerateMaze(Random, MazeBias)"/>.</summary>
             public new Grid GenerateMaze(Random rnd = null, MazeBias bias = MazeBias.Default) => (Grid) base.GenerateMaze(rnd, bias);
@@ -261,25 +261,25 @@ namespace RT.Coordinates
             public new Grid GenerateMaze(Func<int, int, int> rndNext, MazeBias bias = MazeBias.Default) => (Grid) base.GenerateMaze(rndNext, bias);
 
             /// <inheritdoc/>
-            protected override EdgeInfo<Coord> svgEdgeType(Link<Coordinates.Vertex> edge, List<Coord> cells)
+            protected override EdgeInfo<Square> svgEdgeType(Link<Coordinates.Vertex> edge, List<Square> cells)
             {
                 if (cells.Count == 1)
                 {
                     var c = cells[0];
                     if (_toroidalX && c.X == 0 && edge.All(v => v is Vertex cv && cv.Cell.X == 0))
-                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveX(_width - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(_width - 1) };
+                        return new EdgeInfo<Square> { EdgeType = _links.Contains(new Link<Square>(c, c.MoveX(_width - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(_width - 1) };
                     else if (_toroidalX && c.X == _width - 1 && edge.All(v => v is Vertex cv && cv.Cell.X == _width))
-                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveX(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(-_width + 1) };
+                        return new EdgeInfo<Square> { EdgeType = _links.Contains(new Link<Square>(c, c.MoveX(-_width + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveX(-_width + 1) };
                     else if (_toroidalY && c.Y == 0 && edge.All(v => v is Vertex cv && cv.Cell.Y == 0))
-                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveY(_height - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(_height - 1) };
+                        return new EdgeInfo<Square> { EdgeType = _links.Contains(new Link<Square>(c, c.MoveY(_height - 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(_height - 1) };
                     else if (_toroidalY && c.Y == _height - 1 && edge.All(v => v is Vertex cv && cv.Cell.Y == _height))
-                        return new EdgeInfo<Coord> { EdgeType = _links.Contains(new Link<Coord>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(-_height + 1) };
+                        return new EdgeInfo<Square> { EdgeType = _links.Contains(new Link<Square>(c, c.MoveY(-_height + 1))) ? EdgeType.Passage : EdgeType.Wall, Cell1 = c, Cell2 = c.MoveY(-_height + 1) };
                 }
                 return base.svgEdgeType(edge, cells);
             }
 
             /// <inheritdoc/>
-            protected override bool drawBridge(Link<Coord> link)
+            protected override bool drawBridge(Link<Square> link)
             {
                 var c = link.Apart(out var d);
                 return !(_toroidalX && Math.Abs(c.X - d.X) + 1 == _width || _toroidalY && Math.Abs(c.Y - d.Y) + 1 == _height);
@@ -290,7 +290,7 @@ namespace RT.Coordinates
         public class Vertex : Coordinates.Vertex
         {
             /// <summary>Returns the grid cell whose top-left corner is this coordinate.</summary>
-            public Coord Cell { get; private set; }
+            public Square Cell { get; private set; }
 
             /// <summary>
             ///     Constructor.</summary>
@@ -300,11 +300,11 @@ namespace RT.Coordinates
             ///     The y-coordinate of the cell that has this vertex as its top-left corner.</param>
             public Vertex(int x, int y)
             {
-                Cell = new Coord(x, y);
+                Cell = new Square(x, y);
             }
 
             /// <summary>Constructor.</summary>
-            public Vertex(Coord cell)
+            public Vertex(Square cell)
             {
                 Cell = cell;
             }
@@ -349,8 +349,8 @@ namespace RT.Coordinates
         public static readonly IEnumerable<Direction> AllDirections = (Direction[]) Enum.GetValues(typeof(Direction));
 
         /// <summary>Addition operator.</summary>
-        public static Coord operator +(Coord one, Coord two) => new Coord(one.X + two.X, one.Y + two.Y);
+        public static Square operator +(Square one, Square two) => new Square(one.X + two.X, one.Y + two.Y);
         /// <summary>Subtraction operator.</summary>
-        public static Coord operator -(Coord one, Coord two) => new Coord(one.X - two.X, one.Y - two.Y);
+        public static Square operator -(Square one, Square two) => new Square(one.X - two.X, one.Y - two.Y);
     }
 }
