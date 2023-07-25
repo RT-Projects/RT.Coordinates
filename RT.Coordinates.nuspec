@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>RT.Coordinates</id>
-    <version>2.6.0</version>
+    <version>2.7.0</version>
     <authors>Timwi</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <owners>Timwi</owners>

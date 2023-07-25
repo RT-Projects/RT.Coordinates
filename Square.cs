@@ -29,7 +29,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override string ToString() => $"C({X},{Y})";
+        public override readonly string ToString() => $"S({X},{Y})";
 
         /// <summary>
         ///     Moves the current cell <paramref name="dx"/> number of spaces to the right.</summary>
