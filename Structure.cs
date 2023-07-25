@@ -196,8 +196,8 @@ namespace RT.Coordinates
                 else
                 {
                     edgeType = objInf.Value.EdgeType;
-                    cell1 = (TCell) objInf.Value.Cell1;
-                    cell2 = (TCell) objInf.Value.Cell2;
+                    cell1 = (TCell) (objInf.Value.Cell1 ?? default(TCell));
+                    cell2 = (TCell) (objInf.Value.Cell2 ?? default(TCell));
                 }
 
                 switch (edgeType)
