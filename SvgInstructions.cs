@@ -130,17 +130,28 @@ namespace RT.Coordinates
         public Func<string, object, string> OutlinePaths = (d, c) => $"<path d='{d}' fill='none' stroke-width='.1' stroke='black' />";
 
         /// <summary>
-        ///     Generates SVG code for a bridge — a connection between cells that have no edges in common. The first and third
-        ///     parameter are the cells; the second and fourth are their center points.</summary>
-        public Func<object, PointD, object, PointD, string> BridgeSvg = null;
+        ///     Generates SVG code for a bridge — a connection between cells that have no edges in common. The first two
+        ///     parameters are the cells; the third is a default SVG path <c>d</c> attribute that can optionally be used.</summary>
+        public Func<object, object, string, string> BridgeSvg = null;
+
+        /// <summary>Specifies a number of decimal places to round every coordinate to when generating SVG paths.</summary>
+        public int? Precision = null;
 
         /// <summary>Provides a default implementation for <see cref="BridgeSvg"/>.</summary>
-        public static string DrawBridge(PointD center1, PointD center2)
+        public static string DrawBridge(PointD center1, PointD center2, Func<double, string> r)
         {
             var control1 = ((center1 * 2 + center2) / 3 - center1).RotateDeg(30) + center1;
             var control2 = ((center1 + center2 * 2) / 3 - center2).RotateDeg(-30) + center2;
-            var d = $"M{center1.X} {center1.Y}C{control1.X} {control1.Y} {control2.X} {control2.Y} {center2.X} {center2.Y}";
+            var d = $"M{r(center1.X)} {r(center1.Y)}C{r(control1.X)} {r(control1.Y)} {r(control2.X)} {r(control2.Y)} {r(center2.X)} {r(center2.Y)}";
             return $"<path d='{d}' fill='none' stroke-width='.3' stroke='black' /><path d='{d}' fill='none' stroke-width='.2' stroke='white' stroke-linecap='round' />";
         }
+
+        /// <summary>
+        ///     Rounds a floating-point value to a number of decimal places specified by <see cref="Precision"/>. Useful to
+        ///     pass into methods such as <see cref="GridUtils.SvgEdgesPath(IEnumerable{Link{Vertex}}, Func{Vertex, PointD},
+        ///     Func{double, string})"/>.</summary>
+        /// <param name="value">
+        ///     The floating-point value to be rounded.</param>
+        public string Round(double value) => Precision == null ? value.ToString() : value.ToString($"0.{new string('0', Precision.Value)}");
     }
 }

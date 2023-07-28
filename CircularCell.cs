@@ -194,10 +194,10 @@ namespace RT.Coordinates
             public override string ToString() => $"{Radius};{Position}";
 
             /// <inheritdoc/>
-            public override string SvgPathFragment(Coordinates.Vertex from, Func<Coordinates.Vertex, PointD> getVertexPoint, bool isLast)
+            public override string SvgPathFragment(Coordinates.Vertex from, Func<Coordinates.Vertex, PointD> getVertexPoint, Func<double, string> r, bool isLast)
             {
                 if (!(from is Vertex v) || v.Radius != Radius)
-                    return base.SvgPathFragment(from, getVertexPoint, isLast);
+                    return base.SvgPathFragment(from, getVertexPoint, r, isLast);
 
                 var gc = gcd(Position.Denominator, v.Position.Denominator);
                 var n1 = Position.Numerator * v.Position.Denominator / gc;
@@ -205,7 +205,7 @@ namespace RT.Coordinates
                 var cd = Position.Denominator * v.Position.Denominator / gc;
 
                 var p = getVertexPoint(this);
-                return $"A {Radius} {Radius} 0 0 {((n2 > n1 ? n1 + cd - n2 < n2 - n1 : n2 + cd - n1 > n1 - n2) ? "1" : "0")} {p.X} {p.Y}";
+                return $"A {Radius} {Radius} 0 0 {((n2 > n1 ? (2 * (n2 - n1) > cd) : (2 * (n1 - n2) < cd)) ? "1" : "0")} {r(p.X)} {r(p.Y)}";
             }
         }
 

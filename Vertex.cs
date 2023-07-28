@@ -47,19 +47,22 @@ namespace RT.Coordinates
         /// <param name="isLast">
         ///     <c>true</c> if we are generating a closed path and this is the last invocation. This vertex is therefore the
         ///     first in the path, as the path is returning to its starting position.</param>
+        /// <param name="r">
+        ///     Use this to turn floating-point value into strings. This will respect the user’s <see
+        ///     cref="SvgInstructions.Precision"/> instruction.</param>
         /// <returns>
         ///     A string that can be inserted in the <c>d</c> attribute of an SVG <c>&lt;path&gt;</c> element.</returns>
         /// <remarks>
         ///     The implementation must assume that the SVG path is already at the <paramref name="from"/> vertex and return
         ///     only the part of the path that leads to the current vertex. For example, the default implementation returns
-        ///     <c>$"L{<see cref="PointD.X"/>} {<see cref="PointD.Y"/>}"</c> and does not reference <paramref name="from"/> at
-        ///     all.</remarks>
-        public virtual string SvgPathFragment(Vertex from, Func<Vertex, PointD> getVertexPoint, bool isLast)
+        ///     <c>$"L{<paramref name="r"/>(<see cref="PointD.X"/>)} {<paramref name="r"/>(<see cref="PointD.Y"/>)}"</c> and
+        ///     does not reference <paramref name="from"/> at all.</remarks>
+        public virtual string SvgPathFragment(Vertex from, Func<Vertex, PointD> getVertexPoint, Func<double, string> r, bool isLast)
         {
             if (isLast)
                 return "";
             var p = getVertexPoint(this);
-            return $"L{p.X} {p.Y}";
+            return $"L{r(p.X)} {r(p.Y)}";
         }
     }
 }

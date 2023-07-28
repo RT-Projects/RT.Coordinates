@@ -208,19 +208,24 @@ namespace RT.Coordinates
         ///     A set of edges to render.</param>
         /// <param name="getVertexPoint">
         ///     An optional function that can customize the coordinates of each vertex.</param>
-        public static string SvgEdgesPath(IEnumerable<Link<Vertex>> edges, Func<Vertex, PointD> getVertexPoint = null)
+        /// <param name="r">
+        ///     Provides a means to turn floating-point values into strings. <see
+        ///     cref="Structure{TCell}.Svg(SvgInstructions)"/> uses this to respect the user’s <see
+        ///     cref="SvgInstructions.Precision"/> instruction.</param>
+        public static string SvgEdgesPath(IEnumerable<Link<Vertex>> edges, Func<Vertex, PointD> getVertexPoint = null, Func<double, string> r = null)
         {
             getVertexPoint ??= (v => v.Point);
+            r ??= (d => d.ToString());
             var sb = new StringBuilder();
             foreach (var segment in combineSegments(edges))
             {
                 var p = getVertexPoint(segment.Vertices[0]);
-                sb.AppendFormat("M{0} {1}", p.X, p.Y);
+                sb.AppendFormat("M{0} {1}", r(p.X), r(p.Y));
                 for (var i = 1; i < segment.Vertices.Count; i++)
-                    sb.Append(segment.Vertices[i].SvgPathFragment(segment.Vertices[i - 1], getVertexPoint, isLast: false));
+                    sb.Append(segment.Vertices[i].SvgPathFragment(segment.Vertices[i - 1], getVertexPoint, r, isLast: false));
                 if (segment.Closed)
                 {
-                    sb.Append(segment.Vertices[0].SvgPathFragment(segment.Vertices[segment.Vertices.Count - 1], getVertexPoint, isLast: true));
+                    sb.Append(segment.Vertices[0].SvgPathFragment(segment.Vertices[segment.Vertices.Count - 1], getVertexPoint, r, isLast: true));
                     sb.Append("z");
                 }
             }
@@ -296,9 +301,9 @@ namespace RT.Coordinates
         /// <param name="str">
         ///     A string representation in the same format as returned by the original cell’s <c>ToString()</c> method.</param>
         /// <returns>
-        ///     This method can parse cells of type <see cref="Cairo"/>, <see cref="CircularCell"/>, <see cref="Square"/>, <see
-        ///     cref="Floret"/>, <see cref="Hex"/>, <see cref="Kite"/>, <see cref="OctoCell"/>, <see cref="Penrose"/>, <see
-        ///     cref="Rhomb"/>, <see cref="Rhombihexadel"/> and <see cref="Tri"/>.</returns>
+        ///     This method can parse cells of type <see cref="Cairo"/>, <see cref="Chamf"/>, <see cref="CircularCell"/>, <see
+        ///     cref="Square"/>, <see cref="Floret"/>, <see cref="Hex"/>, <see cref="Kite"/>, <see cref="OctoCell"/>, <see
+        ///     cref="Penrose"/>, <see cref="Rhomb"/>, <see cref="Rhombihexadel"/> and <see cref="Tri"/>.</returns>
         public static object Parse(string str)
         {
             Match m;

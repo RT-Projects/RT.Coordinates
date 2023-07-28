@@ -219,6 +219,8 @@ namespace RT.Coordinates
                 }
             }
 
+            string r(double value) => inf?.Round(value) ?? value.ToString();
+
             var bridges = new StringBuilder();
             foreach (var bridge in _links.Except(allEdges.Values.Where(v => v.Count == 2).Select(v => new Link<TCell>(v[0], v[1]))))
                 if (drawBridge(bridge))
@@ -226,7 +228,10 @@ namespace RT.Coordinates
                     var (cell1, cell2) = bridge;
                     var center1 = getCenter(cell1, inf);
                     var center2 = getCenter(cell2, inf);
-                    bridges.Append(inf?.BridgeSvg?.Invoke(cell1, center1, cell2, center2) ?? SvgInstructions.DrawBridge(center1, center2));
+                    var control1 = ((center1 * 2 + center2) / 3 - center1).RotateDeg(30) + center1;
+                    var control2 = ((center1 + center2 * 2) / 3 - center2).RotateDeg(-30) + center2;
+                    var d = $"M{r(center1.X)} {r(center1.Y)}C{r(control1.X)} {r(control1.Y)} {r(control2.X)} {r(control2.Y)} {r(center2.X)} {r(center2.Y)}";
+                    bridges.Append(inf?.BridgeSvg?.Invoke(cell1, cell2, d) ?? SvgInstructions.DrawBridge(center1, center2, r));
                 }
 
             // Slightly dirty trick using inline assignment to ensure that ‘path’ is evaluated only once and only if needed:
@@ -235,18 +240,18 @@ namespace RT.Coordinates
             //  • If ‘inf?.OutlinePath’ is not null, ‘path’ will get assigned in the invocation parameter list; but if that invocation RETURNS null, we need to re-use the value in the default string
             string path = null;
             var outline = outlineEdges.Count == 0 ? "" : (inf?.OutlineSeparate ?? false)
-                ? outlineEdges.Select((edge, ix) => inf.OutlinePaths(svgEdgePath(edge, getVertexPoint), outlineCells[ix])).JoinString()
-                : inf?.OutlinePath?.Invoke(path = GridUtils.SvgEdgesPath(outlineEdges, getVertexPoint)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(outlineEdges, getVertexPoint)}' fill='none' stroke-width='.1' stroke='black' />";
+                ? outlineEdges.Select((edge, ix) => inf.OutlinePaths(svgEdgePath(edge, getVertexPoint, r), outlineCells[ix])).JoinString()
+                : inf?.OutlinePath?.Invoke(path = GridUtils.SvgEdgesPath(outlineEdges, getVertexPoint, r)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(outlineEdges, getVertexPoint, r)}' fill='none' stroke-width='.1' stroke='black' />";
 
             path = null;
             var walls = wallEdges.Count == 0 ? "" : (inf?.WallsSeparate ?? false)
-                ? wallEdges.Select((edge, ix) => inf.WallsPaths(svgEdgePath(edge, getVertexPoint), wallLinks[ix].Apart(out var cc), cc)).JoinString()
-                : inf?.WallsPath?.Invoke(path = GridUtils.SvgEdgesPath(wallEdges, getVertexPoint)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(wallEdges, getVertexPoint)}' fill='none' stroke-width='.05' stroke='black' />";
+                ? wallEdges.Select((edge, ix) => inf.WallsPaths(svgEdgePath(edge, getVertexPoint, r), wallLinks[ix].Apart(out var cc), cc)).JoinString()
+                : inf?.WallsPath?.Invoke(path = GridUtils.SvgEdgesPath(wallEdges, getVertexPoint, r)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(wallEdges, getVertexPoint, r)}' fill='none' stroke-width='.05' stroke='black' />";
 
             path = null;
             var passages = passageEdges.Count == 0 ? "" : (inf?.PassagesSeparate ?? false)
-                ? passageEdges.Select((edge, ix) => inf.PassagesPaths(svgEdgePath(edge, getVertexPoint), passageLinks[ix].Apart(out var cc), cc)).JoinString()
-                : inf?.PassagesPath?.Invoke(path = GridUtils.SvgEdgesPath(passageEdges, getVertexPoint)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(passageEdges, getVertexPoint)}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />";
+                ? passageEdges.Select((edge, ix) => inf.PassagesPaths(svgEdgePath(edge, getVertexPoint, r), passageLinks[ix].Apart(out var cc), cc)).JoinString()
+                : inf?.PassagesPath?.Invoke(path = GridUtils.SvgEdgesPath(passageEdges, getVertexPoint, r)) ?? $"<path d='{path ?? GridUtils.SvgEdgesPath(passageEdges, getVertexPoint, r)}' fill='none' stroke-width='.02' stroke='#ccc' stroke-dasharray='.1' />";
 
             var allPoints = allEdges.SelectMany(kvp => kvp.Key.Select(getVertexPoint)).ToList();
             var minX = allPoints.Min(v => v.X);
@@ -277,7 +282,8 @@ namespace RT.Coordinates
             if (svg == null)
                 return "";
             var center = getCenter(cell, inf);
-            return $"<g transform='translate({center.X} {center.Y})'>{svg}</g>";
+            string r(double value) => inf == null ? value.ToString() : inf.Round(value);
+            return $"<g transform='translate({r(center.X)} {r(center.Y)})'>{svg}</g>";
         }
 
         private static IHasSvgGeometry geom(TCell cell) => (cell as IHasSvgGeometry) ??
@@ -310,11 +316,11 @@ namespace RT.Coordinates
         ///     Specifies the link for which to decide whether to draw a bridge.</param>
         protected virtual bool drawBridge(Link<TCell> link) => true;
 
-        private string svgEdgePath(Link<Vertex> segment, Func<Vertex, PointD> getVertexPoint)
+        private string svgEdgePath(Link<Vertex> segment, Func<Vertex, PointD> getVertexPoint, Func<double, string> r)
         {
             var one = segment.Apart(out var two);
             var p = getVertexPoint(one);
-            return string.Format("M{0} {1}{2}", p.X, p.Y, two.SvgPathFragment(one, getVertexPoint, isLast: false));
+            return string.Format("M{0} {1}{2}", r(p.X), r(p.Y), two.SvgPathFragment(one, getVertexPoint, r, isLast: false));
         }
 
         /// <summary>Adds the specified link to this structure.</summary>
