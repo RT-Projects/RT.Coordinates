@@ -36,6 +36,7 @@
     <Compile Include="CircleFraction.cs" />
     <Compile Include="CircularCell.cs" />
     <Compile Include="CombinedCell.cs" />
+    <Compile Include="PentaCell.cs" />
     <Compile Include="Pentavector.cs" />
     <Compile Include="Square.cs" />
     <Compile Include="CoordinatesHelpers.cs" />
