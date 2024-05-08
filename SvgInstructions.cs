@@ -7,8 +7,11 @@ namespace RT.Coordinates
     /// <summary>Contains instructions to control the behavior of <see cref="Structure{TCell}.Svg(SvgInstructions)"/>.</summary>
     public class SvgInstructions
     {
-        /// <summary>Adds extra SVG code for every cell.</summary>
-        public Func<object, string> PerCell = null;
+        /// <summary>Adds extra SVG code for every cell before the SVG for the outline and walls.</summary>
+        public Func<object, string> PerCellBefore = null;
+
+        /// <summary>Adds extra SVG code for every cell after the SVG for the outline and walls.</summary>
+        public Func<object, string> PerCellAfter = null;
 
         /// <summary>
         ///     Paints some cells with a background color.</summary>
@@ -70,7 +73,7 @@ namespace RT.Coordinates
         public string ExtraSvg2;
 
         /// <summary>
-        ///     Provides some additional SVG code to add into the file after the main grid but before <see cref="PerCell"/>.</summary>
+        ///     Provides some additional SVG code to add into the file after the main grid but before <see cref="PerCellAfter"/>.</summary>
         public string ExtraSvg3;
 
         /// <summary>Provides some additional SVG code to add at the end of the file.</summary>

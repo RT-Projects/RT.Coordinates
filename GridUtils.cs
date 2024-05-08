@@ -313,21 +313,24 @@ namespace RT.Coordinates
             throw new InvalidOperationException($"The string ‘{str}’ cannot be parsed into a cell type.");
         }
 
-        private static readonly CellParserInfo[] _parsers = new CellParserInfo[]
-        {
+        /// <summary>Returns the parameters as an array.</summary>
+        internal static T[] NewArray<T>(params T[] array) => array;
+
+        private static readonly CellParserInfo[] _parsers = NewArray
+        (
             new CellParserInfo(@"^C\((-?\d+),(-?\d+)\)/([0-3])$", m => new Cairo(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Cairo.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^C\((\d+);(\d+)/(\d+)→(\d+)/(\d+)\)$", m => new CircularCell(int.Parse(m.Groups[1].Value), new CircleFraction(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value)), new CircleFraction(int.Parse(m.Groups[4].Value), int.Parse(m.Groups[5].Value)))),
+            new CellParserInfo(@"^([Ee])\((\d+),(\d+),(\d+)\)$", m => new PentaCell(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), int.Parse(m.Groups[4].Value), m.Groups[1].Value[0] == 'e')),
             new CellParserInfo(@"^F\((-?\d+),(-?\d+)\)/([0-5])$", m => new Floret(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Floret.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^H\((-?\d+),(-?\d+)\)$", m => new Hex(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
             new CellParserInfo(@"^H\((-?\d+),(-?\d+)\)/([0-4])$", m => new Chamf(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Chamf.Tile) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^K\((-?\d+),(-?\d+)\)/([0-5])$", m => new Kite(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Kite.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^M\((-?\d+),(-?\d+)\)/([0-5])$", m => new Rhombihexadel(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Rhombihexadel.Tile) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^([Oo])\((-?\d+),(-?\d+)\)$", m => new OctoCell(int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), m.Groups[1].Value[0] == 'o')),
-            new CellParserInfo(@"^P\((-?\d+),(-?\d+),(-?\d+),(-?\d+)\)/([0-3])/([0-9])$", m => new Penrose((Penrose.Kind) int.Parse(m.Groups[5].Value), new Penrose.Vector(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), int.Parse(m.Groups[4].Value)), int.Parse(m.Groups[6].Value))),
+            new CellParserInfo(@"^P\((-?\d+),(-?\d+),(-?\d+),(-?\d+)\)/([0-3])/([0-9])$", m => new Penrose((Penrose.Kind) int.Parse(m.Groups[5].Value), new Pentavector(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), int.Parse(m.Groups[4].Value)), int.Parse(m.Groups[6].Value))),
             new CellParserInfo(@"^R\((-?\d+),(-?\d+)\)/([0-2])$", m => new Rhomb(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Rhomb.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^S\((-?\d+),(-?\d+)\)$", m => new Square(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
-            new CellParserInfo(@"^T\((-?\d+),(-?\d+)\)$", m => new Tri(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value)))
-        };
+            new CellParserInfo(@"^T\((-?\d+),(-?\d+)\)$", m => new Tri(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))));
 
         private struct CellParserInfo
         {

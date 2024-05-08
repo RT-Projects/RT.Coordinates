@@ -99,5 +99,17 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public override readonly string ToString() => $"({X}, {Y})";
 
+        /// <summary>Returns the theta (angle) of the vector represented by this <see cref="PointD"/>.</summary>
+        public readonly double Theta => Math.Atan2(Y, X);
+
+        /// <summary>Returns the unit vector in the same direction as this one.</summary>
+        public readonly PointD Unit
+        {
+            get
+            {
+                double len = Math.Sqrt(X * X + Y * Y);
+                return new PointD(X / len, Y / len);
+            }
+        }
     }
 }

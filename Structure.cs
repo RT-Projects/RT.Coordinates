@@ -266,19 +266,19 @@ namespace RT.Coordinates
                 inf?.ExtraSvg1 +
                 highlights +
                 inf?.ExtraSvg2 +
+                (inf?.PerCellBefore == null ? "" : _cells.Select(cell => processCellSvg(cell, inf.PerCellBefore(cell), inf)).JoinString()) +
                 passages +
                 walls +
                 outline +
                 bridges +
                 inf?.ExtraSvg3 +
-                (inf?.PerCell == null ? "" : _cells.Select(cell => processCellSvg(cell, inf)).JoinString()) +
+                (inf?.PerCellAfter == null ? "" : _cells.Select(cell => processCellSvg(cell, inf.PerCellAfter(cell), inf)).JoinString()) +
                 inf?.ExtraSvg4 +
                 endTag;
         }
 
-        private static string processCellSvg(TCell cell, SvgInstructions inf)
+        private static string processCellSvg(TCell cell, string svg, SvgInstructions inf)
         {
-            var svg = inf?.PerCell(cell);
             if (svg == null)
                 return "";
             var center = getCenter(cell, inf);
@@ -338,6 +338,8 @@ namespace RT.Coordinates
         public void RemoveLinks(params Link<TCell>[] links) { foreach (var link in links) _links.Remove(link); }
         /// <summary>Removes the specified links from this structure.</summary>
         public void RemoveLinks(IEnumerable<Link<TCell>> links) { foreach (var link in links) _links.Remove(link); }
+        /// <summary>Removes the specified links from this structure.</summary>
+        public void RemoveLinks(Predicate<Link<TCell>> predicate) { _links.RemoveWhere(predicate); }
 
         /// <summary>Removes the specified cell from this structure.</summary>
         public void RemoveCell(TCell cell) { _cells.Remove(cell); _links.RemoveWhere(l => l.Contains(cell)); }
