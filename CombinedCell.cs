@@ -115,6 +115,6 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override string ToString() => _underlyingCells.JoinString("+");
+        public override readonly string ToString() => _underlyingCells.JoinString("+");
     }
 }

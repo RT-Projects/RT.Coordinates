@@ -34,14 +34,14 @@ namespace RT.Coordinates
         public static PointD operator -(PointD p1, PointD p2) => new PointD(p1.X - p2.X, p1.Y - p2.Y);
 
         /// <summary>Calculates the distance of this point from the origin.</summary>
-        public double Distance => Math.Sqrt(X * X + Y * Y);
+        public readonly double Distance => Math.Sqrt(X * X + Y * Y);
 
         /// <summary>Implements <see cref="IEquatable{T}"/>.</summary>
-        public bool Equals(PointD other) => X == other.X && Y == other.Y;
+        public readonly bool Equals(PointD other) => X == other.X && Y == other.Y;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is PointD p && Equals(p);
+        public override readonly bool Equals(object obj) => obj is PointD p && Equals(p);
         /// <inheritdoc/>
-        public override int GetHashCode() => X.GetHashCode() * 1073741827 + Y.GetHashCode();
+        public override readonly int GetHashCode() => X.GetHashCode() * 1073741827 + Y.GetHashCode();
 
         /// <summary>
         ///     Rotates the current point by the specified <paramref name="angle"/> about the origin.</summary>
@@ -52,7 +52,7 @@ namespace RT.Coordinates
         /// <remarks>
         ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
         ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
-        public PointD Rotate(double angle)
+        public readonly PointD Rotate(double angle)
         {
             var sina = Math.Sin(angle);
             var cosa = Math.Cos(angle);
@@ -70,7 +70,7 @@ namespace RT.Coordinates
         /// <remarks>
         ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
         ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
-        public PointD Rotate(double angle, PointD about) => (this - about).Rotate(angle) + about;
+        public readonly PointD Rotate(double angle, PointD about) => (this - about).Rotate(angle) + about;
 
         /// <summary>
         ///     Rotates the current point by the specified <paramref name="angle"/> about the origin.</summary>
@@ -81,7 +81,7 @@ namespace RT.Coordinates
         /// <remarks>
         ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
         ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
-        public PointD RotateDeg(double angle) => Rotate(angle * Math.PI / 180);
+        public readonly PointD RotateDeg(double angle) => Rotate(angle * Math.PI / 180);
 
         /// <summary>
         ///     Rotates the current point by the specified <paramref name="angle"/> about the specified point.</summary>
@@ -94,9 +94,10 @@ namespace RT.Coordinates
         /// <remarks>
         ///     If the point coordinates are interpreted as is common in geometry (positive Y-axis goes up), this rotation is
         ///     counter-clockwise. In SVG, where the positive Y-axis goes down, the rotation is clockwise.</remarks>
-        public PointD RotateDeg(double angle, PointD about) => Rotate(angle * Math.PI / 180, about);
+        public readonly PointD RotateDeg(double angle, PointD about) => Rotate(angle * Math.PI / 180, about);
 
         /// <inheritdoc/>
-        public override string ToString() => $"({X}, {Y})";
+        public override readonly string ToString() => $"({X}, {Y})";
+
     }
 }

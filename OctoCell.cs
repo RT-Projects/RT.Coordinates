@@ -127,27 +127,27 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public bool Equals(OctoCell other) => other.X == X && other.Y == Y && other.IsSquare == IsSquare;
+        public readonly bool Equals(OctoCell other) => other.X == X && other.Y == Y && other.IsSquare == IsSquare;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is OctoCell oc && Equals(oc);
+        public override readonly bool Equals(object obj) => obj is OctoCell oc && Equals(oc);
         /// <inheritdoc/>
-        public override int GetHashCode() => X * 1073741827 + Y * 47 + (IsSquare ? 1 : 0);
+        public override readonly int GetHashCode() => X * 1073741827 + Y * 47 + (IsSquare ? 1 : 0);
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="OctoCell"/>, going clockwise from the top-left
         ///     (octagon) or top (square).</summary>
-        public Coordinates.Vertex[] Vertices => IsSquare
+        public readonly Coordinates.Vertex[] Vertices => IsSquare
             ? new Coordinates.Vertex[] { new Vertex(X + 1, Y, 0), new Vertex(X + 1, Y + 1, 2), new Vertex(X + 1, Y + 1, 1), new Vertex(X, Y + 1, 3) }
             : new Coordinates.Vertex[] { new Vertex(X, Y, 2), new Vertex(X, Y, 3), new Vertex(X + 1, Y, 1), new Vertex(X + 1, Y, 0), new Vertex(X, Y + 1, 3), new Vertex(X, Y + 1, 2), new Vertex(X, Y, 0), new Vertex(X, Y, 1) };
 
         /// <inheritdoc/>
-        public PointD Center => IsSquare ? new PointD(X + 1, Y + 1) : new PointD(X + .5, Y + .5);
+        public readonly PointD Center => IsSquare ? new PointD(X + 1, Y + 1) : new PointD(X + .5, Y + .5);
 
         /// <inheritdoc/>
-        public IEnumerable<OctoCell> Neighbors
+        public readonly IEnumerable<OctoCell> Neighbors
         {
             get
             {
@@ -171,10 +171,10 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public override string ToString() => string.Format("{0}({1},{2})", IsSquare ? "o" : "O", X, Y);
+        public override readonly string ToString() => string.Format("{0}({1},{2})", IsSquare ? "o" : "O", X, Y);
 
         /// <summary>Describes a 2D grid of octagonal cells with (diagonal) squares filling the gaps.</summary>
         public class Grid : Structure<OctoCell>

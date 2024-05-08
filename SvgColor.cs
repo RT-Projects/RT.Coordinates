@@ -40,7 +40,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override string ToString() => $"{SvgFillColor}{(SvgFillOpacity == null ? "" : "/")}{SvgFillOpacity}";
+        public override readonly string ToString() => $"{SvgFillColor}{(SvgFillOpacity == null ? "" : "/")}{SvgFillOpacity}";
 
         /// <summary>Implicitly converts a string (containing an SVG color) to an opaque <see cref="SvgColor"/>.</summary>
         public static implicit operator SvgColor(string color) => new SvgColor(color: color);

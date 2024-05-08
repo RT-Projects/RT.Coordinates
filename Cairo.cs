@@ -191,7 +191,7 @@ namespace RT.Coordinates
         public PointD Center => (Cell.Center + _centers[(int) Pos]) * 2;
 
         /// <inheritdoc/>
-        public override string ToString() => $"C({Cell.X},{Cell.Y})/{(int) Pos}";
+        public override readonly string ToString() => $"C({Cell.X},{Cell.Y})/{(int) Pos}";
 
         /// <summary>
         ///     Describes a grid structure consisting of <see cref="Cairo"/> cells that join up in groups of 4 to form a

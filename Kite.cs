@@ -164,7 +164,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override string ToString() => $"K({Hex.Q},{Hex.R})/{(int) Pos}";
+        public override readonly string ToString() => $"K({Hex.Q},{Hex.R})/{(int) Pos}";
 
         private static readonly Position[] _kitePositions = (Position[]) Enum.GetValues(typeof(Position));
 

@@ -97,6 +97,6 @@ namespace RT.Coordinates
         /// <inheritdoc/>
         public override int GetHashCode() => unchecked(Numerator * 28935701 + Denominator);
         /// <inheritdoc/>
-        public override string ToString() => $"{Numerator}/{Denominator}";
+        public override readonly string ToString() => $"{Numerator}/{Denominator}";
     }
 }

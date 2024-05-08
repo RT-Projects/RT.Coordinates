@@ -93,7 +93,7 @@ namespace RT.Coordinates
         public override readonly int GetHashCode() => X * 1073741831 + Y * 347 + (int) Subtile;
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Chamf"/>, going clockwise from the top-left

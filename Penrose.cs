@@ -136,17 +136,17 @@ namespace RT.Coordinates
         public int Angle { get; private set; }
 
         /// <inheritdoc/>
-        public bool Equals(Penrose other) => other.TileKind == TileKind && other.Corner == Corner && other.Angle == Angle;
+        public readonly bool Equals(Penrose other) => other.TileKind == TileKind && other.Corner == Corner && other.Angle == Angle;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Penrose other && other.TileKind == TileKind && other.Corner == Corner && other.Angle == Angle;
+        public override readonly bool Equals(object obj) => obj is Penrose other && other.TileKind == TileKind && other.Corner == Corner && other.Angle == Angle;
         /// <inheritdoc/>
-        public override int GetHashCode() => unchecked((Corner.GetHashCode() * 10 + Angle) * 4 + (int) TileKind);
+        public override readonly int GetHashCode() => unchecked((Corner.GetHashCode() * 10 + Angle) * 4 + (int) TileKind);
 
         /// <inheritdoc/>
         public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <inheritdoc/>
-        public PointD Center => TileKind switch
+        public readonly PointD Center => TileKind switch
         {
             Kind.Dart => (3 * Corner.MultiplyByPhi + Vector.Base(Angle)).Point / 3,
             Kind.Kite => (Corner.MultiplyByPhi + Vector.Base(Angle)).Point,
@@ -171,7 +171,7 @@ namespace RT.Coordinates
         ///     Returns a collection of tiles obtained from one iteration of deflating (expanding) this tile.</summary>
         /// <remarks>
         ///     Note that deflating several adjacent tiles will generate some duplicated tiles.</remarks>
-        public IEnumerable<Penrose> DeflatedTiles
+        public readonly IEnumerable<Penrose> DeflatedTiles
         {
             get
             {
@@ -230,7 +230,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Penrose> Neighbors
+        public readonly IEnumerable<Penrose> Neighbors
         {
             get
             {

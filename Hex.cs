@@ -309,7 +309,7 @@ namespace RT.Coordinates
         public PointD Center => new PointD(Q * .75, (Q * .5 + R) * WidthToHeight);
 
         /// <inheritdoc/>
-        public override string ToString() => $"H({Q},{R})";
+        public override readonly string ToString() => $"H({Q},{R})";
 
         /// <summary>Compares this hex tile to another for equality.</summary>
         public bool Equals(Hex other) => Q == other.Q && R == other.R;

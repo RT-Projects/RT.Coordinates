@@ -184,7 +184,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override string ToString() => $"F({Hex.Q},{Hex.R})/{(int) Pos}";
+        public override readonly string ToString() => $"F({Hex.Q},{Hex.R})/{(int) Pos}";
 
         /// <summary>
         ///     Describes a grid structure consisting of <see cref="Floret"/> cells that join up in groups of 6 to form

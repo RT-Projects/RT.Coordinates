@@ -169,7 +169,7 @@ namespace RT.Coordinates
         public static IEnumerable<Rhomb> LargeHexagon(int sideLength) => Hex.LargeHexagon(sideLength).SelectMany(hex => _rhombPositions.Select(pos => new Rhomb(hex, pos)));
 
         /// <inheritdoc/>
-        public override string ToString() => $"R({Hex.Q},{Hex.R})/{(int) Pos}";
+        public override readonly string ToString() => $"R({Hex.Q},{Hex.R})/{(int) Pos}";
 
         /// <summary>
         ///     Describes a grid structure consisting of <see cref="Rhomb"/> cells that join up in groups of 3 to form

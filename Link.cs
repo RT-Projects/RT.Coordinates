@@ -87,7 +87,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override string ToString() => $"{_elem1} ↔ {_elem2}";
+        public override readonly string ToString() => $"{_elem1} ↔ {_elem2}";
 
         /// <summary>Compares two <see cref="Link{T}"/> values for equality.</summary>
         public static bool operator ==(Link<T> one, Link<T> two) => one.Equals(two);

@@ -134,17 +134,17 @@ namespace RT.Coordinates
         /// <summary>Returns the row containing this tri.</summary>
         public int Y { get; private set; }
         /// <summary>Determines whether this tri is up-pointing (<c>true</c>) or down-pointing (<c>false</c>).</summary>
-        public bool IsUpPointing => ((X ^ Y) & 1) == 0;
+        public readonly bool IsUpPointing => ((X ^ Y) & 1) == 0;
 
         /// <inheritdoc/>
-        public bool Equals(Tri other) => other.X == X && other.Y == Y;
+        public readonly bool Equals(Tri other) => other.X == X && other.Y == Y;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Tri tri && Equals(tri);
+        public override readonly bool Equals(object obj) => obj is Tri tri && Equals(tri);
         /// <inheritdoc/>
-        public override int GetHashCode() => X * 1073741827 + Y;
+        public override readonly int GetHashCode() => X * 1073741827 + Y;
 
         /// <inheritdoc/>
-        public IEnumerable<Tri> Neighbors
+        public readonly IEnumerable<Tri> Neighbors
         {
             get
             {
@@ -154,15 +154,15 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Tri"/>, going clockwise from the top (up-pointing)
         ///     or top-left (down-pointing).</summary>
-        public Coordinates.Vertex[] Vertices => IsUpPointing
+        public readonly Coordinates.Vertex[] Vertices => IsUpPointing
             ? new Coordinates.Vertex[] { new Vertex(this), new Vertex(new Tri(X + 1, Y + 1)), new Vertex(new Tri(X - 1, Y + 1)) }
             : new Coordinates.Vertex[] { new Vertex(new Tri(X - 1, Y)), new Vertex(new Tri(X + 1, Y)), new Vertex(new Tri(X, Y + 1)) };
 
@@ -170,10 +170,10 @@ namespace RT.Coordinates
         private const double sin60 = .86602540378443864676372317075294;
 
         /// <inheritdoc/>
-        public PointD Center => new PointD(X * (1.5d * cos60), (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * (1.5d * sin60));
+        public readonly PointD Center => new PointD(X * (1.5d * cos60), (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * (1.5d * sin60));
 
         /// <inheritdoc/>
-        public override string ToString() => $"T({X},{Y})";
+        public override readonly string ToString() => $"T({X},{Y})";
 
         /// <summary>Describes a 2D grid of triangular cells.</summary>
         public class Grid : Structure<Tri>

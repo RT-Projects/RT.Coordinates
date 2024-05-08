@@ -208,7 +208,7 @@ namespace RT.Coordinates
         public PointD Center => new PointD(Hex.Q * 2.36602540378444 + _xs[(int) Subtile], Hex.R * 2.73205080756888 + Hex.Q * 1.36602540378444 + _ys[(int) Subtile]);
 
         /// <inheritdoc/>
-        public override string ToString() => $"M({Hex.Q},{Hex.R})/{(int) Subtile}";
+        public override readonly string ToString() => $"M({Hex.Q},{Hex.R})/{(int) Subtile}";
 
         /// <summary>
         ///     Describes a vertex in a <see cref="Rhombihexadel"/> grid. Each vertex is actually one of the 6 vertices of a
