@@ -48,7 +48,7 @@ namespace RT.Coordinates
         ///     <c>true</c> if we are generating a closed path and this is the last invocation. This vertex is therefore the
         ///     first in the path, as the path is returning to its starting position.</param>
         /// <param name="r">
-        ///     Use this to turn floating-point value into strings. This will respect the user’s <see
+        ///     Use this to turn floating-point values into strings. This will respect the user’s <see
         ///     cref="SvgInstructions.Precision"/> instruction.</param>
         /// <returns>
         ///     A string that can be inserted in the <c>d</c> attribute of an SVG <c>&lt;path&gt;</c> element.</returns>
