@@ -4,7 +4,7 @@ namespace RT.Coordinates
 {
     /// <summary>
     ///     Describes a vertex in a pentagonal grid using a system of four base vectors, which are unit vectors 36° from one
-    ///     another. Used by <see cref="Penrose"/>.</summary>
+    ///     another. Used by <see cref="Penrose"/> and <see cref="PentaCell"/>.</summary>
     public struct Pentavector : IEquatable<Pentavector>
     {
         /// <summary>Constructor.</summary>
