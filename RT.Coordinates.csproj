@@ -15,6 +15,7 @@
     <OutputPath>builds\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>builds\$(Configuration)\obj-$(AssemblyName)\</IntermediateOutputPath>
     <BaseIntermediateOutputPath>builds\$(Configuration)\obj-$(AssemblyName)\</BaseIntermediateOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -70,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="RT.Coordinates.nuspec" />
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

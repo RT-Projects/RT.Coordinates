@@ -209,7 +209,7 @@ namespace RT.Coordinates
         ///     Returns a collection containing all of the current tile’s neighbors.</summary>
         /// <remarks>
         ///     The collection starts with the upper-left neighbor and proceeds clockwise.</remarks>
-        public IEnumerable<Hex> Neighbors
+        public readonly IEnumerable<Hex> Neighbors
         {
             get
             {
@@ -222,7 +222,7 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <summary>
         ///     Returns the hex tile reached by moving in the specified direction.</summary>
@@ -232,7 +232,7 @@ namespace RT.Coordinates
         ///     Number of tiles to move. Default is <c>1</c>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The value of <paramref name="dir"/> is not a valid HexDirection enum value.</exception>
-        public Hex Move(Direction dir, int amount = 1) => dir switch
+        public readonly Hex Move(Direction dir, int amount = 1) => dir switch
         {
             Direction.UpLeft => new Hex(Q - amount, R),
             Direction.Up => new Hex(Q, R - amount),
@@ -253,14 +253,14 @@ namespace RT.Coordinates
         ///         To calculate the distance between two hex tiles <c>h1</c> and <c>h2</c>, write <c>(h1 - h2).Distance</c>.</para>
         ///     <para>
         ///         To calculate actual Euclidean distance, use <see cref="Center"/> and <see cref="PointD.Distance"/>.</para></remarks>
-        public int Distance => Math.Max(Math.Abs(Q), Math.Max(Math.Abs(R), Math.Abs(-Q - R)));
+        public readonly int Distance => Math.Max(Math.Abs(Q), Math.Max(Math.Abs(R), Math.Abs(-Q - R)));
 
         /// <summary>
         ///     Assuming a <see cref="LargeHexagon(int, Hex)"/> structure of side length <paramref name="sideLength"/>,
         ///     returns a collection specifying which edges of the structure the current hex tile is adjacent to.</summary>
         /// <remarks>
         ///     If the current hex tile is in a corner of the structure, two values are returned; otherwise, only one.</remarks>
-        public IEnumerable<Direction> GetEdges(int sideLength)
+        public readonly IEnumerable<Direction> GetEdges(int sideLength)
         {
             // Don’t use ‘else’ because multiple conditions could apply
             if (Q + R == -sideLength)
@@ -281,7 +281,7 @@ namespace RT.Coordinates
         ///     Returns a polygon describing the shape and position of the current hex tile in 2D space.</summary>
         /// <param name="hexWidth">
         ///     Specifies the width of a single hex tile in the grid.</param>
-        public PointD[] GetPolygon(double hexWidth) => new PointD[]
+        public readonly PointD[] GetPolygon(double hexWidth) => new PointD[]
         {
             new PointD((Q * .75 - .50) * hexWidth, (Q * .5 + R + .00) * hexWidth * WidthToHeight),
             new PointD((Q * .75 - .25) * hexWidth, (Q * .5 + R - .50) * hexWidth * WidthToHeight),
@@ -292,10 +292,10 @@ namespace RT.Coordinates
         };
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Hex"/>, going clockwise from the top-left.</summary>
-        public Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
+        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
             new Vertex(this, false),
             new Vertex(this, true),
@@ -306,21 +306,21 @@ namespace RT.Coordinates
         };
 
         /// <summary>Returns the center of the hex tile in 2D space.</summary>
-        public PointD Center => new PointD(Q * .75, (Q * .5 + R) * WidthToHeight);
+        public readonly PointD Center => new PointD(Q * .75, (Q * .5 + R) * WidthToHeight);
 
         /// <inheritdoc/>
         public override readonly string ToString() => $"H({Q},{R})";
 
         /// <summary>Compares this hex tile to another for equality.</summary>
-        public bool Equals(Hex other) => Q == other.Q && R == other.R;
+        public readonly bool Equals(Hex other) => Q == other.Q && R == other.R;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Hex hex && Equals(hex);
+        public override readonly bool Equals(object obj) => obj is Hex hex && Equals(hex);
         /// <summary>Compares two <see cref="Hex"/> values for equality.</summary>
         public static bool operator ==(Hex one, Hex two) => one.Q == two.Q && one.R == two.R;
         /// <summary>Compares two <see cref="Hex"/> values for inequality.</summary>
         public static bool operator !=(Hex one, Hex two) => one.Q != two.Q || one.R != two.R;
         /// <inheritdoc/>
-        public override int GetHashCode() => Q * 1073741827 + R;
+        public override readonly int GetHashCode() => Q * 1073741827 + R;
 
         /// <summary>Adds two hexes (treating them as vectors).</summary>
         public static Hex operator +(Hex one, Hex two) => new Hex(one.Q + two.Q, one.R + two.R);
@@ -344,7 +344,7 @@ namespace RT.Coordinates
         ///     multiple of 60°.</summary>
         /// <param name="rotation">
         ///     Amount of rotation. For example, a value of <c>1</c> results in a clockwise rotation by 60°.</param>
-        public Hex Rotate(int rotation) => (((rotation % 6) + 6) % 6) switch
+        public readonly Hex Rotate(int rotation) => (((rotation % 6) + 6) % 6) switch
         {
             0 => this,
             1 => new Hex(-R, Q + R),
@@ -360,7 +360,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns the hex tile which is equal to the current hex tile when mirrored about the X-axis (horizontal line
         ///     going through the center hex (0, 0)).</summary>
-        public Hex Mirrored => new Hex(Q, -R - Q);
+        public readonly Hex Mirrored => new Hex(Q, -R - Q);
 
         /// <summary>
         ///     Returns a string representing this hex tile’s position within a <see cref="LargeHexagon(int, Hex)"/> structure
@@ -369,7 +369,7 @@ namespace RT.Coordinates
         ///     column, counting from 1 at the top.</summary>
         /// <param name="sideLength">
         ///     The side length of the hexagonal grid.</param>
-        public string ConvertCoordinates(int sideLength) => Q >= 0
+        public readonly string ConvertCoordinates(int sideLength) => Q >= 0
                 ? $"({Q + sideLength}, {R + sideLength})"
                 : $"({Q + sideLength}, {Q + R + sideLength})";
 
