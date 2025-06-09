@@ -1,77 +1,26 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{80E00597-BD8D-4C94-B112-56A09D1C0D62}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>RT.Coordinates</RootNamespace>
-    <AssemblyName>RT.Coordinates</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <LangVersion>8.0</LangVersion>
-    <OutputPath>builds\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>builds\$(Configuration)\obj-$(AssemblyName)\</IntermediateOutputPath>
-    <BaseIntermediateOutputPath>builds\$(Configuration)\obj-$(AssemblyName)\</BaseIntermediateOutputPath>
+    <OutputType>library</OutputType>
+    <TargetFrameworks>netstandard2.0;net35</TargetFrameworks>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <DebugType>embedded</DebugType>
+    <Title>RT.Coordinates</Title>
+    <Authors>Timwi</Authors>
+    <Description>A library to work with grids of various geometries (rectilinear, hexagonal, triangular, octagonal, pentagonal, etc.), generate mazes, find paths and generate SVG graphics. Useful for 2D games and puzzles.</Description>
+    <PackageProjectUrl>https://github.com/RT-Projects/RT.Coordinates</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RT-Projects/RT.Coordinates</RepositoryUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>builds\Debug\RT.Coordinates.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>builds\Release\RT.Coordinates.xml</DocumentationFile>
+    <LangVersion>10.0</LangVersion>
+    <Version>3.2.0</Version>
+    <AssemblyVersion>3.2.0.0</AssemblyVersion>
+    <FileVersion>3.2.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Cairo.cs" />
-    <Compile Include="CellWithDistance.cs" />
-    <Compile Include="CircleFraction.cs" />
-    <Compile Include="CircularCell.cs" />
-    <Compile Include="CombinedCell.cs" />
-    <Compile Include="PentaCell.cs" />
-    <Compile Include="Pentavector.cs" />
-    <Compile Include="Square.cs" />
-    <Compile Include="CoordinatesHelpers.cs" />
-    <Compile Include="EdgeInfo.cs" />
-    <Compile Include="EdgeType.cs" />
-    <Compile Include="Floret.cs" />
-    <Compile Include="GenericVertex.cs" />
-    <Compile Include="GridUtils.cs" />
-    <Compile Include="Hex.cs" />
-    <Compile Include="IHasDirection.cs" />
-    <Compile Include="IHasSvgGeometry.cs" />
-    <Compile Include="INeighbor.cs" />
-    <Compile Include="Kite.cs" />
-    <Compile Include="Link.cs" />
-    <Compile Include="MazeBias.cs" />
-    <Compile Include="Chamf.cs" />
-    <Compile Include="OctoCell.cs" />
-    <Compile Include="Penrose.cs" />
-    <Compile Include="PointD.cs" />
-    <Compile Include="Rhomb.cs" />
-    <Compile Include="Rhombihexadel.cs" />
-    <Compile Include="Structure.cs" />
-    <Compile Include="SvgColor.cs" />
-    <Compile Include="SvgInstructions.cs" />
-    <Compile Include="SvgSegment.cs" />
-    <Compile Include="Tri.cs" />
-    <Compile Include="Vertex.cs" />
+    <None Include="README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="RT.Coordinates.nuspec" />
-    <None Include="README.md" Pack="true" PackagePath="\"/>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

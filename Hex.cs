@@ -360,7 +360,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns the hex tile which is equal to the current hex tile when mirrored about the X-axis (horizontal line
         ///     going through the center hex (0, 0)).</summary>
-        public readonly Hex Mirrored => new Hex(Q, -R - Q);
+        public readonly Hex Mirrored => new(Q, -R - Q);
 
         /// <summary>
         ///     Returns a string representing this hex tile’s position within a <see cref="LargeHexagon(int, Hex)"/> structure

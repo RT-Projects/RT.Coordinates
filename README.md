@@ -8,13 +8,13 @@ This small library can generate and manipulate various grid structures, for exam
 File.WriteAllText("output.svg", new Hex.Grid(5).Svg());
 ```
 
-![Hexagonal grid example](Img/Hex.png)
+![Hexagonal grid example](https://raw.githubusercontent.com/RT-Projects/RT.Coordinates/refs/heads/main/Img/Hex.png)
 
 ```cs
 File.WriteAllText("output.svg", new OctoCell.Grid(7, 4).Svg());
 ```
 
-![OctoCell grid example](Img/OctoCell.png)
+![OctoCell grid example](https://raw.githubusercontent.com/RT-Projects/RT.Coordinates/refs/heads/main/Img/OctoCell.png)
 
 You can generate a random maze:
 
@@ -22,7 +22,7 @@ You can generate a random maze:
 File.WriteAllText("output.svg", new Floret.Grid(4).GenerateMaze().Svg());
 ```
 
-![Floret grid example with random maze](Img/Floret.png)
+![Floret grid example with random maze](https://raw.githubusercontent.com/RT-Projects/RT.Coordinates/refs/heads/main/Img/Floret.png)
 
 Each cell in each grid geometry has a unique coordinate that identifies each cell:
 
@@ -33,7 +33,7 @@ File.WriteAllText("output.svg", new Cairo.Grid(7, 4).GenerateMaze().Svg(new SvgI
 }));
 ```
 
-![Cairo grid example with maze and coordinates](Img/Cairo.png)
+![Cairo grid example with maze and coordinates](https://raw.githubusercontent.com/RT-Projects/RT.Coordinates/refs/heads/main/Img/Cairo.png)
 
 Find a path in a maze:
 
@@ -46,7 +46,7 @@ File.WriteAllText("output.svg", maze.Svg(new SvgInstructions
 }));
 ```
 
-![Kite grid example with maze and path](Img/Kite.png)
+![Kite grid example with maze and path](https://raw.githubusercontent.com/RT-Projects/RT.Coordinates/refs/heads/main/Img/Kite.png)
 
 Customize colors and appearance:
 
@@ -62,7 +62,7 @@ File.WriteAllText("output.svg", maze.Svg(new SvgInstructions
 }));
 ```
 
-![PentaCell grid example with custom coloration](Img/PentaCell.png)
+![PentaCell grid example with custom coloration](https://raw.githubusercontent.com/RT-Projects/RT.Coordinates/refs/heads/main/Img/PentaCell.png)
 
 Multiple grid geometries can be combined and connected with bridges. Note that in the following example, the entire structure is a single maze — the only path connecting the cells shown involves use of the bridges.
 
@@ -83,4 +83,4 @@ File.WriteAllText("output.svg", maze.Svg(new SvgInstructions
 }));
 ```
 
-![Combined Penrose and Chamf grid example showing maze path across connecting bridges](Img/Combined.png)
+![Combined Penrose and Chamf grid example showing maze path across connecting bridges](https://raw.githubusercontent.com/RT-Projects/RT.Coordinates/refs/heads/main/Img/Combined.png)
