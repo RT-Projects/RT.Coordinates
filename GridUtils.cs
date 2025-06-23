@@ -70,7 +70,7 @@ namespace RT.Coordinates
                 throw new InvalidOperationException($"Cell {cellsArr[already]} is already in a combination with other cells.");
             var combo = new CombinedCell<TCell>(cellsArr);
             return new Structure<CombinedCell<TCell>>(
-                structure.Cells.Where(c => c.Count > 1 || !combo.Contains(c.First())).Concat(new CombinedCell<TCell>[] { combo }),
+                structure.Cells.Where(c => c.Count > 1 || !combo.Contains(c.First())).Concat([combo]),
                 structure.Links.Select(link =>
                 {
                     var (cc1, cc2) = link;
@@ -284,7 +284,7 @@ namespace RT.Coordinates
                     // This is an entirely new segment
                     endPoints[v1] = segments.Count;
                     endPoints[v2] = segments.Count;
-                    segments.Add(new List<Vertex> { v1, v2 });
+                    segments.Add([v1, v2]);
                     closed.Add(false);
                 }
             }
@@ -330,16 +330,10 @@ namespace RT.Coordinates
             new CellParserInfo(@"^S\((-?\d+),(-?\d+)\)$", m => new Square(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
             new CellParserInfo(@"^T\((-?\d+),(-?\d+)\)$", m => new Tri(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))));
 
-        private struct CellParserInfo
+        private struct CellParserInfo(string regex, Func<Match, object> generator)
         {
-            public Regex Regex { get; private set; }
-            public Func<Match, object> Generator { get; private set; }
-
-            public CellParserInfo(string regex, Func<Match, object> generator)
-            {
-                Regex = new Regex(regex, RegexOptions.Compiled);
-                Generator = generator;
-            }
+            public Regex Regex { get; private set; } = new Regex(regex, RegexOptions.Compiled);
+            public Func<Match, object> Generator { get; private set; } = generator;
         }
     }
 }
