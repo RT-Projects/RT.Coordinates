@@ -62,19 +62,12 @@ namespace RT.Coordinates
     ///     7.27429188517743L6 8M7.27429188517743 6.27429188517743L7 7L6.27429188517743 6.72570811482257M7.72570811482257
     ///     7.27429188517743L7 7L6.72570811482257 7.72570811482257' fill='none' stroke-width='.05' stroke='black'
     ///     /&gt;&lt;/svg&gt;</image>
-    public struct Cairo : IEquatable<Cairo>, INeighbor<Cairo>, INeighbor<object>, IHasSvgGeometry
+    public struct Cairo(Square cell, Cairo.Position pos) : IEquatable<Cairo>, INeighbor<Cairo>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>Identifies a square. Each cairo forms one quarter of this square.</summary>
-        public Square Cell { get; private set; }
-        /// <summary>Identifies which cairo within <see cref="Cell"/> this is.</summary>
-        public Position Pos { get; private set; }
-
-        /// <summary>Constructor.</summary>
-        public Cairo(Square cell, Position pos)
-        {
-            Cell = cell;
-            Pos = pos;
-        }
+        public Square Cell { get; private set; } = cell;
+        /// <summary>Identifies which of the four cairos within <see cref="Cell"/> this is.</summary>
+        public Position Pos { get; private set; } = pos;
 
         /// <summary>
         ///     Constructor.</summary>
@@ -84,11 +77,7 @@ namespace RT.Coordinates
         ///     Y-coordinate of the underlying square.</param>
         /// <param name="pos">
         ///     Position of the <see cref="Cairo"/> within the square.</param>
-        public Cairo(int x, int y, Position pos)
-        {
-            Cell = new Square(x, y);
-            Pos = pos;
-        }
+        public Cairo(int x, int y, Position pos) : this(new Square(x, y), pos) { }
 
         /// <summary>Identifies one of the <see cref="Cairo"/> cells that make up a square.</summary>
         public enum Position
@@ -106,7 +95,31 @@ namespace RT.Coordinates
         /// <summary>
         ///     Constructs a grid of the specified <paramref name="width"/> and <paramref name="height"/> and divides each
         ///     square into four <see cref="Cairo"/> cells.</summary>
-        public static IEnumerable<Cairo> Rectangle(int width, int height) => Square.Rectangle(width, height).SelectMany(cell => _cairoPositions.Select(pos => new Cairo(cell, pos)));
+        /// <param name="width">
+        ///     Width of the grid.</param>
+        /// <param name="height">
+        ///     Height of the grid.</param>
+        public static IEnumerable<Cairo> Rectangle(int width, int height) =>
+            Square.Rectangle(width, height).SelectMany(cell => _cairoPositions.Select(pos => new Cairo(cell, pos)));
+
+        /// <summary>
+        ///     Constructs a grid consisting of a rectangle positioned at (<paramref name="dx"/>/2, <paramref name="dy"/>/2)
+        ///     and of size <paramref name="dw"/>/2 × <paramref name="dh"/>/2.</summary>
+        /// <param name="dx">
+        ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dy">
+        ///     Double the y-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dw">
+        ///     Double the width of the rectangle.</param>
+        /// <param name="dh">
+        ///     Double the height of the rectangle.</param>
+        /// <remarks>
+        ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to four cairos
+        ///     (arranged in a 2×2). By using doubled values, we effectively support half-integer points and sizes.</remarks>
+        public static IEnumerable<Cairo> Rectangle(int dx, int dy, int dw, int dh) =>
+            Enumerable.Range(dx, dw).SelectMany(x => Enumerable.Range(dy, dh).Select(y =>
+                new Cairo(new Square(x / 2, y / 2), x % 2 != 0 ? y % 2 != 0 ? Position.BottomRight : Position.TopRight : y % 2 != 0 ? Position.BottomLeft : Position.TopLeft)));
+
         private static readonly Position[] _cairoPositions = (Position[]) Enum.GetValues(typeof(Position));
 
         /// <inheritdoc/>
@@ -136,46 +149,102 @@ namespace RT.Coordinates
         readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices().MakeEdges();
+
+        /// <summary>
+        ///     Returns the vertices along the perimeter of this <see cref="Cairo"/> assuming that we’re rendering a rectangle
+        ///     positioned at (<paramref name="dx"/>/2, <paramref name="dy"/>/2) and of size <paramref name="dw"/>/2 ×
+        ///     <paramref name="dh"/>/2 and we want the edges of the rectangle straightened.</summary>
+        /// <param name="dx">
+        ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dy">
+        ///     Double the y-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dw">
+        ///     Double the width of the rectangle.</param>
+        /// <param name="dh">
+        ///     Double the height of the rectangle.</param>
+        /// <remarks>
+        ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to four cairos
+        ///     (arranged in a 2×2). By using doubled values, we effectively support half-integer points and sizes.</remarks>
+        public readonly IEnumerable<Coordinates.Vertex> Vertices(int dx, int dy, int dw, int dh)
+        {
+            var dr = dx + dw - 1;
+            var db = dy + dh - 1;
+            return Vertices(
+                ((Cell.Y == dy / 2 && ((dy % 2 != 0) ^ (Pos is Position.TopLeft or Position.TopRight))) ? AtEdges.Top : 0) |
+                ((Cell.X == dr / 2 && ((dr % 2 != 0) ^ (Pos is Position.TopLeft or Position.BottomLeft))) ? AtEdges.Right : 0) |
+                ((Cell.Y == db / 2 && ((db % 2 != 0) ^ (Pos is Position.TopLeft or Position.TopRight))) ? AtEdges.Bottom : 0) |
+                ((Cell.X == dx / 2 && ((dx % 2 != 0) ^ (Pos is Position.TopLeft or Position.BottomLeft))) ? AtEdges.Left : 0));
+        }
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Cairo"/>, going clockwise from the vertex at the
         ///     center of <see cref="Cell"/>.</summary>
-        public readonly Coordinates.Vertex[] Vertices => Pos switch
+        /// <param name="atEdges">
+        ///     If specified, renders some of the edges of the cairo in such a way that they join up to form a larger
+        ///     rectangle. For example, if <see cref="AtEdges.Top"/> is specified, this cairo is assumed to be at the top edge
+        ///     of the larger rectangle.</param>
+        public readonly IEnumerable<Coordinates.Vertex> Vertices(AtEdges atEdges = 0)
         {
-            Position.TopLeft => new Coordinates.Vertex[] {
-                new Vertex(Cell, Vertex.Position.Center),
-                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRightPlus1),
-                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRight),
-                new Vertex(Cell, Vertex.Position.TopLeftPlus1),
-                new Vertex(Cell, Vertex.Position.TopRightMinus1)
-            },
-            Position.TopRight => new Coordinates.Vertex[] {
-                new Vertex(Cell, Vertex.Position.Center),
-                new Vertex(Cell, Vertex.Position.TopRightMinus1),
-                new Vertex(Cell, Vertex.Position.TopRight),
-                new Vertex(Cell, Vertex.Position.TopRightPlus1),
-                new Vertex(Cell, Vertex.Position.BottomRightMinus1)
-            },
-            Position.BottomRight => new Coordinates.Vertex[] {
-                new Vertex(Cell, Vertex.Position.Center),
-                new Vertex(Cell, Vertex.Position.BottomRightMinus1),
-                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopRight),
-                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopRightMinus1),
-                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopLeftPlus1)
-            },
-            Position.BottomLeft => new Coordinates.Vertex[] {
-                new Vertex(Cell, Vertex.Position.Center),
-                new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopLeftPlus1),
-                new Vertex(Cell.Move(Square.Direction.DownLeft), Vertex.Position.TopRight),
-                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.BottomRightMinus1),
-                new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRightPlus1)
-            },
-            _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.")
-        };
+            switch (Pos)
+            {
+                case Position.TopLeft:
+                    yield return new Vertex(Cell, Vertex.Position.CenterPoint);
+                    if ((atEdges & AtEdges.Left) == 0 && (atEdges & AtEdges.Bottom) == 0) yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRightPlus1);
+                    else if ((atEdges & AtEdges.Left) == 0) yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.RightOuterMiter);
+                    else if ((atEdges & AtEdges.Bottom) == 0) yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.RightEdgeNegMiter);
+                    else yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.RightEdgeCenter);
+                    yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRight);
+                    if ((atEdges & AtEdges.Right) == 0 && (atEdges & AtEdges.Top) == 0) { yield return new Vertex(Cell, Vertex.Position.TopLeftPlus1); yield return new Vertex(Cell, Vertex.Position.TopRightMinus1); }
+                    else if ((atEdges & AtEdges.Right) == 0) yield return new Vertex(Cell, Vertex.Position.TopEdgePosMiter);
+                    else if ((atEdges & AtEdges.Top) == 0) yield return new Vertex(Cell, Vertex.Position.TopOuterMiter);
+                    else yield return new Vertex(Cell, Vertex.Position.TopEdgeCenter);
+                    break;
 
-        private static readonly PointD[] _centers =
-        {
+                case Position.TopRight:
+                    yield return new Vertex(Cell, Vertex.Position.CenterPoint);
+                    if ((atEdges & AtEdges.Top) == 0 && (atEdges & AtEdges.Left) == 0) yield return new Vertex(Cell, Vertex.Position.TopRightMinus1);
+                    else if ((atEdges & AtEdges.Top) == 0) yield return new Vertex(Cell, Vertex.Position.TopInnerMiter);
+                    else if ((atEdges & AtEdges.Left) == 0) yield return new Vertex(Cell, Vertex.Position.TopEdgePosMiter);
+                    else yield return new Vertex(Cell, Vertex.Position.TopEdgeCenter);
+                    yield return new Vertex(Cell, Vertex.Position.TopRight);
+                    if ((atEdges & AtEdges.Bottom) == 0 && (atEdges & AtEdges.Right) == 0) { yield return new Vertex(Cell, Vertex.Position.TopRightPlus1); yield return new Vertex(Cell, Vertex.Position.BottomRightMinus1); }
+                    else if ((atEdges & AtEdges.Bottom) == 0) yield return new Vertex(Cell, Vertex.Position.RightEdgePosMiter);
+                    else if ((atEdges & AtEdges.Right) == 0) yield return new Vertex(Cell, Vertex.Position.RightOuterMiter);
+                    else yield return new Vertex(Cell, Vertex.Position.RightEdgeCenter);
+                    break;
+
+                case Position.BottomRight:
+                    yield return new Vertex(Cell, Vertex.Position.CenterPoint);
+                    if ((atEdges & AtEdges.Right) == 0 && (atEdges & AtEdges.Top) == 0) yield return new Vertex(Cell, Vertex.Position.BottomRightMinus1);
+                    else if ((atEdges & AtEdges.Right) == 0) yield return new Vertex(Cell, Vertex.Position.RightInnerMiter);
+                    else if ((atEdges & AtEdges.Top) == 0) yield return new Vertex(Cell, Vertex.Position.RightEdgePosMiter);
+                    else yield return new Vertex(Cell, Vertex.Position.RightEdgeCenter);
+                    yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopRight);
+                    if ((atEdges & AtEdges.Left) == 0 && (atEdges & AtEdges.Bottom) == 0) { yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopRightMinus1); yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopLeftPlus1); }
+                    else if ((atEdges & AtEdges.Left) == 0) yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopEdgeNegMiter);
+                    else if ((atEdges & AtEdges.Bottom) == 0) yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopInnerMiter);
+                    else yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopEdgeCenter);
+                    break;
+
+                case Position.BottomLeft:
+                    yield return new Vertex(Cell, Vertex.Position.CenterPoint);
+                    if ((atEdges & AtEdges.Bottom) == 0 && (atEdges & AtEdges.Right) == 0) yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopLeftPlus1);
+                    else if ((atEdges & AtEdges.Bottom) == 0) yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopOuterMiter);
+                    else if ((atEdges & AtEdges.Right) == 0) yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopEdgeNegMiter);
+                    else yield return new Vertex(Cell.Move(Square.Direction.Down), Vertex.Position.TopEdgeCenter);
+                    yield return new Vertex(Cell.Move(Square.Direction.DownLeft), Vertex.Position.TopRight);
+                    if ((atEdges & AtEdges.Top) == 0 && (atEdges & AtEdges.Left) == 0) { yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.BottomRightMinus1); yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.TopRightPlus1); }
+                    else if ((atEdges & AtEdges.Top) == 0) yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.RightEdgeNegMiter);
+                    else if ((atEdges & AtEdges.Left) == 0) yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.RightInnerMiter);
+                    else yield return new Vertex(Cell.Move(Square.Direction.Left), Vertex.Position.RightEdgeCenter);
+                    break;
+                default:
+                    throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.");
+            }
+        }
+
+        private static readonly PointD[] _centers = [
             // The formula for the first one is:
             //  x = 1/24 × √7 − 7/24
             //  y = −1/24 × √7 − 5/24
@@ -185,7 +254,7 @@ namespace RT.Coordinates
             new(.3185729713, -.1814270287),
             new(.1814270287, .3185729713),
             new(-.3185729713, .1814270287)
-        };
+        ];
 
         /// <inheritdoc/>
         public readonly PointD Center => (Cell.Center + _centers[(int) Pos]) * 2;
@@ -225,19 +294,12 @@ namespace RT.Coordinates
         }
 
         /// <summary>Describes one of the vertices of a <see cref="Cairo"/>.</summary>
-        public class Vertex : Coordinates.Vertex
+        public class Vertex(Square cell, Vertex.Position pos) : Coordinates.Vertex
         {
             /// <summary>The <see cref="Square"/> tile that this <see cref="Vertex"/> is within.</summary>
-            public Square Cell { get; private set; }
+            public Square Cell { get; private set; } = cell;
             /// <summary>Which position within the <see cref="Cell"/> this vertex is.</summary>
-            public Position Pos { get; private set; }
-
-            /// <summary>Constructor.</summary>
-            public Vertex(Square cell, Position pos)
-            {
-                Cell = cell;
-                Pos = pos;
-            }
+            public Position Pos { get; private set; } = pos;
 
             /// <summary>
             ///     Describes the position of a <see cref="Vertex"/> in relation to the vertices of its containing <see
@@ -256,13 +318,62 @@ namespace RT.Coordinates
                 ///     The vertex one counter-clockwise from the bottom-right vertex of the referenced <see cref="Cell"/>.</summary>
                 BottomRightMinus1,
                 /// <summary>The vertex at the center of the referenced <see cref="Cell"/>.</summary>
-                Center
+                CenterPoint,
+                /// <summary>
+                ///     The point where the top edge intersects with the extended line from the above cell’s <see
+                ///     cref="Center"/> to our <see cref="TopLeftPlus1"/>. Used only if the cairo is rendered as part of a
+                ///     straightened rectangle (see <see cref="Vertices(AtEdges)"/>).</summary>
+                TopEdgeNegMiter,
+                /// <summary>
+                ///     The point off the top edge arising from extending the line from the top-right corner to <see
+                ///     cref="TopRightMinus1"/>. Used only if the cairo is rendered as part of a straightened rectangle (see
+                ///     <see cref="Vertices(AtEdges)"/>).</summary>
+                TopInnerMiter,
+                /// <summary>
+                ///     The vertex halfway along the top edge of the referenced <see cref="Cell"/>. Used only if the cairo is
+                ///     rendered as part of a straightened rectangle (see <see cref="Vertices(AtEdges)"/>).</summary>
+                TopEdgeCenter,
+                /// <summary>
+                ///     The point beyond the top edge arising from extending the line from the top-left corner to <see
+                ///     cref="TopLeftPlus1"/>. Used only if the cairo is rendered as part of a straightened rectangle (see
+                ///     <see cref="Vertices(AtEdges)"/>).</summary>
+                TopOuterMiter,
+                /// <summary>
+                ///     The point where the top edge intersects with the extended line from <see cref="Center"/> to <see
+                ///     cref="TopRightMinus1"/>. Used only if the cairo is rendered as part of a straightened rectangle (see
+                ///     <see cref="Vertices(AtEdges)"/>).</summary>
+                TopEdgePosMiter,
+                /// <summary>
+                ///     The point where the right edge intersects with the extended line from the right cell’s <see
+                ///     cref="Center"/> to our <see cref="TopRightPlus1"/>. Used only if the cairo is rendered as part of a
+                ///     straightened rectangle (see <see cref="Vertices(AtEdges)"/>).</summary>
+                RightEdgeNegMiter,
+                /// <summary>
+                ///     The point off the right edge arising from extending the line from the bottom-right corner to <see
+                ///     cref="BottomRightMinus1"/>. Used only if the cairo is rendered as part of a straightened rectangle
+                ///     (see <see cref="Vertices(AtEdges)"/>).</summary>
+                RightInnerMiter,
+                /// <summary>
+                ///     The vertex halfway along the right edge of the referenced <see cref="Cell"/>. Used only if the cairo
+                ///     is rendered as part of a straightened rectangle (see <see cref="Vertices(AtEdges)"/>).</summary>
+                RightEdgeCenter,
+                /// <summary>
+                ///     The point beyond the right edge arising from extending the line from the top-right corner to <see
+                ///     cref="TopRightPlus1"/>. Used only if the cairo is rendered as part of a straightened rectangle (see
+                ///     <see cref="Vertices(AtEdges)"/>).</summary>
+                RightOuterMiter,
+                /// <summary>
+                ///     The point where the right edge intersects with the extended line from <see cref="Center"/> to <see
+                ///     cref="BottomRightMinus1"/>. Used only if the cairo is rendered as part of a straightened rectangle
+                ///     (see <see cref="Vertices(AtEdges)"/>).</summary>
+                RightEdgePosMiter,
             }
 
-            private const double x = .36285405741128411746; // = (7 − √7)/12    = x-difference between top-left vertex and next clockwise
-            private const double y = .13714594258871588254; // = (√7 − 1)/12    = y-difference between top-left vertex and next clockwise
-            private static readonly double[] xs = { x, 1 - x, 1, 1 + y, 1 - y, .5 };
-            private static readonly double[] ys = { -y, y, 0, x, 1 - x, .5 };
+            private const double x = .36285405741128411746;           // = (7 − √7)/12    = x-difference between top-left vertex and next clockwise
+            private const double y = .13714594258871588254;           // = (√7 − 1)/12    = y-difference between top-left vertex and next clockwise
+            private const double m = .18898223650461361361;       // = √7/14   = outer miter = x-difference between neg/pos miter vertex and midpoint
+            private static readonly double[] xs = [x, 1 - x, 1, 1 + y, 1 - y, .5, .5 - m, .5, .5, .5, .5 + m, 1, 1 - m, 1, 1 + m, 1];
+            private static readonly double[] ys = [-y, y, 0, x, 1 - x, .5, 0, m, 0, -m, 0, .5 - m, .5, .5, .5, .5 + m];
 
             /// <inheritdoc/>
             public override PointD Point => new PointD(Cell.X + xs[(int) Pos], Cell.Y + ys[(int) Pos]) * 2;

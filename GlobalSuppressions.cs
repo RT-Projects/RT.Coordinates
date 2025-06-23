@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Let me name things how I want")]
+[assembly: SuppressMessage("Style", "IDE0305:Simplify collection initialization", Justification = "Let me use .ToArray() and .ToList()")]
