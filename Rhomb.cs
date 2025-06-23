@@ -84,14 +84,14 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public bool Equals(Rhomb rhomb) => Hex.Equals(rhomb.Hex) && Pos == rhomb.Pos;
+        public readonly bool Equals(Rhomb rhomb) => Hex.Equals(rhomb.Hex) && Pos == rhomb.Pos;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Rhomb rhomb && Hex.Equals(rhomb.Hex) && Pos == rhomb.Pos;
+        public override readonly bool Equals(object obj) => obj is Rhomb rhomb && Hex.Equals(rhomb.Hex) && Pos == rhomb.Pos;
         /// <inheritdoc/>
-        public override int GetHashCode() => Hex.GetHashCode() * 3 + (int) Pos;
+        public override readonly int GetHashCode() => Hex.GetHashCode() * 3 + (int) Pos;
 
         /// <inheritdoc/>
-        public IEnumerable<Rhomb> Neighbors
+        public readonly IEnumerable<Rhomb> Neighbors
         {
             get
             {
@@ -124,15 +124,15 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Rhomb"/>, going clockwise from the vertex at the
         ///     center of <see cref="Hex"/>.</summary>
-        public Coordinates.Vertex[] Vertices => Pos switch
+        public readonly Coordinates.Vertex[] Vertices => Pos switch
         {
             Position.TopRight => new Coordinates.Vertex[] {
                 new Vertex(Hex, Vertex.Position.Center),
@@ -155,10 +155,10 @@ namespace RT.Coordinates
             _ => throw new InvalidOperationException($"{nameof(Pos)} has an invalid value of {Pos}.")
         };
 
-        private static readonly PointD[] _ps = { new PointD(.25, -.433012701892220), new PointD(.25, .433012701892220), new PointD(-.5, 0) };
+        private static readonly PointD[] _ps = { new(.25, -.433012701892220), new(.25, .433012701892220), new(-.5, 0) };
 
         /// <inheritdoc/>
-        public PointD Center => Hex.Center * 2 + _ps[(int) Pos];
+        public readonly PointD Center => Hex.Center * 2 + _ps[(int) Pos];
 
         private static readonly Position[] _rhombPositions = (Position[]) Enum.GetValues(typeof(Position));
 
@@ -237,7 +237,7 @@ namespace RT.Coordinates
             public override int GetHashCode() => Hex.GetHashCode() * 13 + (int) Pos;
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(
+            public override PointD Point => new(
                 Hex.Q * 1.5 + (Pos switch { Position.TopLeft => -.5, Position.TopRight => .5, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") }),
                 Hex.WidthToHeight * (Hex.Q + Hex.R * 2 + (Pos switch { Position.TopLeft => -1, Position.TopRight => -1, Position.Center => 0, _ => throw new InvalidOperationException($"{nameof(Pos)} has invalid value {Pos}.") })));
         }

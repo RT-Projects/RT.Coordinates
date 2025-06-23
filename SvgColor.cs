@@ -19,12 +19,12 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is SvgColor other && SvgFillColor == other.SvgFillColor && SvgFillOpacity == other.SvgFillOpacity;
+        public override readonly bool Equals(object obj) => obj is SvgColor other && SvgFillColor == other.SvgFillColor && SvgFillOpacity == other.SvgFillOpacity;
         /// <inheritdoc/>
-        public bool Equals(SvgColor other) => SvgFillColor == other.SvgFillColor && SvgFillOpacity == other.SvgFillOpacity;
+        public readonly bool Equals(SvgColor other) => SvgFillColor == other.SvgFillColor && SvgFillOpacity == other.SvgFillOpacity;
 
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             var hashCode = 1413938657;
             hashCode = unchecked(hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SvgFillColor));
@@ -33,7 +33,7 @@ namespace RT.Coordinates
         }
 
         /// <summary>Deconstructor.</summary>
-        public void Deconstruct(out string color, out string opacity)
+        public readonly void Deconstruct(out string color, out string opacity)
         {
             color = SvgFillColor;
             opacity = SvgFillOpacity;
@@ -43,6 +43,6 @@ namespace RT.Coordinates
         public override readonly string ToString() => $"{SvgFillColor}{(SvgFillOpacity == null ? "" : "/")}{SvgFillOpacity}";
 
         /// <summary>Implicitly converts a string (containing an SVG color) to an opaque <see cref="SvgColor"/>.</summary>
-        public static implicit operator SvgColor(string color) => new SvgColor(color: color);
+        public static implicit operator SvgColor(string color) => new(color: color);
     }
 }

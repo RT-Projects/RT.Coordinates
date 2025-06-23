@@ -110,18 +110,18 @@ namespace RT.Coordinates
         private static readonly Position[] _cairoPositions = (Position[]) Enum.GetValues(typeof(Position));
 
         /// <inheritdoc/>
-        public bool Equals(Cairo other) => other.Cell.Equals(Cell) && other.Pos == Pos;
+        public readonly bool Equals(Cairo other) => other.Cell.Equals(Cell) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Cairo other && other.Cell.Equals(Cell) && other.Pos == Pos;
+        public override readonly bool Equals(object obj) => obj is Cairo other && other.Cell.Equals(Cell) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override int GetHashCode() => Cell.GetHashCode() * 4 + (int) Pos;
+        public override readonly int GetHashCode() => Cell.GetHashCode() * 4 + (int) Pos;
         /// <summary>Equality operator.</summary>
         public static bool operator ==(Cairo one, Cairo two) => one.Equals(two);
         /// <summary>Inequality operator.</summary>
         public static bool operator !=(Cairo one, Cairo two) => !one.Equals(two);
 
         /// <inheritdoc/>
-        public IEnumerable<Cairo> Neighbors
+        public readonly IEnumerable<Cairo> Neighbors
         {
             get
             {
@@ -133,15 +133,15 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Cairo"/>, going clockwise from the vertex at the
         ///     center of <see cref="Cell"/>.</summary>
-        public Coordinates.Vertex[] Vertices => Pos switch
+        public readonly Coordinates.Vertex[] Vertices => Pos switch
         {
             Position.TopLeft => new Coordinates.Vertex[] {
                 new Vertex(Cell, Vertex.Position.Center),
@@ -181,14 +181,14 @@ namespace RT.Coordinates
             //  y = −1/24 × √7 − 5/24
             // This point is halfway between the pentagon’s base and apex, shifted by (−1/2, −1/2).
             // The others are 90° rotations of that about the origin.
-            new PointD(-.1814270287, -.3185729713),
-            new PointD(.3185729713, -.1814270287),
-            new PointD(.1814270287, .3185729713),
-            new PointD(-.3185729713, .1814270287)
+            new(-.1814270287, -.3185729713),
+            new(.3185729713, -.1814270287),
+            new(.1814270287, .3185729713),
+            new(-.3185729713, .1814270287)
         };
 
         /// <inheritdoc/>
-        public PointD Center => (Cell.Center + _centers[(int) Pos]) * 2;
+        public readonly PointD Center => (Cell.Center + _centers[(int) Pos]) * 2;
 
         /// <inheritdoc/>
         public override readonly string ToString() => $"C({Cell.X},{Cell.Y})/{(int) Pos}";

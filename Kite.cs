@@ -104,11 +104,11 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public bool Equals(Kite other) => other.Hex.Equals(Hex) && other.Pos == Pos;
+        public readonly bool Equals(Kite other) => other.Hex.Equals(Hex) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Kite other && other.Hex.Equals(Hex) && other.Pos == Pos;
+        public override readonly bool Equals(object obj) => obj is Kite other && other.Hex.Equals(Hex) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override int GetHashCode() => unchecked(Hex.GetHashCode() * 7 + (int) Pos);
+        public override readonly int GetHashCode() => unchecked(Hex.GetHashCode() * 7 + (int) Pos);
 
         /// <summary>Equality operator.</summary>
         public static bool operator ==(Kite one, Kite two) => one.Equals(two);
@@ -116,7 +116,7 @@ namespace RT.Coordinates
         public static bool operator !=(Kite one, Kite two) => !one.Equals(two);
 
         /// <inheritdoc/>
-        public IEnumerable<Kite> Neighbors
+        public readonly IEnumerable<Kite> Neighbors
         {
             get
             {
@@ -127,15 +127,15 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Kite"/>, going clockwise from the “spiky” vertex
         ///     (center of <see cref="Hex"/>).</summary>
-        public Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
+        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
             new Vertex(Hex, Vertex.Position.Center),
             new Vertex(Hex, fullPos: 2 * (int) Pos),
@@ -144,7 +144,7 @@ namespace RT.Coordinates
         };
 
         /// <inheritdoc/>
-        public PointD Center => Hex.Center * 2 + new PointD(0, -.6).Rotate(((int) Pos + .5) * Math.PI / 3);
+        public readonly PointD Center => Hex.Center * 2 + new PointD(0, -.6).Rotate(((int) Pos + .5) * Math.PI / 3);
 
         /// <summary>Identifies one of the <see cref="Kite"/> cells that make up a hexagon.</summary>
         public enum Position
@@ -271,7 +271,7 @@ namespace RT.Coordinates
             private static readonly double[] ys = { -.5, -.5, -.25, 0, .25, 0 };
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD((Hex.Q * .75 + xs[(int) Pos]) * 2, (Hex.Q * .5 + Hex.R + ys[(int) Pos]) * Hex.WidthToHeight * 2);
+            public override PointD Point => new((Hex.Q * .75 + xs[(int) Pos]) * 2, (Hex.Q * .5 + Hex.R + ys[(int) Pos]) * Hex.WidthToHeight * 2);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex kv && kv.Hex.Equals(Hex) && kv.Pos == Pos;

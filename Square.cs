@@ -37,7 +37,7 @@ namespace RT.Coordinates
         ///     Amount of cells to move by.</param>
         /// <returns>
         ///     The new <see cref="Square"/> value.</returns>
-        public Square MoveX(int dx) => Move(dx, 0);
+        public readonly Square MoveX(int dx) => Move(dx, 0);
 
         /// <summary>
         ///     Moves the current cell <paramref name="dy"/> number of spaces down.</summary>
@@ -45,7 +45,7 @@ namespace RT.Coordinates
         ///     Amount of cells to move by.</param>
         /// <returns>
         ///     The new <see cref="Square"/> value.</returns>
-        public Square MoveY(int dy) => Move(0, dy);
+        public readonly Square MoveY(int dy) => Move(0, dy);
 
         /// <summary>
         ///     Moves the current cell <paramref name="dx"/> number of spaces to the right and <paramref name="dy"/> number of
@@ -56,7 +56,7 @@ namespace RT.Coordinates
         ///     Amount of cells to move by in the Y direction.</param>
         /// <returns>
         ///     The new <see cref="Square"/> value.</returns>
-        public Square Move(int dx, int dy) => new Square(X + dx, Y + dy);
+        public readonly Square Move(int dx, int dy) => new(X + dx, Y + dy);
 
         /// <summary>
         ///     Moves the current cell a number of spaces in the specified direction.</summary>
@@ -66,7 +66,7 @@ namespace RT.Coordinates
         ///     Number of cells to move by. Default is <c>1</c>.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     The value of <paramref name="dir"/> was not one of the defined enum values of <see cref="Direction"/>.</exception>
-        public Square Move(Direction dir, int amount = 1) => dir switch
+        public readonly Square Move(Direction dir, int amount = 1) => dir switch
         {
             Direction.Up => Move(0, -amount),
             Direction.UpRight => Move(amount, -amount),
@@ -80,11 +80,11 @@ namespace RT.Coordinates
         };
 
         /// <summary>Compares this cell to another for equality.</summary>
-        public bool Equals(Square other) => other.X == X && other.Y == Y;
+        public readonly bool Equals(Square other) => other.X == X && other.Y == Y;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Square other && Equals(other);
+        public override readonly bool Equals(object obj) => obj is Square other && Equals(other);
         /// <inheritdoc/>
-        public override int GetHashCode() => unchecked(X * 1048583 + Y);
+        public override readonly int GetHashCode() => unchecked(X * 1048583 + Y);
 
         /// <summary>Compares two <see cref="Square"/> values for equality.</summary>
         public static bool operator ==(Square one, Square two) => one.Equals(two);
@@ -114,7 +114,7 @@ namespace RT.Coordinates
         ///     Other cell to compare against.</param>
         /// <param name="includeDiagonal">
         ///     If <c>true</c>, diagonal neighbors are allowed.</param>
-        public bool IsAdjacentTo(Square other, bool includeDiagonal = false)
+        public readonly bool IsAdjacentTo(Square other, bool includeDiagonal = false)
         {
             for (var i = 0; i < 8; i++)
                 if ((includeDiagonal || i % 2 == 0) && Move((Direction) i) == other)
@@ -126,7 +126,7 @@ namespace RT.Coordinates
         ///     Returns a collection of all of this cell’s neighbors.</summary>
         /// <param name="includeDiagonal">
         ///     If <c>true</c>, diagonal neighbors are included.</param>
-        public IEnumerable<Square> GetNeighbors(bool includeDiagonal = false)
+        public readonly IEnumerable<Square> GetNeighbors(bool includeDiagonal = false)
         {
             for (var i = 0; i < 8; i++)
                 if (includeDiagonal || i % 2 == 0)
@@ -134,10 +134,10 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Square"/>, going clockwise from the top-left.</summary>
-        public Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
+        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
             new Vertex(X, Y),
             new Vertex(X + 1, Y),
@@ -146,16 +146,16 @@ namespace RT.Coordinates
         };
 
         /// <summary>Returns the center point of this cell.</summary>
-        public PointD Center => new PointD(X + .5, Y + .5);
+        public readonly PointD Center => new(X + .5, Y + .5);
 
         /// <summary>Returns a collection of all of this cell’s orthogonal neighbors (no diagonals).</summary>
-        public IEnumerable<Square> Neighbors => GetNeighbors();
+        public readonly IEnumerable<Square> Neighbors => GetNeighbors();
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <summary>Returns the set of chess knight’s moves from the current cell.</summary>
-        public IEnumerable<Square> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
-        private static readonly Square[] _knightsMoveOffsets = { new Square(1, -2), new Square(2, -1), new Square(2, 1), new Square(1, 2), new Square(-1, 2), new Square(-2, 1), new Square(-2, -1), new Square(-1, -2) };
+        public readonly IEnumerable<Square> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
+        private static readonly Square[] _knightsMoveOffsets = { new(1, -2), new(2, -1), new(2, 1), new(1, 2), new(-1, 2), new(-2, 1), new(-2, -1), new(-1, -2) };
 
         /// <summary>
         ///     Tests whether this coordinate is within a given rectangular range.</summary>
@@ -170,7 +170,7 @@ namespace RT.Coordinates
         /// <returns>
         ///     Note that numerically, the <paramref name="width"/> and <paramref name="height"/> parameters are exclusive: a
         ///     coordinate at (5, 0) is outside of a rectangle of width 5 and left edge 0.</returns>
-        public bool InRange(int width, int height, int left = 0, int top = 0) => X >= left && X - left < width && Y >= top && Y - top < height;
+        public readonly bool InRange(int width, int height, int left = 0, int top = 0) => X >= left && X - left < width && Y >= top && Y - top < height;
 
         /// <summary>
         ///     Returns the index that this coordinate would have in a rectangle of width <paramref name="width"/> in which
@@ -180,12 +180,12 @@ namespace RT.Coordinates
         /// <returns>
         ///     This method does not check if <see cref="X"/> is within range. If it is not, the returned result is
         ///     meaningless.</returns>
-        public int GetIndex(int width) => X + width * Y;
+        public readonly int GetIndex(int width) => X + width * Y;
 
         /// <summary>
         ///     Calculates the Manhattan distance between this coordinate and <paramref name="other"/>. This is the number of
         ///     orthogonal steps required to reach one from the other.</summary>
-        public int ManhattanDistance(Square other) => Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
+        public readonly int ManhattanDistance(Square other) => Math.Abs(other.X - X) + Math.Abs(other.Y - Y);
 
         /// <summary>Describes a 2D grid of square cells.</summary>
         public class Grid : Structure<Square>
@@ -310,7 +310,7 @@ namespace RT.Coordinates
             }
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(Cell.X, Cell.Y);
+            public override PointD Point => new(Cell.X, Cell.Y);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex cv && cv.Cell.Equals(Cell);
@@ -349,8 +349,8 @@ namespace RT.Coordinates
         public static readonly IEnumerable<Direction> AllDirections = (Direction[]) Enum.GetValues(typeof(Direction));
 
         /// <summary>Addition operator.</summary>
-        public static Square operator +(Square one, Square two) => new Square(one.X + two.X, one.Y + two.Y);
+        public static Square operator +(Square one, Square two) => new(one.X + two.X, one.Y + two.Y);
         /// <summary>Subtraction operator.</summary>
-        public static Square operator -(Square one, Square two) => new Square(one.X - two.X, one.Y - two.Y);
+        public static Square operator -(Square one, Square two) => new(one.X - two.X, one.Y - two.Y);
     }
 }

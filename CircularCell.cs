@@ -179,7 +179,7 @@ namespace RT.Coordinates
             public CircleFraction Position { get; private set; }
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(
+            public override PointD Point => new(
                 Radius * Math.Cos(Math.PI * (2d * Position - .5)),
                 Radius * Math.Sin(Math.PI * (2d * Position - .5)));
 
@@ -196,7 +196,7 @@ namespace RT.Coordinates
             /// <inheritdoc/>
             public override string SvgPathFragment(Coordinates.Vertex from, Func<Coordinates.Vertex, PointD> getVertexPoint, Func<double, string> r, bool isLast)
             {
-                if (!(from is Vertex v) || v.Radius != Radius)
+                if (from is not Vertex v || v.Radius != Radius)
                     return base.SvgPathFragment(from, getVertexPoint, r, isLast);
 
                 var gc = gcd(Position.Denominator, v.Position.Denominator);

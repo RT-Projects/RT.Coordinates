@@ -34,7 +34,7 @@ namespace RT.Coordinates
         public object HighlightCells = null;
 
         /// <summary>Specifies a default color used when highlighting cells specified by <see cref="HighlightCells"/>.</summary>
-        public SvgColor HighlightColor = new SvgColor("hsl(284, 83%, 85%)", null);
+        public SvgColor HighlightColor = new("hsl(284, 83%, 85%)", null);
 
         /// <summary>
         ///     Returns a collection of edges (line segments) that make up the perimeter of the specified cell. If this is

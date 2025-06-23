@@ -28,7 +28,7 @@ namespace RT.Coordinates
         }
 
         /// <summary>Represents the value 0 (zero).</summary>
-        public static readonly CircleFraction Zero = new CircleFraction(0, 1);
+        public static readonly CircleFraction Zero = new(0, 1);
 
         private static int gcd(int a, int b)
         {
@@ -44,13 +44,13 @@ namespace RT.Coordinates
         }
 
         /// <summary>Addition operator.</summary>
-        public static CircleFraction operator +(CircleFraction a, CircleFraction b) => new CircleFraction(a.Numerator * b.Denominator + b.Numerator * a.Denominator, a.Denominator * b.Denominator);
+        public static CircleFraction operator +(CircleFraction a, CircleFraction b) => new(a.Numerator * b.Denominator + b.Numerator * a.Denominator, a.Denominator * b.Denominator);
         /// <summary>Subtraction operator.</summary>
-        public static CircleFraction operator -(CircleFraction a, CircleFraction b) => new CircleFraction(a.Numerator * b.Denominator - b.Numerator * a.Denominator, a.Denominator * b.Denominator);
+        public static CircleFraction operator -(CircleFraction a, CircleFraction b) => new(a.Numerator * b.Denominator - b.Numerator * a.Denominator, a.Denominator * b.Denominator);
         /// <summary>Multiplication operator.</summary>
-        public static CircleFraction operator *(CircleFraction a, CircleFraction b) => new CircleFraction(a.Numerator * b.Numerator, a.Denominator * b.Denominator);
+        public static CircleFraction operator *(CircleFraction a, CircleFraction b) => new(a.Numerator * b.Numerator, a.Denominator * b.Denominator);
         /// <summary>Division operator.</summary>
-        public static CircleFraction operator /(CircleFraction a, CircleFraction b) => new CircleFraction(a.Numerator * b.Denominator, a.Denominator * b.Numerator);
+        public static CircleFraction operator /(CircleFraction a, CircleFraction b) => new(a.Numerator * b.Denominator, a.Denominator * b.Numerator);
         /// <summary>Less-than comparison operator.</summary>
         public static bool operator <(CircleFraction a, CircleFraction b) => a.Numerator * b.Denominator < b.Numerator * a.Denominator;
         /// <summary>Greater-than comparison operator.</summary>
@@ -66,10 +66,10 @@ namespace RT.Coordinates
         /// <summary>
         ///     Determines whether the current value is strictly between <paramref name="min"/> and <paramref name="max"/>
         ///     (exclusive).</summary>
-        public bool IsStrictlyBetween(CircleFraction min, CircleFraction max) => max > min ? (this > min && this < max) : (this > min || this < max);
+        public readonly bool IsStrictlyBetween(CircleFraction min, CircleFraction max) => max > min ? (this > min && this < max) : (this > min || this < max);
         /// <summary>
         ///     Determines whether the current value is between <paramref name="min"/> and <paramref name="max"/> (inclusive).</summary>
-        public bool IsBetweenInclusive(CircleFraction min, CircleFraction max) => max > min ? (this >= min && this <= max) : (this >= min || this <= max);
+        public readonly bool IsBetweenInclusive(CircleFraction min, CircleFraction max) => max > min ? (this >= min && this <= max) : (this >= min || this <= max);
 
         /// <summary>Addition operator.</summary>
         public static double operator +(CircleFraction a, double b) => b + ((double) a.Numerator / a.Denominator);
@@ -89,13 +89,13 @@ namespace RT.Coordinates
         public static double operator /(double b, CircleFraction a) => b * a.Denominator / a.Numerator;
 
         /// <inheritdoc/>
-        public int CompareTo(CircleFraction other) => (Numerator * other.Denominator).CompareTo(other.Numerator * Denominator);
+        public readonly int CompareTo(CircleFraction other) => (Numerator * other.Denominator).CompareTo(other.Numerator * Denominator);
         /// <inheritdoc/>
-        public bool Equals(CircleFraction other) => other.Numerator == Numerator && other.Denominator == Denominator;
+        public readonly bool Equals(CircleFraction other) => other.Numerator == Numerator && other.Denominator == Denominator;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is CircleFraction other && other.Numerator == Numerator && other.Denominator == Denominator;
+        public override readonly bool Equals(object obj) => obj is CircleFraction other && other.Numerator == Numerator && other.Denominator == Denominator;
         /// <inheritdoc/>
-        public override int GetHashCode() => unchecked(Numerator * 28935701 + Denominator);
+        public override readonly int GetHashCode() => unchecked(Numerator * 28935701 + Denominator);
         /// <inheritdoc/>
         public override readonly string ToString() => $"{Numerator}/{Denominator}";
     }

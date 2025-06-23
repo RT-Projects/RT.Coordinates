@@ -139,7 +139,7 @@ namespace RT.Coordinates
         }
 
         /// <summary>Provides a way to override the constructor call for a new structure when a maze is generated.</summary>
-        protected virtual Structure<TCell> makeModifiedStructure(IEnumerable<TCell> cells, IEnumerable<Link<TCell>> traversible) => new Structure<TCell>(cells, traversible);
+        protected virtual Structure<TCell> makeModifiedStructure(IEnumerable<TCell> cells, IEnumerable<Link<TCell>> traversible) => new(cells, traversible);
 
         /// <summary>Returns an SVG file that visualizes this structure.</summary>
         public string Svg(SvgInstructions inf = null)

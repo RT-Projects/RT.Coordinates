@@ -109,8 +109,8 @@ namespace RT.Coordinates
         ///     Specifies the center hex. Default is (0, 0).</param>
         public static IEnumerable<Hex> LargeHexagon(int sideLength, Hex center = default)
         {
-            for (int r = -sideLength + 1; r < sideLength; r++)
-                for (int q = -sideLength + 1; q < sideLength; q++)
+            for (var r = -sideLength + 1; r < sideLength; r++)
+                for (var q = -sideLength + 1; q < sideLength; q++)
                 {
                     var hex = new Hex(q, r);
                     if (hex.Distance < sideLength)
@@ -157,7 +157,7 @@ namespace RT.Coordinates
 
             // North-east
             var offset = expand * new PointD(tan30, -1);
-            for (int i = 0; i <= sideLength; i++)
+            for (var i = 0; i <= sideLength; i++)
             {
                 if (i > 0)
                     yield return new PointD((i * .75 - .25) * hexWidth, (i * .5 - sideLength - .50) * hexWidth * WidthToHeight) + offset;
@@ -165,7 +165,7 @@ namespace RT.Coordinates
             }
             // East
             offset = expand * new PointD(1 / cos30, 0);
-            for (int i = 0; i <= sideLength; i++)
+            for (var i = 0; i <= sideLength; i++)
             {
                 if (i > 0)
                     yield return new PointD((sideLength * .75 + .25) * hexWidth, (sideLength * .5 - sideLength + i - .50) * hexWidth * WidthToHeight) + offset;
@@ -173,7 +173,7 @@ namespace RT.Coordinates
             }
             // South-east
             offset = expand * new PointD(tan30, 1);
-            for (int i = 0; i <= sideLength; i++)
+            for (var i = 0; i <= sideLength; i++)
             {
                 if (i > 0)
                     yield return new PointD(((sideLength - i) * .75 + .50) * hexWidth, ((sideLength - i) * .5 + i + .00) * hexWidth * WidthToHeight) + offset;
@@ -181,7 +181,7 @@ namespace RT.Coordinates
             }
             // South-west
             offset = expand * new PointD(-tan30, 1);
-            for (int i = 0; i <= sideLength; i++)
+            for (var i = 0; i <= sideLength; i++)
             {
                 if (i > 0)
                     yield return new PointD((-i * .75 + .25) * hexWidth, (-i * .5 + sideLength + .50) * hexWidth * WidthToHeight) + offset;
@@ -189,7 +189,7 @@ namespace RT.Coordinates
             }
             // West
             offset = expand * new PointD(-1 / cos30, 0);
-            for (int i = 0; i <= sideLength; i++)
+            for (var i = 0; i <= sideLength; i++)
             {
                 if (i > 0)
                     yield return new PointD((-sideLength * .75 - .25) * hexWidth, (-sideLength * .5 + sideLength - i + .50) * hexWidth * WidthToHeight) + offset;
@@ -197,7 +197,7 @@ namespace RT.Coordinates
             }
             // North-west
             offset = expand * new PointD(-tan30, -1);
-            for (int i = 0; i <= sideLength; i++)
+            for (var i = 0; i <= sideLength; i++)
             {
                 if (i > 0)
                     yield return new PointD(((-sideLength + i) * .75 - .50) * hexWidth, ((-sideLength + i) * .5 - i + .00) * hexWidth * WidthToHeight) + offset;
@@ -283,12 +283,12 @@ namespace RT.Coordinates
         ///     Specifies the width of a single hex tile in the grid.</param>
         public readonly PointD[] GetPolygon(double hexWidth) => new PointD[]
         {
-            new PointD((Q * .75 - .50) * hexWidth, (Q * .5 + R + .00) * hexWidth * WidthToHeight),
-            new PointD((Q * .75 - .25) * hexWidth, (Q * .5 + R - .50) * hexWidth * WidthToHeight),
-            new PointD((Q * .75 + .25) * hexWidth, (Q * .5 + R - .50) * hexWidth * WidthToHeight),
-            new PointD((Q * .75 + .50) * hexWidth, (Q * .5 + R + .00) * hexWidth * WidthToHeight),
-            new PointD((Q * .75 + .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight),
-            new PointD((Q * .75 - .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight)
+            new((Q * .75 - .50) * hexWidth, (Q * .5 + R + .00) * hexWidth * WidthToHeight),
+            new((Q * .75 - .25) * hexWidth, (Q * .5 + R - .50) * hexWidth * WidthToHeight),
+            new((Q * .75 + .25) * hexWidth, (Q * .5 + R - .50) * hexWidth * WidthToHeight),
+            new((Q * .75 + .50) * hexWidth, (Q * .5 + R + .00) * hexWidth * WidthToHeight),
+            new((Q * .75 + .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight),
+            new((Q * .75 - .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight)
         };
 
         /// <inheritdoc/>
@@ -306,7 +306,7 @@ namespace RT.Coordinates
         };
 
         /// <summary>Returns the center of the hex tile in 2D space.</summary>
-        public readonly PointD Center => new PointD(Q * .75, (Q * .5 + R) * WidthToHeight);
+        public readonly PointD Center => new(Q * .75, (Q * .5 + R) * WidthToHeight);
 
         /// <inheritdoc/>
         public override readonly string ToString() => $"H({Q},{R})";
@@ -323,21 +323,21 @@ namespace RT.Coordinates
         public override readonly int GetHashCode() => Q * 1073741827 + R;
 
         /// <summary>Adds two hexes (treating them as vectors).</summary>
-        public static Hex operator +(Hex one, Hex two) => new Hex(one.Q + two.Q, one.R + two.R);
+        public static Hex operator +(Hex one, Hex two) => new(one.Q + two.Q, one.R + two.R);
         /// <summary>Subtracts a hex from another (treating them as vectors).</summary>
-        public static Hex operator -(Hex one, Hex two) => new Hex(one.Q - two.Q, one.R - two.R);
+        public static Hex operator -(Hex one, Hex two) => new(one.Q - two.Q, one.R - two.R);
         /// <summary>
         ///     Multiplies a hex’s coordinates by a <paramref name="multiplier"/>.</summary>
         /// <returns>
         ///     This operation is equivalent to moving from the center hex (0, 0) to the current hex, then making the same
         ///     move again, for a total of <paramref name="multiplier"/> times.</returns>
-        public static Hex operator *(Hex hex, int multiplier) => new Hex(hex.Q * multiplier, hex.R * multiplier);
+        public static Hex operator *(Hex hex, int multiplier) => new(hex.Q * multiplier, hex.R * multiplier);
         /// <summary>
         ///     Multiplies a hex’s coordinates by a <paramref name="multiplier"/>.</summary>
         /// <returns>
         ///     This operation is equivalent to moving from the center hex (0, 0) to the current hex, then making the same
         ///     move again, for a total of <paramref name="multiplier"/> times.</returns>
-        public static Hex operator *(int multiplier, Hex hex) => new Hex(hex.Q * multiplier, hex.R * multiplier);
+        public static Hex operator *(int multiplier, Hex hex) => new(hex.Q * multiplier, hex.R * multiplier);
 
         /// <summary>
         ///     Rotates the current hex’s position within the grid about the center hex (0, 0) clockwise by the specified
@@ -445,7 +445,7 @@ namespace RT.Coordinates
             }
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(Hex.Q * .75 + (Right ? .25 : -.25), (Hex.Q * .5 + Hex.R - .5) * WidthToHeight);
+            public override PointD Point => new(Hex.Q * .75 + (Right ? .25 : -.25), (Hex.Q * .5 + Hex.R - .5) * WidthToHeight);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex hv && hv.Hex == Hex && hv.Right == Right;

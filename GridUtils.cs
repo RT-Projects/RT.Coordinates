@@ -78,9 +78,7 @@ namespace RT.Coordinates
                     var c2 = cc2.First();
                     if (cc1.Count == 1 && combo.Contains(c1))
                         return cc2.Count == 1 && combo.Contains(c2) ? null : new Link<CombinedCell<TCell>>(combo, cc2).Nullable();
-                    if (cc2.Count == 1 && combo.Contains(c2))
-                        return new Link<CombinedCell<TCell>>(cc1, combo).Nullable();
-                    return link.Nullable();
+                    return cc2.Count == 1 && combo.Contains(c2) ? new Link<CombinedCell<TCell>>(cc1, combo).Nullable() : link.Nullable();
                 }).WhereNotNull());
         }
 

@@ -38,11 +38,11 @@ namespace RT.Coordinates
             IEnumerable<TResult> selectConsecutivePairsIterator()
             {
                 using var e = source.GetEnumerator();
-                bool any = e.MoveNext();
+                var any = e.MoveNext();
                 if (!any)
                     yield break;
-                T first = e.Current;
-                T last = e.Current;
+                var first = e.Current;
+                var last = e.Current;
                 while (e.MoveNext())
                 {
                     yield return selector(last, e.Current);
@@ -95,12 +95,10 @@ namespace RT.Coordinates
             if (!enumerator.MoveNext())
             {
                 // Optimize the (common) case where there is no prefix/suffix; this prevents an array allocation when calling string.Concat()
-                if (prefix == null && suffix == null)
-                    return one + lastSeparator + two;
-                return prefix + one + suffix + lastSeparator + prefix + two + suffix;
+                return prefix == null && suffix == null ? one + lastSeparator + two : prefix + one + suffix + lastSeparator + prefix + two + suffix;
             }
 
-            StringBuilder sb = new StringBuilder()
+            var sb = new StringBuilder()
                 .Append(prefix).Append(one).Append(suffix).Append(separator)
                 .Append(prefix).Append(two).Append(suffix);
             var prev = enumerator.Current;
@@ -121,10 +119,7 @@ namespace RT.Coordinates
         ///     Any value.</param>
         /// <returns>
         ///     The same value cast as nullable.</returns>
-        public static TInput? Nullable<TInput>(this TInput input) where TInput : struct
-        {
-            return (TInput?) input;
-        }
+        public static TInput? Nullable<TInput>(this TInput input) where TInput : struct => (TInput?) input;
 
         /// <summary>
         ///     Returns only the non-<c>null</c> elements from the specified collection of nullable values as non-nullable
@@ -158,7 +153,7 @@ namespace RT.Coordinates
                 throw new ArgumentNullException(nameof(source));
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
-            int index = 0;
+            var index = 0;
             foreach (var v in source)
             {
                 if (predicate(v))

@@ -170,7 +170,7 @@ namespace RT.Coordinates
         private const double sin60 = .86602540378443864676372317075294;
 
         /// <inheritdoc/>
-        public readonly PointD Center => new PointD(X * (1.5d * cos60), (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * (1.5d * sin60));
+        public readonly PointD Center => new(X * (1.5d * cos60), (IsUpPointing ? Y + 2d / 3d : Y + 1d / 3d) * (1.5d * sin60));
 
         /// <inheritdoc/>
         public override readonly string ToString() => $"T({X},{Y})";
@@ -221,7 +221,7 @@ namespace RT.Coordinates
             public override int GetHashCode() => unchecked(Tri.GetHashCode() + 47);
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(Tri.X * cos60 * 1.5, Tri.Y * sin60 * 1.5);
+            public override PointD Point => new(Tri.X * cos60 * 1.5, Tri.Y * sin60 * 1.5);
         }
     }
 }

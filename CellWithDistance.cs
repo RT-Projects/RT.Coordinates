@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace RT.Coordinates
@@ -32,13 +31,13 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is CellWithDistance<TCell> other && EqualityComparer<TCell>.Default.Equals(Parent, other.Parent) && Distance == other.Distance;
+        public override readonly bool Equals(object obj) => obj is CellWithDistance<TCell> other && EqualityComparer<TCell>.Default.Equals(Parent, other.Parent) && Distance == other.Distance;
 
         /// <inheritdoc/>
-        public override int GetHashCode() => Parent.GetHashCode() * 1068603923 + Distance;
+        public override readonly int GetHashCode() => Parent.GetHashCode() * 1068603923 + Distance;
 
         /// <summary>Deconstructor.</summary>
-        public void Deconstruct(out TCell parent, out int distance)
+        public readonly void Deconstruct(out TCell parent, out int distance)
         {
             parent = Parent;
             distance = Distance;

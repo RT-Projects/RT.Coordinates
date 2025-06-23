@@ -9,6 +9,6 @@ namespace RT.Coordinates
     public interface INeighbor<TCell>
     {
         /// <summary>Returns the current cell’s neighbors.</summary>
-        public IEnumerable<TCell> Neighbors { get; }
+        IEnumerable<TCell> Neighbors { get; }
     }
 }

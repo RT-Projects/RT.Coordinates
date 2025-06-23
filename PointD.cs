@@ -23,15 +23,15 @@ namespace RT.Coordinates
         public double Y { get; private set; }
 
         /// <summary>Multiplies a point by a specified scalar factor.</summary>
-        public static PointD operator *(PointD p, double amount) => new PointD(p.X * amount, p.Y * amount);
+        public static PointD operator *(PointD p, double amount) => new(p.X * amount, p.Y * amount);
         /// <summary>Multiplies a point by a specified scalar factor.</summary>
-        public static PointD operator *(double amount, PointD p) => new PointD(p.X * amount, p.Y * amount);
+        public static PointD operator *(double amount, PointD p) => new(p.X * amount, p.Y * amount);
         /// <summary>Divides a point by a specified scalar factor.</summary>
-        public static PointD operator /(PointD p, double amount) => new PointD(p.X / amount, p.Y / amount);
+        public static PointD operator /(PointD p, double amount) => new(p.X / amount, p.Y / amount);
         /// <summary>Adds two points (treating them as vectors).</summary>
-        public static PointD operator +(PointD p1, PointD p2) => new PointD(p1.X + p2.X, p1.Y + p2.Y);
+        public static PointD operator +(PointD p1, PointD p2) => new(p1.X + p2.X, p1.Y + p2.Y);
         /// <summary>Subtracts a point from another (treating them as vectors).</summary>
-        public static PointD operator -(PointD p1, PointD p2) => new PointD(p1.X - p2.X, p1.Y - p2.Y);
+        public static PointD operator -(PointD p1, PointD p2) => new(p1.X - p2.X, p1.Y - p2.Y);
 
         /// <summary>Calculates the distance of this point from the origin.</summary>
         public readonly double Distance => Math.Sqrt(X * X + Y * Y);
@@ -107,7 +107,7 @@ namespace RT.Coordinates
         {
             get
             {
-                double len = Math.Sqrt(X * X + Y * Y);
+                var len = Math.Sqrt(X * X + Y * Y);
                 return new PointD(X / len, Y / len);
             }
         }

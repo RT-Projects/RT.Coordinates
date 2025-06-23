@@ -20,7 +20,7 @@ namespace RT.Coordinates
         public TCell Cell2;
 
         /// <summary>Deconstructor.</summary>
-        public void Deconstruct(out EdgeType edgeType, out TCell cell1, out TCell cell2)
+        public readonly void Deconstruct(out EdgeType edgeType, out TCell cell1, out TCell cell2)
         {
             edgeType = EdgeType;
             cell1 = Cell1;

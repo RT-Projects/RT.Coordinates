@@ -114,11 +114,11 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public bool Equals(Floret other) => other.Hex.Equals(Hex) && other.Pos == Pos;
+        public readonly bool Equals(Floret other) => other.Hex.Equals(Hex) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Floret other && other.Hex.Equals(Hex) && other.Pos == Pos;
+        public override readonly bool Equals(object obj) => obj is Floret other && other.Hex.Equals(Hex) && other.Pos == Pos;
         /// <inheritdoc/>
-        public override int GetHashCode() => unchecked(Hex.GetHashCode() * 7 + (int) Pos);
+        public override readonly int GetHashCode() => unchecked(Hex.GetHashCode() * 7 + (int) Pos);
 
         /// <summary>Equality operator.</summary>
         public static bool operator ==(Floret one, Floret two) => one.Equals(two);
@@ -126,7 +126,7 @@ namespace RT.Coordinates
         public static bool operator !=(Floret one, Floret two) => !one.Equals(two);
 
         /// <inheritdoc/>
-        public IEnumerable<Floret> Neighbors
+        public readonly IEnumerable<Floret> Neighbors
         {
             get
             {
@@ -138,15 +138,15 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Floret"/>, going clockwise from the “spiky” vertex
         ///     (center of <see cref="Hex"/>).</summary>
-        public Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
+        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
         {
             new Vertex(Hex, Vertex.Position.Center),
             new Vertex(Hex, fullPos: 3 * (int) Pos + 1),
@@ -156,7 +156,7 @@ namespace RT.Coordinates
         };
 
         /// <inheritdoc/>
-        public PointD Center => Hex.Center * 3 + new PointD(0, -.9).Rotate(((int) Pos + 2d / 3) * Math.PI / 3);
+        public readonly PointD Center => Hex.Center * 3 + new PointD(0, -.9).Rotate(((int) Pos + 2d / 3) * Math.PI / 3);
 
         private static readonly Position[] _floretPositions = (Position[]) Enum.GetValues(typeof(Position));
 
@@ -293,7 +293,7 @@ namespace RT.Coordinates
             private static readonly double[] ys = { -0.494871659305394, -0.371153744479045, -0.433012701892219, -0.309294787065871, -0.123717914826348, 0, 0.185576872239522, 0.247435829652697, 0 };
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD((Hex.Q * .75 + xs[(int) Pos]) * 3, ((Hex.Q * .5 + Hex.R) * Hex.WidthToHeight + ys[(int) Pos]) * 3);
+            public override PointD Point => new((Hex.Q * .75 + xs[(int) Pos]) * 3, ((Hex.Q * .5 + Hex.R) * Hex.WidthToHeight + ys[(int) Pos]) * 3);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex kv && kv.Hex.Equals(Hex) && kv.Pos == Pos;

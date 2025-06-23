@@ -36,22 +36,22 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns a <see cref="Pentavector"/> describing a unit vector at a 54° angle counter-clockwise (SVG) or
         ///     clockwise (geometry) from the x-axis.</summary>
-        public static readonly Pentavector BaseA = new Pentavector(1, 0, 0, 0);
+        public static readonly Pentavector BaseA = new(1, 0, 0, 0);
         /// <summary>
         ///     Returns a <see cref="Pentavector"/> describing a unit vector at a 18° angle counter-clockwise (SVG) or
         ///     clockwise (geometry) from the x-axis.</summary>
-        public static readonly Pentavector BaseB = new Pentavector(0, 1, 0, 0);
+        public static readonly Pentavector BaseB = new(0, 1, 0, 0);
         /// <summary>
         ///     Returns a <see cref="Pentavector"/> describing a unit vector at a 18° angle clockwise (SVG) or
         ///     counter-clockwise (geometry) from the x-axis.</summary>
-        public static readonly Pentavector BaseC = new Pentavector(0, 0, 1, 0);
+        public static readonly Pentavector BaseC = new(0, 0, 1, 0);
         /// <summary>
         ///     Returns a <see cref="Pentavector"/> describing a unit vector at a 54° angle clockwise (SVG) or
         ///     counter-clockwise (geometry) from the x-axis.</summary>
-        public static readonly Pentavector BaseD = new Pentavector(0, 0, 0, 1);
+        public static readonly Pentavector BaseD = new(0, 0, 0, 1);
         /// <summary>
         ///     Returns a <see cref="Pentavector"/> describing a unit vector pointing straight down (SVG) or up (geometry).</summary>
-        public static readonly Pentavector BaseE = new Pentavector(-1, 1, -1, 1);
+        public static readonly Pentavector BaseE = new(-1, 1, -1, 1);
 
         /// <summary>
         ///     Returns a <see cref="Pentavector"/> describing a unit vector at the specified <paramref name="angle"/>.</summary>
@@ -91,11 +91,11 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns a new <see cref="Pentavector"/> whose direction is the same as this vector, but with a length
         ///     multiplied by 1/φ. φ is the golden ratio ((√(5)+1)/2).</summary>
-        public readonly Pentavector DivideByPhi => new Pentavector(B - D, C + D - B, A + B - C, C - A);
+        public readonly Pentavector DivideByPhi => new(B - D, C + D - B, A + B - C, C - A);
         /// <summary>
         ///     Returns a new <see cref="Pentavector"/> whose direction is the same as this vector, but with a length
         ///     multiplied by φ. φ is the golden ratio ((√(5)+1)/2).</summary>
-        public readonly Pentavector MultiplyByPhi => new Pentavector(A + B - D, C + D, A + B, C + D - A);
+        public readonly Pentavector MultiplyByPhi => new(A + B - D, C + D, A + B, C + D - A);
 
         /// <inheritdoc/>
         public readonly bool Equals(Pentavector other) => other.A == A && other.B == B && other.C == C && other.D == D;
@@ -105,15 +105,15 @@ namespace RT.Coordinates
         public override readonly int GetHashCode() => unchecked(148139063 * A + 336220337 * B + 672753941 * C + 797808397 * D);
 
         /// <summary>Addition operator.</summary>
-        public static Pentavector operator +(Pentavector one, Pentavector two) => new Pentavector(one.A + two.A, one.B + two.B, one.C + two.C, one.D + two.D);
+        public static Pentavector operator +(Pentavector one, Pentavector two) => new(one.A + two.A, one.B + two.B, one.C + two.C, one.D + two.D);
         /// <summary>Subtraction operator.</summary>
-        public static Pentavector operator -(Pentavector one, Pentavector two) => new Pentavector(one.A - two.A, one.B - two.B, one.C - two.C, one.D - two.D);
+        public static Pentavector operator -(Pentavector one, Pentavector two) => new(one.A - two.A, one.B - two.B, one.C - two.C, one.D - two.D);
         /// <summary>Multiplication operator.</summary>
-        public static Pentavector operator *(Pentavector one, int two) => new Pentavector(one.A * two, one.B * two, one.C * two, one.D * two);
+        public static Pentavector operator *(Pentavector one, int two) => new(one.A * two, one.B * two, one.C * two, one.D * two);
         /// <summary>Multiplication operator.</summary>
-        public static Pentavector operator *(int one, Pentavector two) => new Pentavector(two.A * one, two.B * one, two.C * one, two.D * one);
+        public static Pentavector operator *(int one, Pentavector two) => new(two.A * one, two.B * one, two.C * one, two.D * one);
         /// <summary>Unary negation operator.</summary>
-        public static Pentavector operator -(Pentavector op) => new Pentavector(-op.A, -op.B, -op.C, -op.D);
+        public static Pentavector operator -(Pentavector op) => new(-op.A, -op.B, -op.C, -op.D);
 
         /// <summary>Equality comparison.</summary>
         public static bool operator ==(Pentavector one, Pentavector two) => one.Equals(two);
@@ -126,10 +126,10 @@ namespace RT.Coordinates
         private const double cos54 = .58778525229247312918;
 
         /// <summary>Returns the 2D point represented by this vector.</summary>
-        public readonly PointD Point => new PointD(cos54 * (A + D) + cos18 * (B + C), sin54 * (D - A) + sin18 * (C - B));
+        public readonly PointD Point => new(cos54 * (A + D) + cos18 * (B + C), sin54 * (D - A) + sin18 * (C - B));
 
         /// <summary>Implicit operator converting <see cref="Pentavector"/> to <see cref="Coordinates.Vertex"/>.</summary>
-        public static implicit operator Vertex(Pentavector v) => new Vertex(v);
+        public static implicit operator Vertex(Pentavector v) => new(v);
         /// <inheritdoc/>
         public override readonly string ToString() => $"({A},{B},{C},{D})";
 

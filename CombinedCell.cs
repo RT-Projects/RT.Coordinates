@@ -11,7 +11,7 @@ namespace RT.Coordinates
     ///     Type of the underlying cells.</typeparam>
     /// <remarks>
     ///     See <see cref="Structure{TCell}.CombineCells(TCell[])"/> for a code example.</remarks>
-    public struct CombinedCell<TCell> : IEquatable<CombinedCell<TCell>>, IHasSvgGeometry, IEnumerable<TCell>
+    public readonly struct CombinedCell<TCell> : IEquatable<CombinedCell<TCell>>, IHasSvgGeometry, IEnumerable<TCell>
     {
         private readonly HashSet<TCell> _underlyingCells;
 
@@ -79,15 +79,15 @@ namespace RT.Coordinates
             {
                 if (_underlyingCells.Count == 1)
                 {
-                    if (!(_underlyingCells.First() is IHasSvgGeometry cellG))
-                        throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell does not implement {typeof(IHasSvgGeometry).FullName}.");
-                    return cellG.Edges;
+                    return _underlyingCells.First() is not IHasSvgGeometry cellG
+                        ? throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell does not implement {typeof(IHasSvgGeometry).FullName}.")
+                        : cellG.Edges;
                 }
 
                 var edges = new HashSet<Link<Vertex>>();
                 foreach (var cell in _underlyingCells)
                 {
-                    if (!(cell is IHasSvgGeometry cellG))
+                    if (cell is not IHasSvgGeometry cellG)
                         throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell does not implement {typeof(IHasSvgGeometry).FullName}.");
                     foreach (var edge in cellG.Edges)
                         if (!edges.Remove(edge))
@@ -105,7 +105,7 @@ namespace RT.Coordinates
                 double x = 0, y = 0;
                 foreach (var c in _underlyingCells)
                 {
-                    if (!(c is IHasSvgGeometry cs))
+                    if (c is not IHasSvgGeometry cs)
                         throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Center)} when a contained cell does not implement {typeof(IHasSvgGeometry).FullName}.");
                     x += cs.Center.X;
                     y += cs.Center.Y;

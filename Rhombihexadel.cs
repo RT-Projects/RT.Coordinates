@@ -102,14 +102,14 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public bool Equals(Rhombihexadel other) => other.Hex.Equals(Hex) && other.Subtile == Subtile;
+        public readonly bool Equals(Rhombihexadel other) => other.Hex.Equals(Hex) && other.Subtile == Subtile;
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Rhombihexadel other && other.Hex.Equals(Hex) && other.Subtile == Subtile;
+        public override readonly bool Equals(object obj) => obj is Rhombihexadel other && other.Hex.Equals(Hex) && other.Subtile == Subtile;
         /// <inheritdoc/>
-        public override int GetHashCode() => unchecked(Hex.GetHashCode() * 7 + (int) Subtile);
+        public override readonly int GetHashCode() => unchecked(Hex.GetHashCode() * 7 + (int) Subtile);
 
         /// <inheritdoc/>
-        public IEnumerable<Rhombihexadel> Neighbors
+        public readonly IEnumerable<Rhombihexadel> Neighbors
         {
             get
             {
@@ -160,7 +160,7 @@ namespace RT.Coordinates
             }
         }
 
-        IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
+        readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <summary>
         ///     Returns a collection of <see cref="Rhombihexadel"/> tiles that form a larger hexagonal structure in which
@@ -187,7 +187,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Rhombihexadel"/>, going clockwise from the
         ///     top-left (hexagon) or starting with the two edges adjacent to its corresponding hexagon.</summary>
-        public Coordinates.Vertex[] Vertices => Subtile switch
+        public readonly Coordinates.Vertex[] Vertices => Subtile switch
         {
             Tile.Hexagon => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.TopLeft), new Vertex(Hex, Vertex.Position.TopRight), new Vertex(Hex, Vertex.Position.Right), new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex, Vertex.Position.Left) },
             Tile.BottomRightSquare => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex, Vertex.Position.Right), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.Left) },
@@ -199,13 +199,13 @@ namespace RT.Coordinates
         };
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
 
         private static readonly double[] _xs = { 0, 1.18301270189222, .788675134594814, 0, -.788675134594814, -1.18301270189222 };
         private static readonly double[] _ys = { 0, .683012701892220, 1.36602540378444, 1.36602540378444, 1.36602540378444, .683012701892220 };
 
         /// <inheritdoc/>
-        public PointD Center => new PointD(Hex.Q * 2.36602540378444 + _xs[(int) Subtile], Hex.R * 2.73205080756888 + Hex.Q * 1.36602540378444 + _ys[(int) Subtile]);
+        public readonly PointD Center => new(Hex.Q * 2.36602540378444 + _xs[(int) Subtile], Hex.R * 2.73205080756888 + Hex.Q * 1.36602540378444 + _ys[(int) Subtile]);
 
         /// <inheritdoc/>
         public override readonly string ToString() => $"M({Hex.Q},{Hex.R})/{(int) Subtile}";
@@ -231,7 +231,7 @@ namespace RT.Coordinates
             private static readonly double[] _ys = { -.8660254040, -.8660254040, 0, .8660254040, .8660254040, 0 };
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(Hex.Q * 2.36602540378444 + _xs[(int) Pos], Hex.R * 2.73205080756888 + Hex.Q * 1.36602540378444 + _ys[(int) Pos]);
+            public override PointD Point => new(Hex.Q * 2.36602540378444 + _xs[(int) Pos], Hex.R * 2.73205080756888 + Hex.Q * 1.36602540378444 + _ys[(int) Pos]);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex vx && vx.Hex.Equals(Hex) && vx.Pos == Pos;

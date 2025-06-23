@@ -236,7 +236,7 @@ namespace RT.Coordinates
             private static readonly double[] ys = { D2, D1, 0, 0 };
 
             /// <inheritdoc/>
-            public override PointD Point => new PointD(CellX + xs[Pos], CellY + ys[Pos]);
+            public override PointD Point => new(CellX + xs[Pos], CellY + ys[Pos]);
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex ov && ov.CellX == CellX && ov.CellY == CellY && ov.Pos == Pos;

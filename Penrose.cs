@@ -339,7 +339,7 @@ namespace RT.Coordinates
             ///     The angle, specified as a multiple of 36° going clockwise (SVG) or counter-clockwise (geometry).</param>
             /// <returns>
             ///     The new grid.</returns>
-            public Grid Rotate(int angle) => new Grid(_cells.Select(c => c.Rotate(angle)), _links.Select(l => new Link<Penrose>(l.Apart(out var other).Rotate(angle), other.Rotate(angle))));
+            public Grid Rotate(int angle) => new(_cells.Select(c => c.Rotate(angle)), _links.Select(l => new Link<Penrose>(l.Apart(out var other).Rotate(angle), other.Rotate(angle))));
 
             /// <inheritdoc/>
             protected override Structure<Penrose> makeModifiedStructure(IEnumerable<Penrose> cells, IEnumerable<Link<Penrose>> traversible) => new Grid(cells, traversible);
@@ -370,6 +370,6 @@ namespace RT.Coordinates
         ///     Rotates this cell by the specified <paramref name="angle"/> about the origin.</summary>
         /// <param name="angle">
         ///     The angle, specified as a multiple of 36° going clockwise (SVG) or counter-clockwise (geometry).</param>
-        public readonly Penrose Rotate(int angle) => new Penrose(TileKind, Corner.Rotate(angle), Angle + angle);
+        public readonly Penrose Rotate(int angle) => new(TileKind, Corner.Rotate(angle), Angle + angle);
     }
 }

@@ -13,14 +13,14 @@ namespace RT.Coordinates
     ///         This type is used in this library for two purposes:</para>
     ///     <list type="bullet">
     ///         <item><description>
-    ///             When used with cell types (<see cref="Square"/>, <see cref="Hex"/>, etc.), it represents a traversible link
-    ///             between two cells.</description></item>
+    ///             When used with cell types (<see cref="Square"/>, <see cref="Hex"/>, etc.), it represents a traversible
+    ///             link between two cells.</description></item>
     ///         <item><description>
     ///             When used with <see cref="Vertex"/>, it represents an edge connecting two vertices when rendering SVG.</description></item></list>
     ///     <para>
     ///         Two instances of <see cref="Link{T}"/> containing the same two elements will compare equal regardless of the
     ///         order in which the elements are specified.</para></remarks>
-    public struct Link<T> : IEquatable<Link<T>>, IEnumerable<T>
+    public readonly struct Link<T> : IEquatable<Link<T>>, IEnumerable<T>
     {
         private readonly T _elem1;
         private readonly T _elem2;
@@ -40,7 +40,7 @@ namespace RT.Coordinates
         }
 
         /// <summary>Returns the elements linked by this <see cref="Link{T}"/> without guaranteeing an order.</summary>
-        public LinkEnumerator GetEnumerator() => new LinkEnumerator(this);
+        public LinkEnumerator GetEnumerator() => new(this);
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => new LinkEnumerator(this);
         IEnumerator IEnumerable.GetEnumerator() => new LinkEnumerator(this);
 
@@ -52,14 +52,14 @@ namespace RT.Coordinates
             /// <summary>Constructor.</summary>
             public LinkEnumerator(Link<T> link) { _link = link; _pos = 0; }
             /// <inheritdoc/>
-            public T Current => _pos switch { 1 => _link._elem1, 2 => _link._elem2, _ => throw new InvalidOperationException() };
-            object IEnumerator.Current => Current;
+            public readonly T Current => _pos switch { 1 => _link._elem1, 2 => _link._elem2, _ => throw new InvalidOperationException() };
+            readonly object IEnumerator.Current => Current;
             /// <inheritdoc/>
             public bool MoveNext() { if (_pos < 3) _pos++; return _pos < 3; }
             /// <inheritdoc/>
-            public void Dispose() { }
+            public readonly void Dispose() { }
             /// <inheritdoc/>
-            public void Reset() { _pos = 0; }
+            public void Reset() => _pos = 0;
         }
 
         /// <summary>
@@ -68,16 +68,16 @@ namespace RT.Coordinates
         ///     One of the elements in this link.</param>
         /// <exception cref="ArgumentException">
         ///     The specified element is not part of this link.</exception>
-        public T Other(T one) => _elem1.Equals(one) ? _elem2 : _elem2.Equals(one) ? _elem1 : throw new ArgumentException($"‘{one}’ is not part of the link.", nameof(one));
+        public readonly T Other(T one) => _elem1.Equals(one) ? _elem2 : _elem2.Equals(one) ? _elem1 : throw new ArgumentException($"‘{one}’ is not part of the link.", nameof(one));
 
         /// <summary>Returns the elements of this link in no particular order.</summary>
-        public T Apart(out T other) { other = _elem2; return _elem1; }
+        public readonly T Apart(out T other) { other = _elem2; return _elem1; }
 
         /// <inheritdoc/>
-        public bool Equals(Link<T> other) => (_elem1.Equals(other._elem1) && _elem2.Equals(other._elem2)) || (_elem1.Equals(other._elem2) && _elem2.Equals(other._elem1));
+        public readonly bool Equals(Link<T> other) => (_elem1.Equals(other._elem1) && _elem2.Equals(other._elem2)) || (_elem1.Equals(other._elem2) && _elem2.Equals(other._elem1));
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => obj is Link<T> link && Equals(link);
+        public override readonly bool Equals(object obj) => obj is Link<T> link && Equals(link);
 
         /// <inheritdoc/>
         public override int GetHashCode()
@@ -85,6 +85,9 @@ namespace RT.Coordinates
             var eq = EqualityComparer<T>.Default;
             return eq.GetHashCode(_elem1) ^ eq.GetHashCode(_elem2);
         }
+
+        /// <summary>Determines whether this link and <paramref name="other"/> have at least one element in common.</summary>
+        public readonly bool HalfEquals(Link<T> other) => _elem1.Equals(other._elem1) || _elem2.Equals(other._elem2) || _elem1.Equals(other._elem2) || _elem2.Equals(other._elem1);
 
         /// <inheritdoc/>
         public override readonly string ToString() => $"{_elem1} ↔ {_elem2}";
