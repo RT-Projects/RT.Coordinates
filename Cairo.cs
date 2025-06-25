@@ -283,6 +283,25 @@ namespace RT.Coordinates
             {
             }
 
+            /// <summary>
+            ///     Constructs a grid consisting of a rectangle positioned at (<paramref name="dx"/>/2, <paramref
+            ///     name="dy"/>/2) and of size <paramref name="dw"/>/2 × <paramref name="dh"/>/2.</summary>
+            /// <param name="dx">
+            ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
+            /// <param name="dy">
+            ///     Double the y-coordinate of the top-left corner of the rectangle.</param>
+            /// <param name="dw">
+            ///     Double the width of the rectangle.</param>
+            /// <param name="dh">
+            ///     Double the height of the rectangle.</param>
+            /// <remarks>
+            ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to four cairos
+            ///     (arranged in a 2×2). By using doubled values, we effectively support half-integer points and sizes.</remarks>
+            public Grid(int dx, int dy, int dw, int dh)
+                : base(Rectangle(dx, dy, dw, dh))
+            {
+            }
+
             /// <inheritdoc/>
             protected override Structure<Cairo> makeModifiedStructure(IEnumerable<Cairo> cells, IEnumerable<Link<Cairo>> traversible) => new Grid(cells, traversible);
 
