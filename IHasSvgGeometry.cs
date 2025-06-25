@@ -6,7 +6,7 @@ namespace RT.Coordinates
     public interface IHasSvgGeometry
     {
         /// <summary>Returns a sequence of edges (line segments) describing the perimeter of the cell.</summary>
-        IEnumerable<Link<Vertex>> Edges { get; }
+        IEnumerable<Edge> Edges { get; }
 
         /// <summary>Returns the center-point of the cell.</summary>
         PointD Center { get; }

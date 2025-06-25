@@ -73,7 +73,7 @@ namespace RT.Coordinates
         public override int GetHashCode() => _underlyingCells.Count == 1 ? _underlyingCells.First().GetHashCode() : unchecked(_underlyingCells.Aggregate(0, (p, n) => p ^ n.GetHashCode()) + 235661 * _underlyingCells.Count);
 
         /// <inheritdoc/>
-        public IEnumerable<Link<Vertex>> Edges
+        public IEnumerable<Edge> Edges
         {
             get
             {
@@ -84,16 +84,50 @@ namespace RT.Coordinates
                         : cellG.Edges;
                 }
 
-                var edges = new HashSet<Link<Vertex>>();
-                foreach (var cell in _underlyingCells)
+                using var e = _underlyingCells.GetEnumerator();
+                if (!e.MoveNext())
+                    return [];
+                if (e.Current is not IHasSvgGeometry firstGeom)
+                    throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell ({e.Current}) does not implement {typeof(IHasSvgGeometry).FullName}.");
+                var loops = new List<List<Edge>> { firstGeom.Edges.ToList() };
+                while (e.MoveNext())
                 {
-                    if (cell is not IHasSvgGeometry cellG)
-                        throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell does not implement {typeof(IHasSvgGeometry).FullName}.");
-                    foreach (var edge in cellG.Edges)
-                        if (!edges.Remove(edge))
-                            edges.Add(edge);
+                    if (e.Current is not IHasSvgGeometry geom)
+                        throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell ({e.Current}) does not implement {typeof(IHasSvgGeometry).FullName}.");
+                    loops.Add(geom.Edges.ToList());
                 }
-                return edges;
+
+                for (var i = 0; i < loops.Count; i++)
+                {
+                    continue_i:
+                    for (var j = i + 1; j < loops.Count; j++)
+                    {
+                        var oldConnIx = loops[i].IndexOf(edge => loops[j].Contains(edge.Reverse));
+                        if (oldConnIx == -1)
+                            continue;
+
+                        var newConnIx = loops[j].IndexOf(loops[i][oldConnIx].Reverse);
+                        loops[i].RemoveAt(oldConnIx);
+                        loops[i].InsertRange(oldConnIx, loops[j].Take(newConnIx));
+                        loops[i].InsertRange(oldConnIx, loops[j].Skip(newConnIx + 1));
+
+                        for (var k = 0; k < loops[i].Count;)
+                        {
+                            if (loops[i][k].Reverse == loops[i][(k + 1) % loops[i].Count])
+                            {
+                                loops[i].RemoveAt(k);
+                                loops[i].RemoveAt(k % loops[i].Count);
+                            }
+                            else
+                                k++;
+                        }
+
+                        loops.RemoveAt(j);
+                        goto continue_i;
+                    }
+                }
+
+                return loops.SelectMany(x => x);
             }
         }
 

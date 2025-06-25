@@ -289,7 +289,7 @@ namespace RT.Coordinates
         private static IHasSvgGeometry geom(TCell cell) => (cell as IHasSvgGeometry) ??
             throw new InvalidOperationException($"To generate SVG, the type ‘{cell.GetType().FullName}’ must implement ‘{typeof(IHasSvgGeometry).FullName}’ or the provided ‘{typeof(SvgInstructions)}’ instance must provide ‘{nameof(SvgInstructions.GetEdges)}’ and ‘{nameof(SvgInstructions.GetCenter)}’ delegates.");
 
-        private static IEnumerable<Link<Vertex>> getEdges(TCell cell, SvgInstructions inf) => inf?.GetEdges?.Invoke(cell) ?? geom(cell).Edges;
+        private static IEnumerable<Link<Vertex>> getEdges(TCell cell, SvgInstructions inf) => (inf?.GetEdges?.Invoke(cell) ?? geom(cell).Edges).Select(e => e.ToLink());
         private static PointD getCenter(TCell cell, SvgInstructions inf) => inf?.GetCenter?.Invoke(cell) ?? geom(cell).Center;
 
         /// <summary>

@@ -199,7 +199,7 @@ namespace RT.Coordinates
         };
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
         private static readonly double[] _xs = { 0, 1.18301270189222, .788675134594814, 0, -.788675134594814, -1.18301270189222 };
         private static readonly double[] _ys = { 0, .683012701892220, 1.36602540378444, 1.36602540378444, 1.36602540378444, .683012701892220 };

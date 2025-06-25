@@ -134,7 +134,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Square"/>, going clockwise from the top-left.</summary>
         public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]

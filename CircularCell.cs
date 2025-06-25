@@ -119,7 +119,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Given a collection of <see cref="CircularCell"/> objects, returns a collection of edges that describes the
         ///     perimeter of the current cell.</summary>
-        public IEnumerable<Link<Coordinates.Vertex>> FindEdges(IEnumerable<CircularCell> cells)
+        public IEnumerable<Edge> FindEdges(IEnumerable<CircularCell> cells)
         {
             var vertices = new List<Coordinates.Vertex> { new Vertex(Radius, Start), new Vertex(Radius + 1, Start) };
 

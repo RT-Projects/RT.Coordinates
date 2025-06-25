@@ -143,7 +143,7 @@ namespace RT.Coordinates
         public override readonly int GetHashCode() => unchecked((Corner.GetHashCode() * 10 + Angle) * 4 + (int) TileKind);
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
         /// <inheritdoc/>
         public readonly PointD Center => TileKind switch

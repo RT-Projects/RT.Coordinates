@@ -149,7 +149,7 @@ namespace RT.Coordinates
         readonly IEnumerable<object> INeighbor<object>.Neighbors => Neighbors.Cast<object>();
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices().MakeEdges();
+        public readonly IEnumerable<Edge> Edges => Vertices().MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Cairo"/> assuming that we’re rendering a rectangle

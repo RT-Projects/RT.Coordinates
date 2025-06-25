@@ -39,7 +39,7 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns a collection of edges (line segments) that make up the perimeter of the specified cell. If this is
         ///     absent or returns <c>null</c>, the cell must implement <see cref="IHasSvgGeometry"/>.</summary>
-        public Func<object, IEnumerable<Link<Vertex>>> GetEdges;
+        public Func<object, IEnumerable<Edge>> GetEdges;
 
         /// <summary>
         ///     Returns the center point for the specified cell. If this is absent or returns <c>null</c>, the cell must

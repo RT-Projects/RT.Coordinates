@@ -157,7 +157,7 @@ namespace RT.Coordinates
         }
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Link<Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the <see cref="Pentavector"/> corresponding to a pentagon cell’s center. Warning: throws if this cell

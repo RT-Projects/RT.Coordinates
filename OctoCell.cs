@@ -134,7 +134,7 @@ namespace RT.Coordinates
         public override readonly int GetHashCode() => X * 1073741827 + Y * 47 + (IsSquare ? 1 : 0);
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Link<Coordinates.Vertex>> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="OctoCell"/>, going clockwise from the top-left
