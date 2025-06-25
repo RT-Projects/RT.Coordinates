@@ -106,5 +106,8 @@ namespace RT.Coordinates
             elem1 = _elem1;
             elem2 = _elem2;
         }
+
+        /// <summary>Projects the elements of this link and creates a new link between the resulting new elements.</summary>
+        public Link<TResult> SelectLink<TResult>(Func<T, TResult> selector) => new(selector(_elem1), selector(_elem2));
     }
 }
