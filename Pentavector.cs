@@ -5,33 +5,24 @@ namespace RT.Coordinates
     /// <summary>
     ///     Describes a vertex in a pentagonal grid using a system of four base vectors, which are unit vectors 36° from one
     ///     another. Used by <see cref="Penrose"/> and <see cref="PentaCell"/>.</summary>
-    public struct Pentavector : IEquatable<Pentavector>
+    public struct Pentavector(int a, int b, int c, int d) : IEquatable<Pentavector>
     {
-        /// <summary>Constructor.</summary>
-        public Pentavector(int a, int b, int c, int d)
-        {
-            A = a;
-            B = b;
-            C = c;
-            D = d;
-        }
-
         /// <summary>
         ///     The A component of this vector, which extends outward from the origin at a 54° angle counter-clockwise (SVG)
         ///     or clockwise (geometry) from the x-axis.</summary>
-        public int A { get; private set; }
+        public int A { get; private set; } = a;
         /// <summary>
         ///     The B component of this vector, which extends outward from the origin at an 18° angle counter-clockwise (SVG)
         ///     or clockwise (geometry) from the x-axis.</summary>
-        public int B { get; private set; }
+        public int B { get; private set; } = b;
         /// <summary>
         ///     The C component of this vector, which extends outward from the origin at an 18° angle clockwise (SVG) or
         ///     counter-clockwise (geometry) from the x-axis.</summary>
-        public int C { get; private set; }
+        public int C { get; private set; } = c;
         /// <summary>
         ///     The D component of this vector, which extends outward from the origin at a 54° angle clockwise (SVG) or
         ///     counter-clockwise (geometry) from the x-axis.</summary>
-        public int D { get; private set; }
+        public int D { get; private set; } = d;
 
         /// <summary>
         ///     Returns a <see cref="Pentavector"/> describing a unit vector at a 54° angle counter-clockwise (SVG) or
@@ -138,12 +129,10 @@ namespace RT.Coordinates
         /// <remarks>
         ///     This is merely a thin wrapper around <see cref="Pentavector"/> but for the purpose of implementing <see
         ///     cref="Coordinates.Vertex"/>.</remarks>
-        public class Vertex : Coordinates.Vertex
+        public class Vertex(Pentavector vector) : Coordinates.Vertex
         {
             /// <summary>The underlying <see cref="Vector"/>.</summary>
-            public Pentavector Vector { get; private set; }
-            /// <summary>Constructor.</summary>
-            public Vertex(Pentavector vector) { Vector = vector; }
+            public Pentavector Vector { get; private set; } = vector;
 
             /// <inheritdoc/>
             public override bool Equals(Coordinates.Vertex other) => other is Vertex v && v.Vector.Equals(Vector);

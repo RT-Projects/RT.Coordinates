@@ -135,13 +135,12 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Kite"/>, going clockwise from the “spiky” vertex
         ///     (center of <see cref="Hex"/>).</summary>
-        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
-        {
+        public readonly Coordinates.Vertex[] Vertices => [
             new Vertex(Hex, Vertex.Position.Center),
             new Vertex(Hex, fullPos: 2 * (int) Pos),
             new Vertex(Hex, fullPos: 2 * (int) Pos + 1),
             new Vertex(Hex, fullPos: 2 * (int) Pos + 2)
-        };
+        ];
 
         /// <inheritdoc/>
         public readonly PointD Center => Hex.Center * 2 + new PointD(0, -.6).Rotate(((int) Pos + .5) * Math.PI / 3);
@@ -267,8 +266,8 @@ namespace RT.Coordinates
                 Center
             }
 
-            private static readonly double[] xs = { 0, .25, .375, .5, .375, 0 };
-            private static readonly double[] ys = { -.5, -.5, -.25, 0, .25, 0 };
+            private static readonly double[] xs = [0, .25, .375, .5, .375, 0];
+            private static readonly double[] ys = [-.5, -.5, -.25, 0, .25, 0];
 
             /// <inheritdoc/>
             public override PointD Point => new((Hex.Q * .75 + xs[(int) Pos]) * 2, (Hex.Q * .5 + Hex.R + ys[(int) Pos]) * Hex.WidthToHeight * 2);

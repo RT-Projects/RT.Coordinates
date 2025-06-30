@@ -32,19 +32,8 @@ namespace RT.Coordinates
     ///     6.49519052838329L6 7.79422863405995L5.25 6.49519052838329L4.5 7.79422863405995L3.75 6.49519052838329L3
     ///     7.79422863405995L2.25 6.49519052838329L1.5 7.79422863405995L0.75 6.49519052838329L0 7.79422863405995' fill='none'
     ///     stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</image>
-    public struct Tri : IEquatable<Tri>, INeighbor<Tri>, INeighbor<object>, IHasSvgGeometry
+    public struct Tri(int x, int y) : IEquatable<Tri>, INeighbor<Tri>, INeighbor<object>, IHasSvgGeometry
     {
-        /// <summary>
-        ///     Constructor.</summary>
-        /// <param name="x">
-        ///     Position of the tri within its row.</param>
-        /// <param name="y">
-        ///     Row.</param>
-        public Tri(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
 
         /// <summary>
         ///     Returns a set of tris that make up a large up-pointing triangle structure.</summary>
@@ -130,9 +119,9 @@ namespace RT.Coordinates
         }
 
         /// <summary>Returns the position of the tri within its row.</summary>
-        public int X { get; private set; }
+        public int X { get; private set; } = x;
         /// <summary>Returns the row containing this tri.</summary>
-        public int Y { get; private set; }
+        public int Y { get; private set; } = y;
         /// <summary>Determines whether this tri is up-pointing (<c>true</c>) or down-pointing (<c>false</c>).</summary>
         public readonly bool IsUpPointing => ((X ^ Y) & 1) == 0;
 
@@ -163,8 +152,8 @@ namespace RT.Coordinates
         ///     Returns the vertices along the perimeter of this <see cref="Tri"/>, going clockwise from the top (up-pointing)
         ///     or top-left (down-pointing).</summary>
         public readonly Coordinates.Vertex[] Vertices => IsUpPointing
-            ? new Coordinates.Vertex[] { new Vertex(this), new Vertex(new Tri(X + 1, Y + 1)), new Vertex(new Tri(X - 1, Y + 1)) }
-            : new Coordinates.Vertex[] { new Vertex(new Tri(X - 1, Y)), new Vertex(new Tri(X + 1, Y)), new Vertex(new Tri(X, Y + 1)) };
+            ? [new Vertex(this), new Vertex(new Tri(X + 1, Y + 1)), new Vertex(new Tri(X - 1, Y + 1))]
+            : [new Vertex(new Tri(X - 1, Y)), new Vertex(new Tri(X + 1, Y)), new Vertex(new Tri(X, Y + 1))];
 
         private const double cos60 = .5;
         private const double sin60 = .86602540378443864676372317075294;
@@ -176,7 +165,10 @@ namespace RT.Coordinates
         public override readonly string ToString() => $"T({X},{Y})";
 
         /// <summary>Describes a 2D grid of triangular cells.</summary>
-        public class Grid : Structure<Tri>
+        /// <remarks>
+        ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
+        ///     IEnumerable{TCell}})"/>.</remarks>
+        public class Grid(IEnumerable<Tri> cells, IEnumerable<Link<Tri>> links = null, Func<Tri, IEnumerable<Tri>> getNeighbors = null) : Structure<Tri>(cells, links, getNeighbors)
         {
             /// <summary>
             ///     Constructs a grid of the specified width and height in which the top-left triangle is an up-pointing one.</summary>
@@ -185,13 +177,6 @@ namespace RT.Coordinates
             /// <param name="height">
             ///     Number of rows.</param>
             public Grid(int width, int height) : this(Enumerable.Range(0, width * height).Select(i => new Tri(i % width, i / width)))
-            {
-            }
-
-            /// <summary>
-            ///     See <see cref="Structure{TCell}.Structure(IEnumerable{TCell}, IEnumerable{Link{TCell}}, Func{TCell,
-            ///     IEnumerable{TCell}})"/>.</summary>
-            public Grid(IEnumerable<Tri> cells, IEnumerable<Link<Tri>> links = null, Func<Tri, IEnumerable<Tri>> getNeighbors = null) : base(cells, links, getNeighbors)
             {
             }
         }

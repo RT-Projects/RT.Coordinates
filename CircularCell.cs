@@ -148,15 +148,8 @@ namespace RT.Coordinates
         public PointD Center => new PointD(0, -Radius - .5).Rotate(Math.PI * (Start + (Start < End ? 0 : 1) + End));
 
         /// <summary>Describes a vertex in a <see cref="CircularCell"/> grid.</summary>
-        public class Vertex : Coordinates.Vertex
+        public class Vertex(int radius, CircleFraction pos) : Coordinates.Vertex
         {
-            /// <summary>Constructor.</summary>
-            public Vertex(int radius, CircleFraction pos)
-            {
-                Radius = radius;
-                Position = radius == 0 ? new CircleFraction(0, 1) : pos;
-            }
-
             private static int gcd(int a, int b)
             {
                 while (a != 0 && b != 0)
@@ -171,12 +164,12 @@ namespace RT.Coordinates
             }
 
             /// <summary>The distance of this vertex from the origin.</summary>
-            public int Radius { get; private set; }
+            public int Radius { get; private set; } = radius;
             /// <summary>
             ///     The angle of this vertex from the vertical, expressed as a fraction of the full circle.</summary>
             /// <remarks>
             ///     In SVG, the angle is clockwise. In geometry, the angle is counter-clockwise.</remarks>
-            public CircleFraction Position { get; private set; }
+            public CircleFraction Position { get; private set; } = radius == 0 ? new CircleFraction(0, 1) : pos;
 
             /// <inheritdoc/>
             public override PointD Point => new(

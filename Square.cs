@@ -14,19 +14,12 @@ namespace RT.Coordinates
     ///     1L7 2L6 2L6 3L5 3L5 4L4 4L4 5L3 5L3 6L2 6L2 7L1 7L1 8M8 2L7 2L7 3L6 3L6 4L5 4L5 5L4 5L4 6L3 6L3 7L2 7L2 8M8 3L7
     ///     3L7 4L6 4L6 5L5 5L5 6L4 6L4 7L3 7L3 8M8 4L7 4L7 5L6 5L6 6L5 6L5 7L4 7L4 8M8 5L7 5L7 6L6 6L6 7L5 7L5 8M8 6L7 6L7
     ///     7L6 7L6 8M8 7L7 7L7 8' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</image>
-    public struct Square : IEquatable<Square>, INeighbor<Square>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Square, Square.Direction>
+    public struct Square(int x, int y) : IEquatable<Square>, INeighbor<Square>, INeighbor<object>, IHasSvgGeometry, IHasDirection<Square, Square.Direction>
     {
         /// <summary>Returns the X coordinate of the cell.</summary>
-        public int X { get; private set; }
+        public int X { get; private set; } = x;
         /// <summary>Returns the Y coordinate of the cell.</summary>
-        public int Y { get; private set; }
-
-        /// <summary>Constructs a <see cref="Square"/> from an X and Y coordinate.</summary>
-        public Square(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
+        public int Y { get; private set; } = y;
 
         /// <inheritdoc/>
         public override readonly string ToString() => $"S({X},{Y})";
@@ -137,13 +130,12 @@ namespace RT.Coordinates
         public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Square"/>, going clockwise from the top-left.</summary>
-        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
-        {
+        public readonly Coordinates.Vertex[] Vertices => [
             new Vertex(X, Y),
             new Vertex(X + 1, Y),
             new Vertex(X + 1, Y + 1),
             new Vertex(X, Y + 1)
-        };
+        ];
 
         /// <summary>Returns the center point of this cell.</summary>
         public readonly PointD Center => new(X + .5, Y + .5);
@@ -155,7 +147,7 @@ namespace RT.Coordinates
 
         /// <summary>Returns the set of chess knight’s moves from the current cell.</summary>
         public readonly IEnumerable<Square> KnightsMoves { get { var orig = this; return _knightsMoveOffsets.Select(k => orig.Move(k.X, k.Y)); } }
-        private static readonly Square[] _knightsMoveOffsets = { new(1, -2), new(2, -1), new(2, 1), new(1, 2), new(-1, 2), new(-2, 1), new(-2, -1), new(-1, -2) };
+        private static readonly Square[] _knightsMoveOffsets = [new(1, -2), new(2, -1), new(2, 1), new(1, 2), new(-1, 2), new(-2, 1), new(-2, -1), new(-1, -2)];
 
         /// <summary>
         ///     Tests whether this coordinate is within a given rectangular range.</summary>
@@ -342,9 +334,9 @@ namespace RT.Coordinates
         }
 
         /// <summary>Provides a collection of all orthogonal directions.</summary>
-        public static readonly IEnumerable<Direction> OrthogonalDirections = new[] { Direction.Up, Direction.Right, Direction.Down, Direction.Left };
+        public static readonly IEnumerable<Direction> OrthogonalDirections = [Direction.Up, Direction.Right, Direction.Down, Direction.Left];
         /// <summary>Provides a collection of all diagonal directions.</summary>
-        public static readonly IEnumerable<Direction> DiagonalDirections = new[] { Direction.UpRight, Direction.DownRight, Direction.DownLeft, Direction.UpLeft };
+        public static readonly IEnumerable<Direction> DiagonalDirections = [Direction.UpRight, Direction.DownRight, Direction.DownLeft, Direction.UpLeft];
         /// <summary>Provides a collection of all directions.</summary>
         public static readonly IEnumerable<Direction> AllDirections = (Direction[]) Enum.GetValues(typeof(Direction));
 

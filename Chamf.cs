@@ -33,16 +33,17 @@ namespace RT.Coordinates
     ///     -0.5L10 -1L11.5 -1L12 -0.5L12.5 -1L14 -1L14.5 -0.5L15 0L15 1.5L14.5 2L15 2.5L15 4L14.5 4.5L15 5L15 6.5L14.5 7L15
     ///     7.5L15 9L14.5 9.5L15 10L15 11.5L14.5 12L14 12.5L12.5 12.5z' fill='none' stroke-width='.05' stroke='black'
     ///     /&gt;&lt;/svg&gt;</image>
-    public struct Chamf : IEquatable<Chamf>, INeighbor<Chamf>, INeighbor<object>, IHasSvgGeometry
+    /// <remarks>Constructor.</remarks>
+    public struct Chamf(int x, int y, Chamf.Tile subtile) : IEquatable<Chamf>, INeighbor<Chamf>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>X-coordinate of the cell.</summary>
-        public int X { get; private set; }
+        public int X { get; private set; } = x;
         /// <summary>Y-coordinate of the cell.</summary>
-        public int Y { get; private set; }
+        public int Y { get; private set; } = y;
         /// <summary>
         ///     Specifies whether this cell is a square, a horizontal hexagon, or a vertical hexagon. The hexagons are above
         ///     and to the left of the square with the same coordinates.</summary>
-        public Tile Subtile { get; private set; }
+        public Tile Subtile { get; private set; } = subtile;
 
         /// <summary>Identifies one of the three types of tiles in a <see cref="Chamf"/> grid.</summary>
         public enum Tile
@@ -53,14 +54,6 @@ namespace RT.Coordinates
             HorizHex,
             /// <summary>A vertically-elongated hexagon, located left of the <see cref="Square"/> with the same coordinates.</summary>
             VertHex
-        }
-
-        /// <summary>Constructor.</summary>
-        public Chamf(int x, int y, Tile subtile)
-        {
-            X = x;
-            Y = y;
-            Subtile = subtile;
         }
 
         /// <summary>
@@ -101,8 +94,8 @@ namespace RT.Coordinates
         public readonly Coordinates.Vertex[] Vertices => Subtile switch
         {
             Tile.Square => new[] { new Vertex(X, Y, 0), new Vertex(X, Y, 1), new Vertex(X, Y, 2), new Vertex(X, Y, 3) },
-            Tile.HorizHex => new[] { new Vertex(X, Y - 1, 3), new Vertex(X, Y - 1, 2), new Vertex(X, Y - 1, 4), new Vertex(X, Y, 1), new Vertex(X, Y, 0), new Vertex(X - 1, Y - 1, 4) },
-            Tile.VertHex => new[] { new Vertex(X - 1, Y - 1, 4), new Vertex(X, Y, 0), new Vertex(X, Y, 3), new Vertex(X - 1, Y, 4), new Vertex(X - 1, Y, 2), new Vertex(X - 1, Y, 1) },
+            Tile.HorizHex => [new Vertex(X, Y - 1, 3), new Vertex(X, Y - 1, 2), new Vertex(X, Y - 1, 4), new Vertex(X, Y, 1), new Vertex(X, Y, 0), new Vertex(X - 1, Y - 1, 4)],
+            Tile.VertHex => [new Vertex(X - 1, Y - 1, 4), new Vertex(X, Y, 0), new Vertex(X, Y, 3), new Vertex(X - 1, Y, 4), new Vertex(X - 1, Y, 2), new Vertex(X - 1, Y, 1)],
             _ => throw new InvalidOperationException("‘Subtile’ has an unexpected value.")
         };
 

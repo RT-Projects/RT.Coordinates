@@ -3,24 +3,12 @@ using System;
 namespace RT.Coordinates
 {
     /// <summary>Represents a point in 2D space.</summary>
-    public struct PointD : IEquatable<PointD>
+    public struct PointD(double x, double y) : IEquatable<PointD>
     {
-        /// <summary>
-        ///     Constructor.</summary>
-        /// <param name="x">
-        ///     X-coordinate.</param>
-        /// <param name="y">
-        ///     Y-coordinate.</param>
-        public PointD(double x, double y)
-        {
-            X = x;
-            Y = y;
-        }
-
         /// <summary>X-coordinate.</summary>
-        public double X { get; private set; }
+        public double X { get; private set; } = x;
         /// <summary>Y-coordinate.</summary>
-        public double Y { get; private set; }
+        public double Y { get; private set; } = y;
 
         /// <summary>Multiplies a point by a specified scalar factor.</summary>
         public static PointD operator *(PointD p, double amount) => new(p.X * amount, p.Y * amount);

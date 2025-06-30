@@ -2,16 +2,10 @@
 
 namespace RT.Coordinates
 {
-    internal struct SvgSegment
+    internal struct SvgSegment(List<Vertex> vertices, bool closed)
     {
-        public List<Vertex> Vertices;
-        public bool Closed;
-
-        public SvgSegment(List<Vertex> vertices, bool closed)
-        {
-            Vertices = vertices;
-            Closed = closed;
-        }
+        public List<Vertex> Vertices = vertices;
+        public bool Closed = closed;
 
         public override readonly bool Equals(object obj) => obj is SvgSegment other && EqualityComparer<List<Vertex>>.Default.Equals(Vertices, other.Vertices) && Closed == other.Closed;
 
@@ -25,8 +19,8 @@ namespace RT.Coordinates
 
         public readonly void Deconstruct(out List<Vertex> vertices, out bool closed)
         {
-            vertices = this.Vertices;
-            closed = this.Closed;
+            vertices = Vertices;
+            closed = Closed;
         }
     }
 }

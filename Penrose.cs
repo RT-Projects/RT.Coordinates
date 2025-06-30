@@ -111,29 +111,20 @@ namespace RT.Coordinates
     ///     2.92705098312484L-3.07768353717525 2.61803398874989L-4.02874005347041 2.92705098312484M-2.1266270208801
     ///     2.92705098312484L-3.07768353717525 4.23606797749979M3.07768353717525 4.23606797749979L2.1266270208801
     ///     2.92705098312484' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</image>
-    public struct Penrose : IEquatable<Penrose>, INeighbor<Penrose>, INeighbor<object>, IHasSvgGeometry
+    /// <param name="kind">
+    ///     The kind of shape.</param>
+    /// <param name="corner">
+    ///     The “main” corner of the shape.</param>
+    /// <param name="angle">
+    ///     The rotation angle of the shape.</param>
+    public struct Penrose(Penrose.Kind kind, Pentavector corner, int angle) : IEquatable<Penrose>, INeighbor<Penrose>, INeighbor<object>, IHasSvgGeometry
     {
-        /// <summary>
-        ///     Constructor.</summary>
-        /// <param name="kind">
-        ///     The kind of shape.</param>
-        /// <param name="corner">
-        ///     The “main” corner of the shape.</param>
-        /// <param name="angle">
-        ///     The rotation angle of the shape.</param>
-        public Penrose(Kind kind, Pentavector corner, int angle)
-        {
-            TileKind = kind;
-            Corner = corner;
-            Angle = (angle % 10 + 10) % 10;
-        }
-
         /// <summary>Indicates which kind of shape this is.</summary>
-        public Kind TileKind { get; private set; }
+        public Kind TileKind { get; private set; } = kind;
         /// <summary>Indicates the “main” corner of this shape.</summary>
-        public Pentavector Corner { get; private set; }
+        public Pentavector Corner { get; private set; } = corner;
         /// <summary>Indicates the rotation angle of this shape.</summary>
-        public int Angle { get; private set; }
+        public int Angle { get; private set; } = (angle % 10 + 10) % 10;
 
         /// <inheritdoc/>
         public readonly bool Equals(Penrose other) => other.TileKind == TileKind && other.Corner == Corner && other.Angle == Angle;
@@ -160,10 +151,10 @@ namespace RT.Coordinates
         ///     (<see cref="Corner"/> in P2; <see cref="Corner"/> times φ in P3).</summary>
         public readonly Vertex[] Vertices => TileKind switch
         {
-            Kind.Dart => new Vertex[] { Corner.MultiplyByPhi, Corner.MultiplyByPhi + Pentavector.Base(Angle + 7), Corner.MultiplyByPhi + Pentavector.Base(Angle), Corner.MultiplyByPhi + Pentavector.Base(Angle + 3) },
-            Kind.Kite => new Vertex[] { Corner.MultiplyByPhi, (Corner + Pentavector.Base(Angle + 9)).MultiplyByPhi, (Corner + Pentavector.Base(Angle)).MultiplyByPhi, (Corner + Pentavector.Base(Angle + 1)).MultiplyByPhi },
-            Kind.ThickRhomb => new Vertex[] { Corner, Corner + Pentavector.Base(Angle + 9), Corner + Pentavector.Base(Angle + 9) + Pentavector.Base(Angle + 1), Corner + Pentavector.Base(Angle + 1) },
-            Kind.ThinRhomb => new Vertex[] { Corner, Corner + Pentavector.Base(Angle), Corner + Pentavector.Base(Angle) + Pentavector.Base(Angle + 1), Corner + Pentavector.Base(Angle + 1) },
+            Kind.Dart => [Corner.MultiplyByPhi, Corner.MultiplyByPhi + Pentavector.Base(Angle + 7), Corner.MultiplyByPhi + Pentavector.Base(Angle), Corner.MultiplyByPhi + Pentavector.Base(Angle + 3)],
+            Kind.Kite => [Corner.MultiplyByPhi, (Corner + Pentavector.Base(Angle + 9)).MultiplyByPhi, (Corner + Pentavector.Base(Angle)).MultiplyByPhi, (Corner + Pentavector.Base(Angle + 1)).MultiplyByPhi],
+            Kind.ThickRhomb => [Corner, Corner + Pentavector.Base(Angle + 9), Corner + Pentavector.Base(Angle + 9) + Pentavector.Base(Angle + 1), Corner + Pentavector.Base(Angle + 1)],
+            Kind.ThinRhomb => [Corner, Corner + Pentavector.Base(Angle), Corner + Pentavector.Base(Angle) + Pentavector.Base(Angle + 1), Corner + Pentavector.Base(Angle + 1)],
             _ => throw new InvalidOperationException($"Invalid TileKind value ‘{TileKind}’."),
         };
 

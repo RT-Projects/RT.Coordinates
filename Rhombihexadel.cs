@@ -189,20 +189,20 @@ namespace RT.Coordinates
         ///     top-left (hexagon) or starting with the two edges adjacent to its corresponding hexagon.</summary>
         public readonly Coordinates.Vertex[] Vertices => Subtile switch
         {
-            Tile.Hexagon => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.TopLeft), new Vertex(Hex, Vertex.Position.TopRight), new Vertex(Hex, Vertex.Position.Right), new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex, Vertex.Position.Left) },
-            Tile.BottomRightSquare => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex, Vertex.Position.Right), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.Left) },
-            Tile.BottomRightTri => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.Left), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopRight) },
-            Tile.BottomSquare => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopRight), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft) },
-            Tile.BottomLeftTri => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft), new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.Right) },
-            Tile.BottomLeftSquare => new Coordinates.Vertex[] { new Vertex(Hex, Vertex.Position.Left), new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.Right), new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.TopRight) },
+            Tile.Hexagon => [new Vertex(Hex, Vertex.Position.TopLeft), new Vertex(Hex, Vertex.Position.TopRight), new Vertex(Hex, Vertex.Position.Right), new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex, Vertex.Position.Left)],
+            Tile.BottomRightSquare => [new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex, Vertex.Position.Right), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.Left)],
+            Tile.BottomRightTri => [new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.Left), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopRight)],
+            Tile.BottomSquare => [new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex, Vertex.Position.BottomRight), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopRight), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft)],
+            Tile.BottomLeftTri => [new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft), new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.Right)],
+            Tile.BottomLeftSquare => [new Vertex(Hex, Vertex.Position.Left), new Vertex(Hex, Vertex.Position.BottomLeft), new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.Right), new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.TopRight)],
             _ => throw new InvalidOperationException($"Invalid {nameof(Subtile)} value: ‘{Subtile}’.")
         };
 
         /// <inheritdoc/>
         public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
-        private static readonly double[] _xs = { 0, 1.18301270189222, .788675134594814, 0, -.788675134594814, -1.18301270189222 };
-        private static readonly double[] _ys = { 0, .683012701892220, 1.36602540378444, 1.36602540378444, 1.36602540378444, .683012701892220 };
+        private static readonly double[] _xs = [0, 1.18301270189222, .788675134594814, 0, -.788675134594814, -1.18301270189222];
+        private static readonly double[] _ys = [0, .683012701892220, 1.36602540378444, 1.36602540378444, 1.36602540378444, .683012701892220];
 
         /// <inheritdoc/>
         public readonly PointD Center => new(Hex.Q * 2.36602540378444 + _xs[(int) Subtile], Hex.R * 2.73205080756888 + Hex.Q * 1.36602540378444 + _ys[(int) Subtile]);
@@ -213,22 +213,15 @@ namespace RT.Coordinates
         /// <summary>
         ///     Describes a vertex in a <see cref="Rhombihexadel"/> grid. Each vertex is actually one of the 6 vertices of a
         ///     hexagon tile.</summary>
-        public class Vertex : Coordinates.Vertex
+        public class Vertex(Hex hex, Vertex.Position pos) : Coordinates.Vertex
         {
             /// <summary>The relevant hexagon tile that shares this vertex.</summary>
-            public Hex Hex { get; private set; }
+            public Hex Hex { get; private set; } = hex;
             /// <summary>Which vertex on <see cref="Hex"/> this is.</summary>
-            public Position Pos { get; private set; }
+            public Position Pos { get; private set; } = pos;
 
-            /// <summary>Constructor.</summary>
-            public Vertex(Hex hex, Position pos)
-            {
-                Hex = hex;
-                Pos = pos;
-            }
-
-            private static readonly double[] _xs = { -.5, .5, 1, .5, -.5, -1 };
-            private static readonly double[] _ys = { -.8660254040, -.8660254040, 0, .8660254040, .8660254040, 0 };
+            private static readonly double[] _xs = [-.5, .5, 1, .5, -.5, -1];
+            private static readonly double[] _ys = [-.8660254040, -.8660254040, 0, .8660254040, .8660254040, 0];
 
             /// <inheritdoc/>
             public override PointD Point => new(Hex.Q * 2.36602540378444 + _xs[(int) Pos], Hex.R * 2.73205080756888 + Hex.Q * 1.36602540378444 + _ys[(int) Pos]);

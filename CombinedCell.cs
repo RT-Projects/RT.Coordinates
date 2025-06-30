@@ -34,7 +34,7 @@ namespace RT.Coordinates
         {
             if (cells == null)
                 throw new ArgumentNullException(nameof(cells));
-            _underlyingCells = new HashSet<TCell>();
+            _underlyingCells = [];
             fillHashset(_underlyingCells, cells);
             if (_underlyingCells.Count == 0)
                 throw new ArgumentException($"Cannot create a {typeof(CombinedCell<TCell>).FullName} containing zero cells.");
@@ -44,7 +44,7 @@ namespace RT.Coordinates
         {
             if (cells == null)
                 throw new ArgumentNullException(nameof(cells));
-            _underlyingCells = new HashSet<TCell>();
+            _underlyingCells = [];
             fillHashset(_underlyingCells, cells);
             if (!allowEmpty && _underlyingCells.Count == 0)
                 throw new ArgumentException($"Cannot create a {typeof(CombinedCell<TCell>).FullName} containing zero cells.");
@@ -53,7 +53,7 @@ namespace RT.Coordinates
         /// <summary>Constructs a <see cref="CombinedCell{TCell}"/> structure consisting of a single cell.</summary>
         public CombinedCell(TCell singleCell) : this()
         {
-            _underlyingCells = new HashSet<TCell> { singleCell };
+            _underlyingCells = [singleCell];
         }
 
         private void fillHashset(HashSet<TCell> underlyingCells, IEnumerable<TCell> cells)

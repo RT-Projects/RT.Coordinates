@@ -8,27 +8,20 @@ namespace RT.Coordinates
     ///     Type of cell (e.g., <see cref="Square"/>, <see cref="Hex"/> or <see cref="Tri"/>).</typeparam>
     /// <remarks>
     ///     Used in the return value of <see cref="Structure{TCell}.FindPaths(TCell)"/>.</remarks>
-    public struct CellWithDistance<TCell>
+    /// <remarks>Constructor.</remarks>
+    public struct CellWithDistance<TCell>(TCell cell, TCell parent, int distance)
     {
         /// <summary>The relevant cell.</summary>
-        public TCell Cell { get; private set; }
+        public TCell Cell { get; private set; } = cell;
         /// <summary>
         ///     The previous cell in the path from the origin cell to this cell.</summary>
         /// <remarks>
         ///     If <see cref="Distance"/> is <c>0</c>, this value is meaningless and must be ignored.</remarks>
-        public TCell Parent { get; private set; }
+        public TCell Parent { get; private set; } = parent;
         /// <summary>
         ///     The amount of steps required to reach this cell from the origin cell. If this is <c>0</c>, this cell is the
         ///     origin cell.</summary>
-        public int Distance { get; private set; }
-
-        /// <summary>Constructor.</summary>
-        public CellWithDistance(TCell cell, TCell parent, int distance)
-        {
-            Cell = cell;
-            Parent = parent;
-            Distance = distance;
-        }
+        public int Distance { get; private set; } = distance;
 
         /// <inheritdoc/>
         public override readonly bool Equals(object obj) => obj is CellWithDistance<TCell> other && EqualityComparer<TCell>.Default.Equals(Parent, other.Parent) && Distance == other.Distance;

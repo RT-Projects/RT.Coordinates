@@ -14,7 +14,7 @@ namespace RT.Coordinates
             if (dic.TryGetValue(key, out var list))
                 list.Add(newValue);
             else
-                dic[key] = new List<TValue> { newValue };
+                dic[key] = [newValue];
         }
 
         /// <summary>

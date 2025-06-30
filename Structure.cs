@@ -44,12 +44,12 @@ namespace RT.Coordinates
         ///             to retrieve the neighbors.</description></item></list></remarks>
         public Structure(IEnumerable<TCell> cells, IEnumerable<Link<TCell>> links = null, Func<TCell, IEnumerable<TCell>> getNeighbors = null)
         {
-            _cells = new HashSet<TCell>(cells);
+            _cells = [.. cells];
             if (links != null)
-                _links = new HashSet<Link<TCell>>(links.Where(l => l.All(_cells.Contains)));
+                _links = [.. links.Where(l => l.All(_cells.Contains))];
             else
             {
-                _links = new HashSet<Link<TCell>>();
+                _links = [];
                 foreach (var cell in cells)
                     foreach (var neighbor in getNeighbors != null ? getNeighbors(cell) : cell is INeighbor<TCell> cn ? cn.Neighbors : throw new InvalidOperationException($"The ‘{nameof(Structure<TCell>)}’ constructor expects that either ‘{nameof(links)}’ or ‘{nameof(getNeighbors)}’ is specified or that every cell type (e.g. {cell.GetType().FullName}) implements ‘{typeof(INeighbor<TCell>).FullName}’."))
                         if (_cells.Contains(neighbor))
@@ -384,7 +384,7 @@ namespace RT.Coordinates
             var links = new Dictionary<TCell, List<TCell>>();
             foreach (var link in _links)
                 foreach (var c in link)
-                    (links.TryGetValue(c, out var list) ? list : (links[c] = new List<TCell>())).Add(link.Other(c));
+                    (links.TryGetValue(c, out var list) ? list : (links[c] = [])).Add(link.Other(c));
 
             var result = new Dictionary<TCell, CellWithDistance<TCell>>();
             var q = new Queue<CellWithDistance<TCell>>();
@@ -440,7 +440,7 @@ namespace RT.Coordinates
                     _cells.Select(c => new CombinedCell<TCell>(c)),
                     _links.Select(link => new Link<CombinedCell<TCell>>(new CombinedCell<TCell>(link.Apart(out var other)), new CombinedCell<TCell>(other))));
             return new Structure<CombinedCell<TCell>>(
-                _cells.Where(c => !combo.Contains(c)).Select(c => new CombinedCell<TCell>(c)).Concat(new CombinedCell<TCell>[] { combo }),
+                _cells.Where(c => !combo.Contains(c)).Select(c => new CombinedCell<TCell>(c)).Concat([combo]),
                 _links.Select(link =>
                 {
                     var (c1, c2) = link;

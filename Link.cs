@@ -45,14 +45,12 @@ namespace RT.Coordinates
         IEnumerator IEnumerable.GetEnumerator() => new LinkEnumerator(this);
 
         /// <summary>Iterates the two elements in a <see cref="Link{T}"/>.</summary>
-        public struct LinkEnumerator : IEnumerator<T>
+        public struct LinkEnumerator(Link<T> link) : IEnumerator<T>
         {
-            private readonly Link<T> _link;
-            private int _pos;
-            /// <summary>Constructor.</summary>
-            public LinkEnumerator(Link<T> link) { _link = link; _pos = 0; }
+            private int _pos = 0;
+
             /// <inheritdoc/>
-            public readonly T Current => _pos switch { 1 => _link._elem1, 2 => _link._elem2, _ => throw new InvalidOperationException() };
+            public readonly T Current => _pos switch { 1 => link._elem1, 2 => link._elem2, _ => throw new InvalidOperationException() };
             readonly object IEnumerator.Current => Current;
             /// <inheritdoc/>
             public bool MoveNext() { if (_pos < 3) _pos++; return _pos < 3; }

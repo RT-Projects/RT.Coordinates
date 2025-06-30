@@ -281,29 +281,27 @@ namespace RT.Coordinates
         ///     Returns a polygon describing the shape and position of the current hex tile in 2D space.</summary>
         /// <param name="hexWidth">
         ///     Specifies the width of a single hex tile in the grid.</param>
-        public readonly PointD[] GetPolygon(double hexWidth) => new PointD[]
-        {
+        public readonly PointD[] GetPolygon(double hexWidth) => [
             new((Q * .75 - .50) * hexWidth, (Q * .5 + R + .00) * hexWidth * WidthToHeight),
             new((Q * .75 - .25) * hexWidth, (Q * .5 + R - .50) * hexWidth * WidthToHeight),
             new((Q * .75 + .25) * hexWidth, (Q * .5 + R - .50) * hexWidth * WidthToHeight),
             new((Q * .75 + .50) * hexWidth, (Q * .5 + R + .00) * hexWidth * WidthToHeight),
             new((Q * .75 + .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight),
             new((Q * .75 - .25) * hexWidth, (Q * .5 + R + .50) * hexWidth * WidthToHeight)
-        };
+        ];
 
         /// <inheritdoc/>
         public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
 
         /// <summary>Returns the vertices along the perimeter of this <see cref="Hex"/>, going clockwise from the top-left.</summary>
-        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
-        {
+        public readonly Coordinates.Vertex[] Vertices => [
             new Vertex(this, false),
             new Vertex(this, true),
             new Vertex(Move(Direction.DownRight), false),
             new Vertex(Move(Direction.Down), true),
             new Vertex(Move(Direction.Down), false),
             new Vertex(Move(Direction.DownLeft), true)
-        };
+        ];
 
         /// <summary>Returns the center of the hex tile in 2D space.</summary>
         public readonly PointD Center => new(Q * .75, (Q * .5 + R) * WidthToHeight);
@@ -424,25 +422,19 @@ namespace RT.Coordinates
         }
 
         /// <summary>Describes a vertex (gridline intersection) in a hexagonal grid (<see cref="Grid"/>).</summary>
-        public class Vertex : Coordinates.Vertex
+        /// <remarks>
+        ///     Constructor.</remarks>
+        /// <param name="hex">
+        ///     The hex just below this vertex.</param>
+        /// <param name="right">
+        ///     If <c>true</c>, identifies the top-right vertex of <paramref name="hex"/>; otherwise, the top-left.</param>
+        public class Vertex(Hex hex, bool right) : Coordinates.Vertex
         {
             /// <summary>Returns the hex just below this vertex.</summary>
-            public Hex Hex { get; private set; }
+            public Hex Hex { get; private set; } = hex;
 
             /// <summary>If <c>true</c>, this vertex is the top-right vertex of <see cref="Hex"/>; otherwise, the top-left.</summary>
-            public bool Right { get; private set; }
-
-            /// <summary>
-            ///     Constructor.</summary>
-            /// <param name="hex">
-            ///     The hex just below this vertex.</param>
-            /// <param name="right">
-            ///     If <c>true</c>, identifies the top-right vertex of <paramref name="hex"/>; otherwise, the top-left.</param>
-            public Vertex(Hex hex, bool right)
-            {
-                Hex = hex;
-                Right = right;
-            }
+            public bool Right { get; private set; } = right;
 
             /// <inheritdoc/>
             public override PointD Point => new(Hex.Q * .75 + (Right ? .25 : -.25), (Hex.Q * .5 + Hex.R - .5) * WidthToHeight);

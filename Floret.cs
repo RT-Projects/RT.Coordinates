@@ -146,14 +146,13 @@ namespace RT.Coordinates
         /// <summary>
         ///     Returns the vertices along the perimeter of this <see cref="Floret"/>, going clockwise from the “spiky” vertex
         ///     (center of <see cref="Hex"/>).</summary>
-        public readonly Coordinates.Vertex[] Vertices => new Coordinates.Vertex[]
-        {
+        public readonly Coordinates.Vertex[] Vertices => [
             new Vertex(Hex, Vertex.Position.Center),
             new Vertex(Hex, fullPos: 3 * (int) Pos + 1),
             new Vertex(Hex, fullPos: 3 * (int) Pos + 2),
             new Vertex(Hex, fullPos: 3 * (int) Pos + 3),
             new Vertex(Hex, fullPos: 3 * (int) Pos + 4)
-        };
+        ];
 
         /// <inheritdoc/>
         public readonly PointD Center => Hex.Center * 3 + new PointD(0, -.9).Rotate(((int) Pos + 2d / 3) * Math.PI / 3);
@@ -289,8 +288,8 @@ namespace RT.Coordinates
                 Center
             }
 
-            private static readonly double[] xs = { -0.0714285714285714, 0.0714285714285714, 0.25, 0.392857142857143, 0.357142857142857, 0.5, 0.464285714285714, 0.285714285714286, 0 };
-            private static readonly double[] ys = { -0.494871659305394, -0.371153744479045, -0.433012701892219, -0.309294787065871, -0.123717914826348, 0, 0.185576872239522, 0.247435829652697, 0 };
+            private static readonly double[] xs = [-0.0714285714285714, 0.0714285714285714, 0.25, 0.392857142857143, 0.357142857142857, 0.5, 0.464285714285714, 0.285714285714286, 0];
+            private static readonly double[] ys = [-0.494871659305394, -0.371153744479045, -0.433012701892219, -0.309294787065871, -0.123717914826348, 0, 0.185576872239522, 0.247435829652697, 0];
 
             /// <inheritdoc/>
             public override PointD Point => new((Hex.Q * .75 + xs[(int) Pos]) * 3, ((Hex.Q * .5 + Hex.R) * Hex.WidthToHeight + ys[(int) Pos]) * 3);

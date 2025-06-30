@@ -89,24 +89,17 @@ namespace RT.Coordinates
     ///     1M7.70710678118655 2L7.29289321881345 2M7.70710678118655 3L7.29289321881345 3M7.70710678118655 4L7.29289321881345
     ///     4M7.70710678118655 5L7.29289321881345 5M7.70710678118655 6L7.29289321881345 6M7.70710678118655 7L7.29289321881345
     ///     7' fill='none' stroke-width='.05' stroke='black' /&gt;&lt;/svg&gt;</image>
-    public struct OctoCell : IEquatable<OctoCell>, INeighbor<OctoCell>, INeighbor<object>, IHasSvgGeometry
+    /// <remarks>Constructor.</remarks>
+    public struct OctoCell(int x, int y, bool isSquare) : IEquatable<OctoCell>, INeighbor<OctoCell>, INeighbor<object>, IHasSvgGeometry
     {
         /// <summary>X-coordinate of the cell.</summary>
-        public int X { get; private set; }
+        public int X { get; private set; } = x;
         /// <summary>Y-coordinate of the cell.</summary>
-        public int Y { get; private set; }
+        public int Y { get; private set; } = y;
         /// <summary>
         ///     Specifies whether this cell is a square or an octagon. If it is a square, it is south-east of the octagon with
         ///     the same coordinates.</summary>
-        public bool IsSquare { get; private set; }
-
-        /// <summary>Constructor.</summary>
-        public OctoCell(int x, int y, bool isSquare)
-        {
-            X = x;
-            Y = y;
-            IsSquare = isSquare;
-        }
+        public bool IsSquare { get; private set; } = isSquare;
 
         /// <summary>
         ///     Returns a set of <see cref="OctoCell"/> cells that form a rectangle. Along the perimeter all the cells will be
@@ -140,8 +133,8 @@ namespace RT.Coordinates
         ///     Returns the vertices along the perimeter of this <see cref="OctoCell"/>, going clockwise from the top-left
         ///     (octagon) or top (square).</summary>
         public readonly Coordinates.Vertex[] Vertices => IsSquare
-            ? new Coordinates.Vertex[] { new Vertex(X + 1, Y, 0), new Vertex(X + 1, Y + 1, 2), new Vertex(X + 1, Y + 1, 1), new Vertex(X, Y + 1, 3) }
-            : new Coordinates.Vertex[] { new Vertex(X, Y, 2), new Vertex(X, Y, 3), new Vertex(X + 1, Y, 1), new Vertex(X + 1, Y, 0), new Vertex(X, Y + 1, 3), new Vertex(X, Y + 1, 2), new Vertex(X, Y, 0), new Vertex(X, Y, 1) };
+            ? [new Vertex(X + 1, Y, 0), new Vertex(X + 1, Y + 1, 2), new Vertex(X + 1, Y + 1, 1), new Vertex(X, Y + 1, 3)]
+            : [new Vertex(X, Y, 2), new Vertex(X, Y, 3), new Vertex(X + 1, Y, 1), new Vertex(X + 1, Y, 0), new Vertex(X, Y + 1, 3), new Vertex(X, Y + 1, 2), new Vertex(X, Y, 0), new Vertex(X, Y, 1)];
 
         /// <inheritdoc/>
         public readonly PointD Center => IsSquare ? new PointD(X + 1, Y + 1) : new PointD(X + .5, Y + .5);
@@ -232,8 +225,8 @@ namespace RT.Coordinates
 
             private const double D1 = .29289321881345247559915563789515096071516406231155;   // 1 - 1/√2
             private const double D2 = .70710678118654752440084436210484903928483593768845;   // 1/√2
-            private static readonly double[] xs = { 0, 0, D1, D2 };
-            private static readonly double[] ys = { D2, D1, 0, 0 };
+            private static readonly double[] xs = [0, 0, D1, D2];
+            private static readonly double[] ys = [D2, D1, 0, 0];
 
             /// <inheritdoc/>
             public override PointD Point => new(CellX + xs[Pos], CellY + ys[Pos]);

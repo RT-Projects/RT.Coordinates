@@ -134,28 +134,28 @@ namespace RT.Coordinates
         ///     center of <see cref="Hex"/>.</summary>
         public readonly Coordinates.Vertex[] Vertices => Pos switch
         {
-            Position.TopRight => new Coordinates.Vertex[] {
+            Position.TopRight => [
                 new Vertex(Hex, Vertex.Position.Center),
                 new Vertex(Hex, Vertex.Position.TopLeft),
                 new Vertex(Hex, Vertex.Position.TopRight),
                 new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft)
-            },
-            Position.BottomRight => new Coordinates.Vertex[] {
+            ],
+            Position.BottomRight => [
                 new Vertex(Hex, Vertex.Position.Center),
                 new Vertex(Hex.Move(Hex.Direction.DownRight), Vertex.Position.TopLeft),
                 new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopRight),
                 new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft)
-            },
-            Position.Left => new Coordinates.Vertex[] {
+            ],
+            Position.Left => [
                 new Vertex(Hex, Vertex.Position.Center),
                 new Vertex(Hex.Move(Hex.Direction.Down), Vertex.Position.TopLeft),
                 new Vertex(Hex.Move(Hex.Direction.DownLeft), Vertex.Position.TopRight),
                 new Vertex(Hex, Vertex.Position.TopLeft)
-            },
+            ],
             _ => throw new InvalidOperationException($"{nameof(Pos)} has an invalid value of {Pos}.")
         };
 
-        private static readonly PointD[] _ps = { new(.25, -.433012701892220), new(.25, .433012701892220), new(-.5, 0) };
+        private static readonly PointD[] _ps = [new(.25, -.433012701892220), new(.25, .433012701892220), new(-.5, 0)];
 
         /// <inheritdoc/>
         public readonly PointD Center => Hex.Center * 2 + _ps[(int) Pos];
@@ -202,19 +202,12 @@ namespace RT.Coordinates
         }
 
         /// <summary>Describes one of the vertices of a <see cref="Rhomb"/>.</summary>
-        public class Vertex : Coordinates.Vertex
+        public class Vertex(Hex hex, Vertex.Position pos) : Coordinates.Vertex
         {
             /// <summary>The <see cref="Hex"/> tile that this <see cref="Vertex"/> is within.</summary>
-            public Hex Hex { get; private set; }
+            public Hex Hex { get; private set; } = hex;
             /// <summary>Which position within the <see cref="Hex"/> this vertex is.</summary>
-            public Position Pos { get; private set; }
-
-            /// <summary>Constructor.</summary>
-            public Vertex(Hex hex, Position pos)
-            {
-                Hex = hex;
-                Pos = pos;
-            }
+            public Position Pos { get; private set; } = pos;
 
             /// <summary>
             ///     Describes the position of a <see cref="Vertex"/> in relation to the vertices of its containing <see
