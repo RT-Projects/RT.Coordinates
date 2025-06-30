@@ -300,8 +300,9 @@ namespace RT.Coordinates
         ///     A string representation in the same format as returned by the original cell’s <c>ToString()</c> method.</param>
         /// <returns>
         ///     This method can parse cells of type <see cref="Cairo"/>, <see cref="Chamf"/>, <see cref="CircularCell"/>, <see
-        ///     cref="Square"/>, <see cref="Floret"/>, <see cref="Hex"/>, <see cref="Kite"/>, <see cref="OctoCell"/>, <see
-        ///     cref="Penrose"/>, <see cref="Rhomb"/>, <see cref="Rhombihexadel"/> and <see cref="Tri"/>.</returns>
+        ///     cref="Floret"/>, <see cref="Hex"/>, <see cref="Kite"/>, <see cref="OctoCell"/>, <see cref="Penrose"/>, <see
+        ///     cref="PentaCell"/>, <see cref="Rhomb"/>, <see cref="Rhombihexadel"/>, <see cref="Snubquad"/>, <see
+        ///     cref="Square"/>, and <see cref="Tri"/>.</returns>
         public static object Parse(string str)
         {
             Match m;
@@ -328,6 +329,7 @@ namespace RT.Coordinates
             new CellParserInfo(@"^P\((-?\d+),(-?\d+),(-?\d+),(-?\d+)\)/([0-3])/([0-9])$", m => new Penrose((Penrose.Kind) int.Parse(m.Groups[5].Value), new Pentavector(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), int.Parse(m.Groups[4].Value)), int.Parse(m.Groups[6].Value))),
             new CellParserInfo(@"^R\((-?\d+),(-?\d+)\)/([0-2])$", m => new Rhomb(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Rhomb.Position) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^S\((-?\d+),(-?\d+)\)$", m => new Square(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))),
+            new CellParserInfo(@"^S\((-?\d+),(-?\d+)\)/([0-5])$", m => new Snubquad(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), (Snubquad.Tile) int.Parse(m.Groups[3].Value))),
             new CellParserInfo(@"^T\((-?\d+),(-?\d+)\)$", m => new Tri(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))));
 
         private struct CellParserInfo(string regex, Func<Match, object> generator)
