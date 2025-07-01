@@ -69,6 +69,29 @@ namespace RT.Coordinates
                         yield return new Snubquad(x, y, (Tile) sub);
         }
 
+        /// <summary>
+        ///     Returns a set of <see cref="Snubquad"/> cells that form a rectangle positioned at (<paramref name="dx"/>/2,
+        ///     <paramref name="dy"/>/2) and of size <paramref name="dw"/>/2 × <paramref name="dh"/>/2.</summary>
+        /// <param name="dx">
+        ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dy">
+        ///     Double the y-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dw">
+        ///     Double the width of the rectangle.</param>
+        /// <param name="dh">
+        ///     Double the height of the rectangle.</param>
+        /// <remarks>
+        ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to multiple
+        ///     snubquads (arranged in a 3×2). By using doubled values, we effectively support half-integer points and sizes.
+        ///     Note that the final number of cells is about <paramref name="dw"/>×<paramref name="dh"/>×3/2.</remarks>
+        public static IEnumerable<Snubquad> Rectangle(int dx, int dy, int dw, int dh) =>
+            Enumerable.Range(dx, dw).SelectMany(x => Enumerable.Range(dy, dh).SelectMany(y =>
+                (x % 2 != 0 ? y % 2 != 0 ? _tilingBr : _tilingTr : y % 2 != 0 ? _tilingBl : _tilingTl).Select(tile => new Snubquad(x / 2, y / 2, tile))));
+        private static readonly Tile[] _tilingTl = [Tile.SquareTL];
+        private static readonly Tile[] _tilingTr = [Tile.TriTM, Tile.TriTR];
+        private static readonly Tile[] _tilingBl = [Tile.TriBL, Tile.TriBM];
+        private static readonly Tile[] _tilingBr = [Tile.SquareBR];
+
         /// <inheritdoc/>
         public readonly bool Equals(Snubquad other) => other.X == X && other.Y == Y && other.Subtile == Subtile;
         /// <inheritdoc/>
@@ -77,21 +100,81 @@ namespace RT.Coordinates
         public override readonly int GetHashCode() => X * 1073741833 + Y * 479 + (int) Subtile;
 
         /// <inheritdoc/>
-        public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();
+        public readonly IEnumerable<Edge> Edges => Vertices().MakeEdges();
 
         /// <summary>
-        ///     Returns the vertices along the perimeter of this <see cref="Snubquad"/>, going clockwise from the top-left
-        ///     (square or horizontal hex) or top (vertical hex).</summary>
-        public readonly Coordinates.Vertex[] Vertices => Subtile switch
+        ///     Returns the vertices along the perimeter of this <see cref="Cairo"/> assuming that we’re rendering a rectangle
+        ///     positioned at (<paramref name="dx"/>/2, <paramref name="dy"/>/2) and of size <paramref name="dw"/>/2 ×
+        ///     <paramref name="dh"/>/2 and we want the edges of the rectangle straightened.</summary>
+        /// <param name="dx">
+        ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dy">
+        ///     Double the y-coordinate of the top-left corner of the rectangle.</param>
+        /// <param name="dw">
+        ///     Double the width of the rectangle.</param>
+        /// <param name="dh">
+        ///     Double the height of the rectangle.</param>
+        /// <remarks>
+        ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to four cairos
+        ///     (arranged in a 2×2). By using doubled values, we effectively support half-integer points and sizes.</remarks>
+        public readonly IEnumerable<Coordinates.Vertex> Vertices(int dx, int dy, int dw, int dh)
         {
-            Tile.SquareTL => new[] { new Vertex(X, Y, Vertex.VertexPos.TL), new Vertex(X, Y, Vertex.VertexPos.TM), new Vertex(X, Y, Vertex.VertexPos.MC), new Vertex(X, Y, Vertex.VertexPos.ML) },
-            Tile.TriTM => [new Vertex(X, Y, Vertex.VertexPos.TM), new Vertex(X + 1, Y, Vertex.VertexPos.ML), new Vertex(X, Y, Vertex.VertexPos.MC)],
-            Tile.TriTR => [new Vertex(X, Y, Vertex.VertexPos.TM), new Vertex(X + 1, Y, Vertex.VertexPos.TL), new Vertex(X + 1, Y, Vertex.VertexPos.ML)],
-            Tile.TriBL => [new Vertex(X, Y, Vertex.VertexPos.ML), new Vertex(X, Y, Vertex.VertexPos.MC), new Vertex(X, Y + 1, Vertex.VertexPos.TL)],
-            Tile.TriBM => [new Vertex(X, Y, Vertex.VertexPos.MC), new Vertex(X, Y + 1, Vertex.VertexPos.TM), new Vertex(X, Y + 1, Vertex.VertexPos.TL)],
-            Tile.SquareBR => [new Vertex(X, Y, Vertex.VertexPos.MC), new Vertex(X + 1, Y, Vertex.VertexPos.ML), new Vertex(X + 1, Y + 1, Vertex.VertexPos.TL), new Vertex(X, Y + 1, Vertex.VertexPos.TM)],
-            _ => throw new InvalidOperationException("‘Subtile’ has an unexpected value.")
-        };
+            var dr = dx + dw - 1;
+            var db = dy + dh - 1;
+            return Vertices(
+                ((Y == dy / 2 && ((dy % 2 != 0) ^ (Subtile is Tile.SquareTL or Tile.TriTM or Tile.TriTR))) ? AtEdges.Top : 0) |
+                ((X == dr / 2 && ((dr % 2 != 0) ^ (Subtile is Tile.SquareTL or Tile.TriBL or Tile.TriBM))) ? AtEdges.Right : 0) |
+                ((Y == db / 2 && ((db % 2 != 0) ^ (Subtile is Tile.SquareTL or Tile.TriTM or Tile.TriTR))) ? AtEdges.Bottom : 0) |
+                ((X == dx / 2 && ((dx % 2 != 0) ^ (Subtile is Tile.SquareTL or Tile.TriBL or Tile.TriBM))) ? AtEdges.Left : 0));
+        }
+
+        /// <summary>
+        ///     Returns the vertices along the perimeter of this <see cref="Snubquad"/>, going clockwise from the top (square
+        ///     or up-pointing tri) or top-left (down-pointing tri).</summary>
+        /// <param name="atEdges">
+        ///     If specified, renders some of the edges of the <see cref="Snubquad"/> in such a way that they join up to form
+        ///     a larger rectangle. For example, if <see cref="AtEdges.Top"/> is specified, this <see cref="Snubquad"/> is
+        ///     assumed to be at the top edge of the larger rectangle.</param>
+        public readonly IEnumerable<Coordinates.Vertex> Vertices(AtEdges atEdges = AtEdges.None)
+        {
+            switch (Subtile)
+            {
+                case Tile.SquareTL:
+                    yield return new Vertex(X, Y, Vertex.VertexPos.TL);
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Top | AtEdges.Right)) != 0 ? Vertex.VertexPos.TMEdge : Vertex.VertexPos.TM);
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Right | AtEdges.Bottom)) != 0 ? Vertex.VertexPos.MCEdge : Vertex.VertexPos.MC);
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Bottom | AtEdges.Left)) != 0 ? Vertex.VertexPos.MLEdge : Vertex.VertexPos.ML);
+                    break;
+                case Tile.TriTM:
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Top | AtEdges.Left)) != 0 ? Vertex.VertexPos.TMEdge : Vertex.VertexPos.TM);
+                    yield return new Vertex(X + 1, Y, (atEdges & (AtEdges.Right | AtEdges.Bottom)) != 0 ? Vertex.VertexPos.MLEdge : Vertex.VertexPos.ML);
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Left | AtEdges.Bottom)) != 0 ? Vertex.VertexPos.MCEdge : Vertex.VertexPos.MC);
+                    break;
+                case Tile.TriTR:
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Top | AtEdges.Left)) != 0 ? Vertex.VertexPos.TMEdge : Vertex.VertexPos.TM);
+                    yield return new Vertex(X + 1, Y, Vertex.VertexPos.TL);
+                    yield return new Vertex(X + 1, Y, (atEdges & (AtEdges.Right | AtEdges.Bottom)) != 0 ? Vertex.VertexPos.MLEdge : Vertex.VertexPos.ML);
+                    break;
+                case Tile.TriBL:
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Top | AtEdges.Left)) != 0 ? Vertex.VertexPos.MLEdge : Vertex.VertexPos.ML);
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Top | AtEdges.Right)) != 0 ? Vertex.VertexPos.MCEdge : Vertex.VertexPos.MC);
+                    yield return new Vertex(X, Y + 1, Vertex.VertexPos.TL);
+                    break;
+                case Tile.TriBM:
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Top | AtEdges.Right)) != 0 ? Vertex.VertexPos.MCEdge : Vertex.VertexPos.MC);
+                    yield return new Vertex(X, Y + 1, (atEdges & (AtEdges.Bottom | AtEdges.Right)) != 0 ? Vertex.VertexPos.TMEdge : Vertex.VertexPos.TM);
+                    yield return new Vertex(X, Y + 1, Vertex.VertexPos.TL);
+                    break;
+                case Tile.SquareBR:
+                    yield return new Vertex(X, Y, (atEdges & (AtEdges.Top | AtEdges.Left)) != 0 ? Vertex.VertexPos.MCEdge : Vertex.VertexPos.MC);
+                    yield return new Vertex(X + 1, Y, (atEdges & (AtEdges.Top | AtEdges.Right)) != 0 ? Vertex.VertexPos.MLEdge : Vertex.VertexPos.ML);
+                    yield return new Vertex(X + 1, Y + 1, Vertex.VertexPos.TL);
+                    yield return new Vertex(X, Y + 1, (atEdges & (AtEdges.Bottom | AtEdges.Left)) != 0 ? Vertex.VertexPos.TMEdge : Vertex.VertexPos.TM);
+                    break;
+                default:
+                    throw new InvalidOperationException("‘Subtile’ has an unexpected value.");
+            }
+        }
 
         /// <inheritdoc/>
         public readonly PointD Center => Subtile switch
@@ -184,6 +267,26 @@ namespace RT.Coordinates
             {
             }
 
+            /// <summary>
+            ///     Constructs a <see cref="Grid"/> that forms a rectangle positioned at (<paramref name="dx"/>/2, <paramref
+            ///     name="dy"/>/2) and of size <paramref name="dw"/>/2 × <paramref name="dh"/>/2.</summary>
+            /// <param name="dx">
+            ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
+            /// <param name="dy">
+            ///     Double the y-coordinate of the top-left corner of the rectangle.</param>
+            /// <param name="dw">
+            ///     Double the width of the rectangle.</param>
+            /// <param name="dh">
+            ///     Double the height of the rectangle.</param>
+            /// <remarks>
+            ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to multiple
+            ///     snubquads (arranged in a 3×2). By using doubled values, we effectively support half-integer points and
+            ///     sizes. Note that the final number of cells is about <paramref name="dw"/>×<paramref name="dh"/>×3/2.</remarks>
+            public Grid(int dx, int dy, int dw, int dh)
+                : base(Rectangle(dx, dy, dw, dh))
+            {
+            }
+
             /// <inheritdoc/>
             protected override Structure<Snubquad> makeModifiedStructure(IEnumerable<Snubquad> cells, IEnumerable<Link<Snubquad>> traversible) => new Grid(cells, traversible);
 
@@ -217,7 +320,14 @@ namespace RT.Coordinates
                 /// <summary>Middle-left vertex (½√3−1, ½).</summary>
                 ML,
                 /// <summary>Middle-center vertex ((√3−1)/2, (3−√3)/2).</summary>
-                MC
+                MC,
+
+                /// <summary>Top-middle vertex when at the top edge (½, 0).</summary>
+                TMEdge,
+                /// <summary>Middle-left vertex when at the left edge (0, ½).</summary>
+                MLEdge,
+                /// <summary>Middle-center vertex when at an internal edge.</summary>
+                MCEdge,
             }
 
             private const double s = .2679491924311227065;     // = 2 − √3
@@ -229,6 +339,9 @@ namespace RT.Coordinates
                 VertexPos.TM => new(2 * CellX + 1, 2 * CellY + s),
                 VertexPos.ML => new(2 * CellX - s, 2 * CellY + 1),
                 VertexPos.MC => new(2 * CellX + 1 - s, 2 * CellY + 1 + s),
+                VertexPos.TMEdge => new(2 * CellX + 1, 2 * CellY),
+                VertexPos.MLEdge => new(2 * CellX, 2 * CellY + 1),
+                VertexPos.MCEdge => new(2 * CellX + 1, 2 * CellY + 1),
                 _ => throw new InvalidOperationException("‘Pos’ has an unexpected value.")
             };
 

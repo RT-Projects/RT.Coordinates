@@ -93,8 +93,8 @@ namespace RT.Coordinates
         }
 
         /// <summary>
-        ///     Constructs a grid of the specified <paramref name="width"/> and <paramref name="height"/> and divides each
-        ///     square into four <see cref="Cairo"/> cells.</summary>
+        ///     Returns a set of <see cref="Cairo"/> cells that form a rectangle of the specified <paramref name="width"/> and
+        ///     <paramref name="height"/>, dividing each square into four <see cref="Cairo"/> cells.</summary>
         /// <param name="width">
         ///     Width of the grid.</param>
         /// <param name="height">
@@ -103,8 +103,8 @@ namespace RT.Coordinates
             Square.Rectangle(width, height).SelectMany(cell => _cairoPositions.Select(pos => new Cairo(cell, pos)));
 
         /// <summary>
-        ///     Constructs a grid consisting of a rectangle positioned at (<paramref name="dx"/>/2, <paramref name="dy"/>/2)
-        ///     and of size <paramref name="dw"/>/2 × <paramref name="dh"/>/2.</summary>
+        ///     Returns a set of <see cref="Cairo"/> cells that form a rectangle positioned at (<paramref name="dx"/>/2,
+        ///     <paramref name="dy"/>/2) and of size <paramref name="dw"/>/2 × <paramref name="dh"/>/2.</summary>
         /// <param name="dx">
         ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
         /// <param name="dy">
@@ -181,10 +181,10 @@ namespace RT.Coordinates
         ///     Returns the vertices along the perimeter of this <see cref="Cairo"/>, going clockwise from the vertex at the
         ///     center of <see cref="Cell"/>.</summary>
         /// <param name="atEdges">
-        ///     If specified, renders some of the edges of the cairo in such a way that they join up to form a larger
-        ///     rectangle. For example, if <see cref="AtEdges.Top"/> is specified, this cairo is assumed to be at the top edge
-        ///     of the larger rectangle.</param>
-        public readonly IEnumerable<Coordinates.Vertex> Vertices(AtEdges atEdges = 0)
+        ///     If specified, renders some of the edges of the <see cref="Cairo"/> in such a way that they join up to form a
+        ///     larger rectangle. For example, if <see cref="AtEdges.Top"/> is specified, this <see cref="Cairo"/> is assumed
+        ///     to be at the top edge of the larger rectangle.</param>
+        public readonly IEnumerable<Coordinates.Vertex> Vertices(AtEdges atEdges = AtEdges.None)
         {
             switch (Pos)
             {
