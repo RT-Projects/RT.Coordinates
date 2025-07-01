@@ -103,9 +103,9 @@ namespace RT.Coordinates
         public readonly IEnumerable<Edge> Edges => Vertices().MakeEdges();
 
         /// <summary>
-        ///     Returns the vertices along the perimeter of this <see cref="Cairo"/> assuming that we’re rendering a rectangle
-        ///     positioned at (<paramref name="dx"/>/2, <paramref name="dy"/>/2) and of size <paramref name="dw"/>/2 ×
-        ///     <paramref name="dh"/>/2 and we want the edges of the rectangle straightened.</summary>
+        ///     Returns the vertices along the perimeter of this <see cref="Snubquad"/> assuming that we’re rendering a
+        ///     rectangle positioned at (<paramref name="dx"/>/2, <paramref name="dy"/>/2) and of size <paramref name="dw"/>/2
+        ///     × <paramref name="dh"/>/2 and we want the edges of the rectangle straightened.</summary>
         /// <param name="dx">
         ///     Double the x-coordinate of the top-left corner of the rectangle.</param>
         /// <param name="dy">
@@ -115,7 +115,7 @@ namespace RT.Coordinates
         /// <param name="dh">
         ///     Double the height of the rectangle.</param>
         /// <remarks>
-        ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to four cairos
+        ///     The reason the arguments are all doubled is because a single integer coordinate pair refers to four snubquads
         ///     (arranged in a 2×2). By using doubled values, we effectively support half-integer points and sizes.</remarks>
         public readonly IEnumerable<Coordinates.Vertex> Vertices(int dx, int dy, int dw, int dh)
         {
