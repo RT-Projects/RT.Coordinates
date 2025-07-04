@@ -1,3 +1,5 @@
+using RT.Geometry;
+
 namespace RT.Coordinates
 {
     /// <summary>

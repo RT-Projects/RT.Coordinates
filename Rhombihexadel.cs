@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RT.Geometry;
 
 namespace RT.Coordinates
 {
@@ -107,6 +108,11 @@ namespace RT.Coordinates
         public override readonly bool Equals(object obj) => obj is Rhombihexadel other && other.Hex.Equals(Hex) && other.Subtile == Subtile;
         /// <inheritdoc/>
         public override readonly int GetHashCode() => unchecked(Hex.GetHashCode() * 7 + (int) Subtile);
+
+        /// <summary>Compares two <see cref="Rhombihexadel"/> values for equality.</summary>
+        public static bool operator ==(Rhombihexadel one, Rhombihexadel two) => one.Hex == two.Hex && one.Subtile == two.Subtile;
+        /// <summary>Compares two <see cref="Rhombihexadel"/> values for inequality.</summary>
+        public static bool operator !=(Rhombihexadel one, Rhombihexadel two) => one.Hex != two.Hex || one.Subtile != two.Subtile;
 
         /// <inheritdoc/>
         public readonly IEnumerable<Rhombihexadel> Neighbors

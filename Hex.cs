@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RT.Geometry;
 
 namespace RT.Coordinates
 {
@@ -240,7 +241,7 @@ namespace RT.Coordinates
             Direction.DownRight => new Hex(Q + amount, R),
             Direction.Down => new Hex(Q, R + amount),
             Direction.DownLeft => new Hex(Q - amount, R + amount),
-            _ => throw new ArgumentOutOfRangeException("dir", "Invalid HexDirection value."),
+            _ => throw new ArgumentOutOfRangeException(nameof(dir), "Invalid HexDirection value."),
         };
 
         /// <summary>

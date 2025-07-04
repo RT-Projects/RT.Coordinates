@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RT.Geometry;
 
 namespace RT.Coordinates
 {
@@ -89,6 +90,11 @@ namespace RT.Coordinates
         public override readonly bool Equals(object obj) => obj is Rhomb rhomb && Hex.Equals(rhomb.Hex) && Pos == rhomb.Pos;
         /// <inheritdoc/>
         public override readonly int GetHashCode() => Hex.GetHashCode() * 3 + (int) Pos;
+
+        /// <summary>Compares two <see cref="Rhomb"/> values for equality.</summary>
+        public static bool operator ==(Rhomb one, Rhomb two) => one.Hex == two.Hex && one.Pos == two.Pos;
+        /// <summary>Compares two <see cref="Rhomb"/> values for inequality.</summary>
+        public static bool operator !=(Rhomb one, Rhomb two) => one.Hex != two.Hex || one.Pos != two.Pos;
 
         /// <inheritdoc/>
         public readonly IEnumerable<Rhomb> Neighbors

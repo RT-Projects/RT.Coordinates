@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RT.Geometry;
 
 namespace RT.Coordinates
 {
@@ -132,6 +133,11 @@ namespace RT.Coordinates
         public override readonly bool Equals(object obj) => obj is Penrose other && other.TileKind == TileKind && other.Corner == Corner && other.Angle == Angle;
         /// <inheritdoc/>
         public override readonly int GetHashCode() => unchecked((Corner.GetHashCode() * 10 + Angle) * 4 + (int) TileKind);
+
+        /// <summary>Compares two <see cref="Penrose"/> values for equality.</summary>
+        public static bool operator ==(Penrose one, Penrose two) => one.Corner == two.Corner && one.TileKind == two.TileKind && one.Angle == two.Angle;
+        /// <summary>Compares two <see cref="Penrose"/> values for inequality.</summary>
+        public static bool operator !=(Penrose one, Penrose two) => one.Corner != two.Corner || one.TileKind != two.TileKind || one.Angle != two.Angle;
 
         /// <inheritdoc/>
         public readonly IEnumerable<Edge> Edges => Vertices.MakeEdges();

@@ -1,4 +1,5 @@
 using System;
+using RT.Geometry;
 
 namespace RT.Coordinates
 {
