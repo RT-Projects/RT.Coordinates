@@ -74,7 +74,8 @@ namespace RT.Coordinates
         public string ExtraSvg2;
 
         /// <summary>
-        ///     Provides some additional SVG code to add into the file after the main grid but before <see cref="PerCellAfter"/>.</summary>
+        ///     Provides some additional SVG code to add into the file after the main grid but before <see
+        ///     cref="PerCellAfter"/>.</summary>
         public string ExtraSvg3;
 
         /// <summary>Provides some additional SVG code to add at the end of the file.</summary>
@@ -140,6 +141,12 @@ namespace RT.Coordinates
 
         /// <summary>Specifies a number of decimal places to round every coordinate to when generating SVG paths.</summary>
         public int? Precision = null;
+
+        /// <summary>Amount of space to leave on the left and right side of the grid (not including the stroke width).</summary>
+        public double MarginX = .1;
+
+        /// <summary>Amount of space to leave on the top and bottom of the grid (not including the stroke width).</summary>
+        public double MarginY = .1;
 
         /// <summary>Provides a default implementation for <see cref="BridgeSvg"/>.</summary>
         public static string DrawBridge(PointD center1, PointD center2, Func<double, string> r)
