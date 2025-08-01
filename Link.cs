@@ -66,7 +66,34 @@ namespace RT.Coordinates
         ///     One of the elements in this link.</param>
         /// <exception cref="ArgumentException">
         ///     The specified element is not part of this link.</exception>
-        public readonly T Other(T one) => _elem1.Equals(one) ? _elem2 : _elem2.Equals(one) ? _elem1 : throw new ArgumentException($"‘{one}’ is not part of the link.", nameof(one));
+        public readonly T Other(T one) => TryOther(one, out var other) ? other : throw new ArgumentException($"‘{one}’ is not part of the link.", nameof(one));
+
+        /// <summary>
+        ///     Given an element in this link, returns the other element.</summary>
+        /// <param name="one">
+        ///     One of the elements in this link.</param>
+        /// <param name="other">
+        ///     Receives the other element in this link.</param>
+        /// <remarks>
+        ///     <c>true</c> if <paramref name="one"/> is part of this link; <c>false</c> otherwise.</remarks>
+        public readonly bool TryOther(T one, out T other)
+        {
+            if (_elem1.Equals(one))
+            {
+                other = _elem2;
+                return true;
+            }
+            else if (_elem2.Equals(one))
+            {
+                other = _elem1;
+                return true;
+            }
+            else
+            {
+                other = default;
+                return false;
+            }
+        }
 
         /// <summary>Returns the elements of this link in no particular order.</summary>
         public readonly T Apart(out T other) { other = _elem2; return _elem1; }

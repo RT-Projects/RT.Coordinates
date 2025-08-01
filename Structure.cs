@@ -409,6 +409,9 @@ namespace RT.Coordinates
             return result;
         }
 
+        /// <summary>Returns all cells that have a link to <paramref name="cell"/>.</summary>
+        public IEnumerable<TCell> Neighbors(TCell cell) => _links.Where(l => l.Contains(cell)).Select(l => l.Other(cell));
+
         /// <summary>
         ///     Returns a new structure in which the specified set of cells is combined (merged) into a single cell.</summary>
         /// <param name="cells">

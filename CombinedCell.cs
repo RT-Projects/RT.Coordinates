@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,57 +78,40 @@ namespace RT.Coordinates
         {
             get
             {
-                if (_underlyingCells.Count == 1)
+                var allEdges = new HashSet<Edge>();
+                foreach (var cell in _underlyingCells)
                 {
-                    return _underlyingCells.First() is not IHasSvgGeometry cellG
-                        ? throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell does not implement {typeof(IHasSvgGeometry).FullName}.")
-                        : cellG.Edges;
+                    if (cell is not IHasSvgGeometry geom)
+                        throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell ({cell}) does not implement {typeof(IHasSvgGeometry).FullName}.");
+                    foreach (var edge in geom.Edges)
+                        if (!allEdges.Remove(edge.Reverse))
+                            allEdges.Add(edge);
                 }
 
-                using var e = _underlyingCells.GetEnumerator();
-                if (!e.MoveNext())
-                    return [];
-                if (e.Current is not IHasSvgGeometry firstGeom)
-                    throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell ({e.Current}) does not implement {typeof(IHasSvgGeometry).FullName}.");
-                var loops = new List<List<Edge>> { firstGeom.Edges.ToList() };
-                while (e.MoveNext())
+                var firstEdge = allEdges.First();
+                yield return firstEdge;
+                allEdges.Remove(firstEdge);
+                var lastEdge = firstEdge;
+                while (true)
                 {
-                    if (e.Current is not IHasSvgGeometry geom)
-                        throw new InvalidOperationException($"Attempt to call {nameof(CombinedCell<TCell>)}.{nameof(Edges)} when a contained cell ({e.Current}) does not implement {typeof(IHasSvgGeometry).FullName}.");
-                    loops.Add(geom.Edges.ToList());
-                }
+                    var next = allEdges.FirstOrNull(e => e.Start == lastEdge.End);
+                    if (next is not { } nextEdge)
+                        throw new InvalidOperationException("Invalid cell geometry.");
+                    yield return nextEdge;
+                    allEdges.Remove(nextEdge);
 
-                for (var i = 0; i < loops.Count; i++)
-                {
-                    continue_i:
-                    for (var j = i + 1; j < loops.Count; j++)
+                    if (nextEdge.End != firstEdge.Start)
+                        lastEdge = nextEdge;
+                    else
                     {
-                        var oldConnIx = loops[i].IndexOf(edge => loops[j].Contains(edge.Reverse));
-                        if (oldConnIx == -1)
-                            continue;
-
-                        var newConnIx = loops[j].IndexOf(loops[i][oldConnIx].Reverse);
-                        loops[i].RemoveAt(oldConnIx);
-                        loops[i].InsertRange(oldConnIx, loops[j].Take(newConnIx));
-                        loops[i].InsertRange(oldConnIx, loops[j].Skip(newConnIx + 1));
-
-                        for (var k = 0; k < loops[i].Count;)
-                        {
-                            if (loops[i][k].Reverse == loops[i][(k + 1) % loops[i].Count])
-                            {
-                                loops[i].RemoveAt(k);
-                                loops[i].RemoveAt(k % loops[i].Count);
-                            }
-                            else
-                                k++;
-                        }
-
-                        loops.RemoveAt(j);
-                        goto continue_i;
+                        if (allEdges.Count == 0)
+                            yield break;
+                        firstEdge = allEdges.First();
+                        yield return firstEdge;
+                        allEdges.Remove(firstEdge);
+                        lastEdge = firstEdge;
                     }
                 }
-
-                return loops.SelectMany(x => x);
             }
         }
 
