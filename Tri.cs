@@ -9,7 +9,7 @@ namespace RT.Coordinates;
 ///     <para>
 ///         Represents a tile in a 2D triangular grid.</para></summary>
 /// <remarks>
-///     Represents a triangular tile in a two-dimensional grid in which the tiles alternative between being up-pointing and
+///     Represents a triangular tile in a two-dimensional grid in which the tiles alternate between being up-pointing and
 ///     down-pointing triangles. Each tri is represented as a pair of coordinates (X, Y), where X counts the tris in a row and
 ///     Y identifies the row. The (0, 0) tri is an up-pointing one.</remarks>
 /// <image type="raw">
