@@ -260,9 +260,9 @@ public class Structure<TCell>
         var maxY = allPoints.Max(v => v.Y);
         var marginX = inf?.MarginX ?? .1;
         var marginY = inf?.MarginY ?? .1;
+        var attrFunc = inf?.SvgAttributes ?? ((x, y, w, h) => $"xmlns='http://www.w3.org/2000/svg' viewBox='{x} {y} {w} {h}' font-size='.2' text-anchor='middle'");
         var startTag = inf != null && inf.SvgAttributes == null ? "" :
-            $"<svg {string.Format(inf?.SvgAttributes ?? "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'",
-            minX - marginX, minY - marginY, maxX - minX + 2 * marginX, maxY - minY + 2 * marginY)}>";
+            $"<svg {attrFunc(minX - marginX, minY - marginY, maxX - minX + 2 * marginX, maxY - minY + 2 * marginY)}>";
         var endTag = inf != null && inf.SvgAttributes == null ? "" : "</svg>";
 
         return startTag +

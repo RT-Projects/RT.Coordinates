@@ -62,8 +62,8 @@ public class SvgInstructions
 
     /// <summary>
     ///     Specifies the attributes on the main <c>&lt;svg&gt;</c> tag. Set this to <c>null</c> to omit the SVG tag
-    ///     entirely.</summary>
-    public string SvgAttributes = "xmlns='http://www.w3.org/2000/svg' viewBox='{0} {1} {2} {3}' font-size='.2' text-anchor='middle'";
+    ///     entirely. The arguments passed into the delegate are the x, y, width and height of the viewBox.</summary>
+    public Func<double, double, double, double, string> SvgAttributes = (x, y, w, h) => $"xmlns='http://www.w3.org/2000/svg' viewBox='{x} {y} {w} {h}' font-size='.2' text-anchor='middle'";
 
     /// <summary>Provides some additional SVG code to add at the start of the file.</summary>
     public string ExtraSvg1;
