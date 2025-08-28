@@ -91,11 +91,64 @@ public struct Chamf(int x, int y, Chamf.Tile subtile) : IEquatable<Chamf>, INeig
     /// <summary>
     ///     Returns the vertices along the perimeter of this <see cref="Chamf"/>, going clockwise from the top-left (square or
     ///     horizontal hex) or top (vertical hex).</summary>
+    /// <seealso cref="VerticesAtEdges(int, int, int, int)"/>
     public readonly Coordinates.Vertex[] Vertices => Subtile switch
     {
-        Tile.Square => new[] { new Vertex(X, Y, 0), new Vertex(X, Y, 1), new Vertex(X, Y, 2), new Vertex(X, Y, 3) },
-        Tile.HorizHex => [new Vertex(X, Y - 1, 3), new Vertex(X, Y - 1, 2), new Vertex(X, Y - 1, 4), new Vertex(X, Y, 1), new Vertex(X, Y, 0), new Vertex(X - 1, Y - 1, 4)],
-        Tile.VertHex => [new Vertex(X - 1, Y - 1, 4), new Vertex(X, Y, 0), new Vertex(X, Y, 3), new Vertex(X - 1, Y, 4), new Vertex(X - 1, Y, 2), new Vertex(X - 1, Y, 1)],
+        Tile.Square => [
+            new Vertex(X, Y, Vertex.Position.TopLeft),
+            new Vertex(X, Y, Vertex.Position.TopRight),
+            new Vertex(X, Y, Vertex.Position.BottomRight),
+            new Vertex(X, Y, Vertex.Position.BottomLeft)],
+        Tile.HorizHex => [
+            new Vertex(X, Y - 1, Vertex.Position.BottomLeft),
+            new Vertex(X, Y - 1, Vertex.Position.BottomRight),
+            new Vertex(X, Y - 1, Vertex.Position.Join),
+            new Vertex(X, Y, Vertex.Position.TopRight),
+            new Vertex(X, Y, Vertex.Position.TopLeft),
+            new Vertex(X - 1, Y - 1, Vertex.Position.Join)],
+        Tile.VertHex => [
+            new Vertex(X - 1, Y - 1, Vertex.Position.Join),
+            new Vertex(X, Y, Vertex.Position.TopLeft),
+            new Vertex(X, Y, Vertex.Position.BottomLeft),
+            new Vertex(X - 1, Y, Vertex.Position.Join),
+            new Vertex(X - 1, Y, Vertex.Position.BottomRight),
+            new Vertex(X - 1, Y, Vertex.Position.TopRight)],
+        _ => throw new InvalidOperationException("‘Subtile’ has an unexpected value.")
+    };
+
+    /// <summary>
+    ///     Returns the vertices along the perimeter of this <see cref="Chamf"/> assuming that we’re rendering a rectangle
+    ///     positioned at (<paramref name="x"/>, <paramref name="y"/>) and of size <paramref name="w"/> × <paramref name="h"/>
+    ///     and we want the edges of the rectangle straightened.</summary>
+    /// <param name="x">
+    ///     X-coordinate of the top-left corner of the rectangle.</param>
+    /// <param name="y">
+    ///     Y-coordinate of the top-left corner of the rectangle.</param>
+    /// <param name="w">
+    ///     Width of the rectangle.</param>
+    /// <param name="h">
+    ///     Height of the rectangle.</param>
+    public readonly Coordinates.Vertex[] VerticesAtEdges(int x, int y, int w, int h) => Subtile switch
+    {
+        Tile.Square => [
+            new Vertex(X, Y, Vertex.Position.TopLeft),
+            new Vertex(X, Y, Vertex.Position.TopRight),
+            new Vertex(X, Y, Vertex.Position.BottomRight),
+            new Vertex(X, Y, Vertex.Position.BottomLeft)],
+        Tile.HorizHex => [
+            ..X == x && Y == y ? Array.Empty<Vertex>() : Y == y ? [new Vertex(X - 1, Y - 1, Vertex.Position.Edge2)] : [new Vertex(X, Y - 1, Vertex.Position.BottomLeft)],
+            ..X == x + w - 1 && Y == y ? Array.Empty<Vertex>() : Y == y ? [new Vertex(X, Y - 1, Vertex.Position.Edge2)] : [new Vertex(X, Y - 1, Vertex.Position.BottomRight)],
+            X == x + w - 1 && Y == y ? new Vertex(X + 1, Y - 1, Vertex.Position.BottomLeft) : X == x + w - 1 && Y == y + h ? new Vertex(X + 1, Y, Vertex.Position.TopLeft) : new Vertex(X, Y - 1, Vertex.Position.Join),
+            ..X == x + w - 1 && Y == y + h ? Array.Empty<Vertex>() : Y == y + h ? [new Vertex(X, Y, Vertex.Position.Edge1)] : [new Vertex(X, Y, Vertex.Position.TopRight)],
+            ..X == x && Y == y + h ? Array.Empty<Vertex>() : Y == y + h ? [new Vertex(X - 1, Y, Vertex.Position.Edge1)] : [new Vertex(X, Y, Vertex.Position.TopLeft)],
+            X == x && Y == y ? new Vertex(X - 1, Y - 1, Vertex.Position.BottomRight) : X == x && Y == y + h ? new Vertex(X - 1, Y, Vertex.Position.TopRight) : new Vertex(X - 1, Y - 1, Vertex.Position.Join)],
+        Tile.VertHex => [
+            X == x && Y == y ? new Vertex(X - 1, Y - 1, Vertex.Position.BottomRight) : X == x + w && Y == y ? new Vertex(X, Y - 1, Vertex.Position.BottomLeft) : new Vertex(X - 1, Y - 1, Vertex.Position.Join),
+            ..X == x + w && Y == y ? Array.Empty<Vertex>() : X == x + w ? [new Vertex(X, Y - 1, Vertex.Position.Edge4)] : [new Vertex(X, Y, Vertex.Position.TopLeft)],
+            ..X == x + w && Y == y + h - 1 ? Array.Empty<Vertex>() : X == x + w ? [new Vertex(X, Y, Vertex.Position.Edge4)] : [new Vertex(X, Y, Vertex.Position.BottomLeft)],
+            X == x && Y == y + h - 1 ? new Vertex(X - 1, Y + 1, Vertex.Position.TopRight) : X == x + w && Y == y + h - 1 ? new Vertex(X, Y + 1, Vertex.Position.TopLeft) : new Vertex(X - 1, Y, Vertex.Position.Join),
+            ..X == x && Y == y + h - 1 ? Array.Empty<Vertex>() : X == x ? [new Vertex(X - 1, Y, Vertex.Position.Edge3)] : [new Vertex(X - 1, Y, Vertex.Position.BottomRight)],
+            ..X == x && Y == y ? Array.Empty<Vertex>() : X == x ? [new Vertex(X - 1, Y - 1, Vertex.Position.Edge3)] : [new Vertex(X - 1, Y, Vertex.Position.TopRight)]],
         _ => throw new InvalidOperationException("‘Subtile’ has an unexpected value.")
     };
 
@@ -169,8 +222,17 @@ public struct Chamf(int x, int y, Chamf.Tile subtile) : IEquatable<Chamf>, INeig
         ///     The number of squares in the x direction.</param>
         /// <param name="height">
         ///     The number of squares in the y direction.</param>
-        public Grid(int width, int height)
-            : base(Rectangle(width, height))
+        /// <param name="neighborsAtEdges">
+        ///     If the grid is rendered with <see cref="VerticesAtEdges(int, int, int, int)"/>, some cells along the edge
+        ///     become neighbors when they would otherwise not be. Setting this to <c>true</c> will designate them as
+        ///     neighbors in this structure.</param>
+        public Grid(int width, int height, bool neighborsAtEdges = false)
+            : base(Rectangle(width, height), getNeighbors: neighborsAtEdges ? (c => c.Neighbors.Concat(c.Subtile switch
+            {
+                Tile.HorizHex when c.Y == 0 || c.Y == height => [new Chamf(c.X - 1, c.Y, Tile.HorizHex), new Chamf(c.X + 1, c.Y, Tile.HorizHex)],
+                Tile.VertHex when c.X == 0 || c.X == width => [new Chamf(c.X, c.Y - 1, Tile.VertHex), new Chamf(c.X, c.Y + 1, Tile.VertHex)],
+                _ => []
+            })) : null)
         {
         }
 
@@ -185,35 +247,70 @@ public struct Chamf(int x, int y, Chamf.Tile subtile) : IEquatable<Chamf>, INeig
     }
 
     /// <summary>Describes a vertex (gridline intersection) in a <see cref="Grid"/>.</summary>
-    public class Vertex : Coordinates.Vertex
+    public class Vertex(int x, int y, Vertex.Position pos) : Coordinates.Vertex
     {
         /// <summary>Specifies the x-coordinate of a square <see cref="Chamf"/>.</summary>
-        public int CellX { get; private set; }
+        public int CellX { get; private set; } = x;
         /// <summary>Specifies the y-coordinate of a square <see cref="Chamf"/>.</summary>
-        public int CellY { get; private set; }
-        /// <summary>
-        ///     Specifies which of the five vertices pertaining to a square <see cref="Chamf"/> this is: 0–3 describe the
-        ///     square (clockwise); 4 is the additional vertex below and to the right of the square.</summary>
-        public int Pos { get; private set; }
+        public int CellY { get; private set; } = y;
+        /// <summary>Specifies which of the vertices pertaining to a square <see cref="Chamf"/> this is.</summary>
+        public Position Pos { get; private set; } = pos;
 
-        /// <summary>Constructor.</summary>
-        public Vertex(int x, int y, int pos)
+        /// <summary>Describes the position of a <see cref="Vertex"/> in a <see cref="Grid"/>.</summary>
+        public enum Position
         {
-            if (pos is < 0 or > 4)
-                throw new ArgumentException($"‘{pos}’ is not a valid value for ‘{nameof(pos)}’ (0–4 expected).", nameof(pos));
-            CellX = x;
-            CellY = y;
-            Pos = pos;
+            /// <summary>The top-left vertex of the square at <see cref="CellX"/>,<see cref="CellY"/>.</summary>
+            TopLeft,
+            /// <summary>The top-right vertex of the square at <see cref="CellX"/>,<see cref="CellY"/>.</summary>
+            TopRight,
+            /// <summary>The bottom-right vertex of the square at <see cref="CellX"/>,<see cref="CellY"/>.</summary>
+            BottomRight,
+            /// <summary>The bottom-left vertex of the square at <see cref="CellX"/>,<see cref="CellY"/>.</summary>
+            BottomLeft,
+            /// <summary>
+            ///     The vertex to the right and below the square at <see cref="CellX"/>,<see cref="CellY"/> that is shared by
+            ///     four hexagons.</summary>
+            Join,
+            /// <summary>
+            ///     The vertex to the right of the square at <see cref="CellX"/>,<see cref="CellY"/> aligned with the top
+            ///     edge.</summary>
+            /// <remarks>
+            ///     Used only if the <see cref="Chamf"/> is rendered as part of a straightened rectangle (see <see
+            ///     cref="VerticesAtEdges(int, int, int, int)"/>).</remarks>
+            Edge1,
+            /// <summary>
+            ///     The vertex to the right of the square at <see cref="CellX"/>,<see cref="CellY"/> aligned with the bottom
+            ///     edge.</summary>
+            /// <remarks>
+            ///     Used only if the <see cref="Chamf"/> is rendered as part of a straightened rectangle (see <see
+            ///     cref="VerticesAtEdges(int, int, int, int)"/>).</remarks>
+            Edge2,
+            /// <summary>
+            ///     The vertex below of the square at <see cref="CellX"/>,<see cref="CellY"/> aligned with the right edge.</summary>
+            /// <remarks>
+            ///     Used only if the <see cref="Chamf"/> is rendered as part of a straightened rectangle (see <see
+            ///     cref="VerticesAtEdges(int, int, int, int)"/>).</remarks>
+            Edge3,
+            /// <summary>
+            ///     The vertex below of the square at <see cref="CellX"/>,<see cref="CellY"/> aligned with the left edge.</summary>
+            /// <remarks>
+            ///     Used only if the <see cref="Chamf"/> is rendered as part of a straightened rectangle (see <see
+            ///     cref="VerticesAtEdges(int, int, int, int)"/>).</remarks>
+            Edge4,
         }
 
         /// <inheritdoc/>
         public override PointD Point => Pos switch
         {
-            0 => new PointD(2.5 * CellX, 2.5 * CellY),
-            1 => new PointD(2.5 * CellX + 1.5, 2.5 * CellY),
-            2 => new PointD(2.5 * CellX + 1.5, 2.5 * CellY + 1.5),
-            3 => new PointD(2.5 * CellX, 2.5 * CellY + 1.5),
-            4 => new PointD(2.5 * CellX + 2, 2.5 * CellY + 2),
+            Position.TopLeft => new PointD(2.5 * CellX, 2.5 * CellY),
+            Position.TopRight => new PointD(2.5 * CellX + 1.5, 2.5 * CellY),
+            Position.BottomRight => new PointD(2.5 * CellX + 1.5, 2.5 * CellY + 1.5),
+            Position.BottomLeft => new PointD(2.5 * CellX, 2.5 * CellY + 1.5),
+            Position.Join => new PointD(2.5 * CellX + 2, 2.5 * CellY + 2),
+            Position.Edge1 => new PointD(2.5 * CellX + 2, 2.5 * CellY),
+            Position.Edge2 => new PointD(2.5 * CellX + 2, 2.5 * CellY + 1.5),
+            Position.Edge3 => new PointD(2.5 * CellX + 1.5, 2.5 * CellY + 2),
+            Position.Edge4 => new PointD(2.5 * CellX, 2.5 * CellY + 2),
             _ => throw new InvalidOperationException("‘Pos’ has an unexpected value.")
         };
 
@@ -222,10 +319,10 @@ public struct Chamf(int x, int y, Chamf.Tile subtile) : IEquatable<Chamf>, INeig
         /// <inheritdoc/>
         public override bool Equals(object obj) => obj is Vertex ov && ov.CellX == CellX && ov.CellY == CellY && ov.Pos == Pos;
         /// <inheritdoc/>
-        public override int GetHashCode() => CellX * 1073741831 + CellY * 347 + Pos;
+        public override int GetHashCode() => CellX * 1073741831 + CellY * 347 + (int) Pos;
 
         /// <inheritdoc/>
-        public override string ToString() => $"Ch({CellX}, {CellY})/{Pos}";
+        public override string ToString() => $"Ch({CellX}, {CellY})/{(int) Pos}";
     }
 
     /// <summary>Equality operator.</summary>
