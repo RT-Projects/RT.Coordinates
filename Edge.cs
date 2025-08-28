@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace RT.Coordinates;
 
@@ -29,4 +29,11 @@ public struct Edge(Vertex start, Vertex end) : IEquatable<Edge>
 
     /// <inheritdoc/>
     public override readonly string ToString() => $"{Start} → {End}";
+
+    /// <summary>Deconstructor.</summary>
+    public readonly void Deconstruct(out Vertex start, out Vertex end)
+    {
+        start = Start;
+        end = End;
+    }
 }

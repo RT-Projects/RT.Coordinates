@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>library</OutputType>
     <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
@@ -18,19 +18,19 @@
     <PackageIcon>Icon.png</PackageIcon>
     <PackageTags>game;games;puzzle;puzzles;grid;grids;coordinate;coordinates;maze;graphics;svg;hexagonal;hexagon;hex;triangle;triangular;tri;octagon;octagonal;pentagon;pentagonal</PackageTags>
     <LangVersion>12.0</LangVersion>
-    <Version>3.8.0</Version>
-    <AssemblyVersion>3.8.0.0</AssemblyVersion>
-    <FileVersion>3.8.0.0</FileVersion>
+    <Version>3.9.0</Version>
+    <AssemblyVersion>3.9.0.0</AssemblyVersion>
+    <FileVersion>3.9.0.0</FileVersion>
     <Configurations>Debug-Nuget;Debug-locallibs;Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="" />
-    <None Include="Icon.png" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath=""/>
+    <None Include="Icon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' == 'Debug-locallibs'">
-    <ProjectReference Include="..\RT.Util\RT.Geometry\RT.Geometry.csproj" />
+    <ProjectReference Include="..\RT.Util\RT.Geometry\RT.Geometry.csproj"/>
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)' != 'Debug-locallibs'">
-    <PackageReference Include="RT.Geometry" Version="2.0.1793" />
+    <PackageReference Include="RT.Geometry" Version="2.0.1793"/>
   </ItemGroup>
 </Project>
