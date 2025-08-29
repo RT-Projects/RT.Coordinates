@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +11,8 @@ namespace RT.Coordinates;
 public static class GridUtils
 {
     /// <summary>
-    ///     Given the output from <see cref="Structure{TCell}.FindPath(TCell, TCell)"/>, reconstructs a path from the
-    ///     origin cell to the specified <paramref name="destination"/> cell.</summary>
+    ///     Given the output from <see cref="Structure{TCell}.FindPath(TCell, TCell)"/>, reconstructs a path from the origin
+    ///     cell to the specified <paramref name="destination"/> cell.</summary>
     /// <typeparam name="TCell">
     ///     Type of cell (e.g., <see cref="Square"/>, <see cref="Hex"/> or <see cref="Tri"/>).</typeparam>
     /// <param name="paths">
@@ -20,8 +20,7 @@ public static class GridUtils
     /// <param name="destination">
     ///     The destination cell to reconstruct the path to.</param>
     /// <returns>
-    ///     A collection containing every cell along the path, including the origin cell and <paramref
-    ///     name="destination"/>.</returns>
+    ///     A collection containing every cell along the path, including the origin cell and <paramref name="destination"/>.</returns>
     /// <exception cref="InvalidOperationException">
     ///     The specified dictionary does not contain the required information to reconstruct the path.</exception>
     public static IEnumerable<TCell> GetPathTo<TCell>(this Dictionary<TCell, CellWithDistance<TCell>> paths, TCell destination)
@@ -108,8 +107,8 @@ public static class GridUtils
 
     /// <summary>
     ///     Determines whether it is possible within <paramref name="structure"/> to move the specified <paramref
-    ///     name="amount"/> of steps in the specified <paramref name="direction"/> and sets <paramref name="newCell"/> to
-    ///     the cell landed on.</summary>
+    ///     name="amount"/> of steps in the specified <paramref name="direction"/> and sets <paramref name="newCell"/> to the
+    ///     cell landed on.</summary>
     /// <param name="structure">
     ///     The structure to examine.</param>
     /// <param name="cell">
@@ -170,8 +169,8 @@ public static class GridUtils
             : throw new InvalidOperationException("The structure does not allow movement for that many steps in that direction.");
 
     /// <summary>
-    ///     Returns the maximum number of steps it is possible to move in the specified <paramref name="direction"/>
-    ///     within <paramref name="structure"/>.</summary>
+    ///     Returns the maximum number of steps it is possible to move in the specified <paramref name="direction"/> within
+    ///     <paramref name="structure"/>.</summary>
     /// <param name="structure">
     ///     The structure within which to move.</param>
     /// <param name="cell">
@@ -219,16 +218,28 @@ public static class GridUtils
     public static Hex.Direction Clockwise(this Hex.Direction dir, int amount = 1) => (Hex.Direction) ((((int) dir + amount) % 6 + 6) % 6);
 
     /// <summary>
-    ///     Returns an SVG path string (usable in the <c>d</c> attribute of a <c>&lt;path&gt;</c> element) that draws all
-    ///     of the specified edges.</summary>
+    ///     Returns an SVG path string (usable in the <c>d</c> attribute of a <c>&lt;path&gt;</c> element) that draws all of
+    ///     the specified edges.</summary>
     /// <param name="edges">
     ///     A set of edges to render.</param>
     /// <param name="getVertexPoint">
     ///     An optional function that can customize the coordinates of each vertex.</param>
     /// <param name="r">
-    ///     Provides a means to turn floating-point values into strings. <see
-    ///     cref="Structure{TCell}.Svg(SvgInstructions)"/> uses this to respect the user’s <see
-    ///     cref="SvgInstructions.Precision"/> instruction.</param>
+    ///     Provides a means to turn floating-point values into strings. <see cref="Structure{TCell}.Svg(SvgInstructions)"/>
+    ///     uses this to respect the user’s <see cref="SvgInstructions.Precision"/> instruction.</param>
+    public static string SvgEdgesPath(IEnumerable<Edge> edges, Func<Vertex, PointD> getVertexPoint = null, Func<double, string> r = null) =>
+        SvgEdgesPath(edges.Select(e => e.ToLink()), getVertexPoint, r);
+
+    /// <summary>
+    ///     Returns an SVG path string (usable in the <c>d</c> attribute of a <c>&lt;path&gt;</c> element) that draws all of
+    ///     the specified edges.</summary>
+    /// <param name="edges">
+    ///     A set of edges to render.</param>
+    /// <param name="getVertexPoint">
+    ///     An optional function that can customize the coordinates of each vertex.</param>
+    /// <param name="r">
+    ///     Provides a means to turn floating-point values into strings. <see cref="Structure{TCell}.Svg(SvgInstructions)"/>
+    ///     uses this to respect the user’s <see cref="SvgInstructions.Precision"/> instruction.</param>
     public static string SvgEdgesPath(IEnumerable<Link<Vertex>> edges, Func<Vertex, PointD> getVertexPoint = null, Func<double, string> r = null)
     {
         getVertexPoint ??= (v => v.Point);
